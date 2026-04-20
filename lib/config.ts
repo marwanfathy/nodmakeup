@@ -1,2 +1,2 @@
-export const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://192.168.1.18:5001';
-export const MEDIA_URL = process.env.NEXT_PUBLIC_MEDIA_URL || 'http://192.168.1.18:5002';
+export const API_URL = 'https://57a6-197-54-41-226.ngrok-free.app';
+export const MEDIA_URL ='https://0243-197-54-41-226.ngrok-free.app';
