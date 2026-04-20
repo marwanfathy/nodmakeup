@@ -193,17 +193,38 @@ export interface ApiStoryGroup {
 //           AXIOS INSTANCE & HELPERS
 // ===============================================
 
+// Add this helper to manage the ID
+const getSessionId = () => {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem('cart_session_id');
+};
+
 const apiClient = axios.create({
     baseURL: API_URL,
-    withCredentials: true, // MANDATORY: For cart cookies
+    withCredentials: true,
     headers: {
-        // TIP: This bypasses the ngrok splash screen that causes "Network Error"
         'ngrok-skip-browser-warning': 'true',
     }
 });
 
-const unwrapData = <T>(response: AxiosResponse<{ data: T }>): T => response.data.data;
+// --- ADD THIS INTERCEPTOR ---
+// This automatically injects the Session ID into every request
+apiClient.interceptors.request.use((config) => {
+    const sessionId = getSessionId();
+    if (sessionId) {
+        config.headers['x-cart-session-id'] = sessionId;
+    }
+    return config;
+});
 
+// --- Update unwrapData to save the ID if the backend sends it ---
+apiClient.interceptors.response.use((response) => {
+    // If the backend returns a new session ID in the data, save it!
+    if (response.data?.data?.cart_session_id) {
+        localStorage.setItem('cart_session_id', response.data.data.cart_session_id);
+    }
+    return response;
+});
 
 // ===============================================
 //           PRODUCTS & DISCOVERY API
