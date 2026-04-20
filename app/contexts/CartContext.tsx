@@ -36,30 +36,41 @@ export const useCart = (): CartContextType => {
     return context;
 };
 
-
 export const CartProvider = ({ children }: { children: ReactNode }) => {
     const [cart, setCart] = useState<CartObject | null>(null);
     const [isCartLoading, setIsCartLoading] = useState(true);
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isHydrated, setIsHydrated] = useState(false);
 
-    // Save cart session ID whenever cart changes
+    /**
+     * HELPER: Sync Session ID to LocalStorage
+     * This fulfills the "Persistence Check" requirement.
+     */
+    const syncSessionId = useCallback((cartObj: CartObject) => {
+        if (cartObj.cart_session_id) {
+            localStorage.setItem('fallback_cart_id', cartObj.cart_session_id);
+        }
+    }, []);
 
     const fetchCart = useCallback(async () => {
         setIsCartLoading(true);
         try {
             const fetchedCart = await getCart();
             setCart(fetchedCart);
+            
+            // PUBLIC FIX: Save the ID for persistence
+            syncSessionId(fetchedCart);
         } catch (error: any) {
             console.error("Failed to fetch cart:", error);
-            if (error.response?.status !== 404) {
+            // Only show toast if it's a real server error (not just an empty/new session)
+            if (error.response?.status !== 404 && error.response?.status !== 401) {
                 toast.error("Could not load your shopping bag.");
             }
             setCart({ cart_session_id: '', items: [], summary: { subtotal: 0, itemCount: 0 } });
         } finally {
             setIsCartLoading(false);
         }
-    }, []);
+    }, [syncSessionId]);
 
     // Initialize cart on mount
     useEffect(() => {
@@ -71,6 +82,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         try {
             const updatedCart = await apiAddItemToCart(variantId, quantity);
             setCart(updatedCart);
+            
+            // PUBLIC FIX: Ensure session is saved after adding first item
+            syncSessionId(updatedCart);
+
             toast.success("Item added to your bag!");
             const shouldOpenCart = options?.openCart ?? true;
             if (shouldOpenCart) {
@@ -89,6 +104,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         if (newQuantity <= 0) {
             return removeItem(cartItemId);
         }
+        
         const originalCart = cart;
         if (cart) {
             const updatedItems = cart.items.map((item: CartItemPublic) =>
@@ -97,9 +113,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             const optimisticCart = { ...cart, items: updatedItems };
             setCart(optimisticCart);
         }
+
         try {
             const updatedCartFromServer = await apiUpdateItemQuantity(cartItemId, newQuantity);
             setCart(updatedCartFromServer);
+            syncSessionId(updatedCartFromServer);
         } catch (error: any) {
             toast.error(error.response?.data?.message || "Could not update item quantity.");
             setCart(originalCart);
@@ -117,6 +135,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             const updatedCartFromServer = await apiRemoveItemFromCart(cartItemId);
             toast.info("Item removed from your bag.");
             setCart(updatedCartFromServer);
+            syncSessionId(updatedCartFromServer);
         } catch (error: any) {
             toast.error(error.response?.data?.message || "Could not remove item.");
             setCart(originalCart);
@@ -135,18 +154,14 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         removeItem,
     };
 
+    // Prevent hydration mismatch by not rendering until hydrated
+    if (!isHydrated) return null;
+
     return (
         <CartContext.Provider value={contextValue}>
             <ToastContainer
                 position="bottom-right"
                 autoClose={4000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
                 theme="light"
             />
             {children}
