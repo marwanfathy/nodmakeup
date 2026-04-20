@@ -252,8 +252,13 @@ export const trackStoryClick = (storyId: number) => {
 
 export const getCart = async (): Promise<CartObject> => {
     const response = await apiClient.get<{ data: CartObject }>('/api/public/cart');
-    return unwrapData(response);
+    const cart = unwrapData(response);
+    if (cart.cart_session_id) {
+        localStorage.setItem('fallback_cart_id', cart.cart_session_id);
+    }
+    return cart;
 };
+
 
 export const addItemToCart = async (variant_id: number, quantity: number): Promise<CartObject> => {
     const response = await apiClient.post<{ data: CartObject }>('/api/public/cart/items', { variant_id, quantity });
@@ -269,7 +274,13 @@ export const removeItemFromCart = async (cartItemId: number): Promise<CartObject
     const response = await apiClient.delete<{ data: CartObject }>(`/api/public/cart/items/${cartItemId}`);
     return unwrapData(response);
 };
-
+apiClient.interceptors.request.use((config) => {
+    const fallbackId = localStorage.getItem('fallback_cart_id');
+    if (fallbackId) {
+        config.headers['x-cart-session-id'] = fallbackId;
+    }
+    return config;
+});
 
 // ===============================================
 //           ORDERS & CHECKOUT API
