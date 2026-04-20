@@ -1,0 +1,117 @@
+@font-face {
+    font-family: 'Ravensara Antiqua Stencil';
+    src: url('RavensaraAntiquaStencil-Bold.eot');
+    src: local('Ravensara Antiqua Stencil Bold'), local('RavensaraAntiquaStencil-Bold'),
+        url('RavensaraAntiquaStencil-Bold.eot?#iefix') format('embedded-opentype'),
+        url('RavensaraAntiquaStencil-Bold.woff2') format('woff2'),
+        url('RavensaraAntiquaStencil-Bold.woff') format('woff'),
+        url('RavensaraAntiquaStencil-Bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Ravensara Antiqua Stencil';
+    src: url('RavensaraAntiquaStencilBlack.eot');
+    src: local('Ravensara Antiqua Stencil Black'), local('RavensaraAntiquaStencilBlack'),
+        url('RavensaraAntiquaStencilBlack.eot?#iefix') format('embedded-opentype'),
+        url('RavensaraAntiquaStencilBlack.woff2') format('woff2'),
+        url('RavensaraAntiquaStencilBlack.woff') format('woff'),
+        url('RavensaraAntiquaStencilBlack.ttf') format('truetype');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Ravensara Antiqua Stencil Extra';
+    src: url('RavensaraAntiquaStencilExtrBlck.eot');
+    src: local('Ravensara Antiqua Stencil Extra Black'), local('RavensaraAntiquaStencilExtrBlck'),
+        url('RavensaraAntiquaStencilExtrBlck.eot?#iefix') format('embedded-opentype'),
+        url('RavensaraAntiquaStencilExtrBlck.woff2') format('woff2'),
+        url('RavensaraAntiquaStencilExtrBlck.woff') format('woff'),
+        url('RavensaraAntiquaStencilExtrBlck.ttf') format('truetype');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Ravensara Antiqua Stencil Extra';
+    src: url('RavensaraAntiquaStencilExtraBol.eot');
+    src: local('Ravensara Antiqua Stencil Extra Bold'), local('RavensaraAntiquaStencilExtraBol'),
+        url('RavensaraAntiquaStencilExtraBol.eot?#iefix') format('embedded-opentype'),
+        url('RavensaraAntiquaStencilExtraBol.woff2') format('woff2'),
+        url('RavensaraAntiquaStencilExtraBol.woff') format('woff'),
+        url('RavensaraAntiquaStencilExtraBol.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Ravensara Antiqua Stencil';
+    src: url('RavensaraAntiquaStencilMedium.eot');
+    src: local('Ravensara Antiqua Stencil Medium'), local('RavensaraAntiquaStencilMedium'),
+        url('RavensaraAntiquaStencilMedium.eot?#iefix') format('embedded-opentype'),
+        url('RavensaraAntiquaStencilMedium.woff2') format('woff2'),
+        url('RavensaraAntiquaStencilMedium.woff') format('woff'),
+        url('RavensaraAntiquaStencilMedium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Ravensara Antiqua Stencil';
+    src: url('RavensaraAntiquaStencilThin.eot');
+    src: local('Ravensara Antiqua Stencil Thin'), local('RavensaraAntiquaStencilThin'),
+        url('RavensaraAntiquaStencilThin.eot?#iefix') format('embedded-opentype'),
+        url('RavensaraAntiquaStencilThin.woff2') format('woff2'),
+        url('RavensaraAntiquaStencilThin.woff') format('woff'),
+        url('RavensaraAntiquaStencilThin.ttf') format('truetype');
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Ravensara Antiqua Stencil';
+    src: url('RavensaraAntiquaStencilLight.eot');
+    src: local('Ravensara Antiqua Stencil Light'), local('RavensaraAntiquaStencilLight'),
+        url('RavensaraAntiquaStencilLight.eot?#iefix') format('embedded-opentype'),
+        url('RavensaraAntiquaStencilLight.woff2') format('woff2'),
+        url('RavensaraAntiquaStencilLight.woff') format('woff'),
+        url('RavensaraAntiquaStencilLight.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Ravensara Antiqua Stencil Semi';
+    src: url('RavensaraAntiquaStencilSemiBold.eot');
+    src: local('Ravensara Antiqua Stencil Semi Bold'), local('RavensaraAntiquaStencilSemiBold'),
+        url('RavensaraAntiquaStencilSemiBold.eot?#iefix') format('embedded-opentype'),
+        url('RavensaraAntiquaStencilSemiBold.woff2') format('woff2'),
+        url('RavensaraAntiquaStencilSemiBold.woff') format('woff'),
+        url('RavensaraAntiquaStencilSemiBold.ttf') format('truetype');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Ravensara Antiqua Stencil';
+    src: url('RavensaraAntiquaStencil-Regular.eot');
+    src: local('Ravensara Antiqua Stencil'), local('RavensaraAntiquaStencil-Regular'),
+        url('RavensaraAntiquaStencil-Regular.eot?#iefix') format('embedded-opentype'),
+        url('RavensaraAntiquaStencil-Regular.woff2') format('woff2'),
+        url('RavensaraAntiquaStencil-Regular.woff') format('woff'),
+        url('RavensaraAntiquaStencil-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+

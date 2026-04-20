@@ -1,0 +1,119 @@
+/* --- Main Container --- */
+.benefits-bar-container {
+  width: 100%;
+  background-color: #fff;
+  border-top: 1px solid #f2f2f2;
+  border-bottom: 1px solid #f2f2f2;
+  padding: 2.5rem 0;
+  margin: 0 auto;
+}
+
+/* --- Wrapper --- */
+.benefits-wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  padding: 0 20px;
+  gap: 20px;
+}
+
+/* --- Individual Item --- */
+.benefit-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex: 1; /* Distributes space equally */
+  min-width: 150px;
+  transition: opacity 0.3s ease;
+}
+
+/* --- Icon Styling --- */
+.benefit-icon {
+  width: 36px;
+  height: 36px;
+  margin-bottom: 1.2rem;
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.benefit-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Hover Effects */
+.benefit-item:hover .benefit-icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+/* --- Text Styling --- */
+.benefit-text {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 0.75rem; /* ~12px */
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  line-height: 1.5;
+  color: #1a1a1a;
+  max-width: 200px; /* Prevents text from being too wide */
+}
+
+/* =========================================
+   RESPONSIVE STYLES
+   ========================================= */
+
+/* Tablet (Small Desktop / iPad) */
+@media (max-width: 1024px) {
+  .benefits-wrapper {
+    gap: 30px;
+  }
+  .benefit-text {
+    font-size: 0.7rem;
+  }
+}
+
+/* Mobile (Phones) */
+@media (max-width: 768px) {
+  .benefits-bar-container {
+    padding: 2rem 10px;
+  }
+  
+  .benefits-wrapper {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2x2 Grid */
+    gap: 2.5rem 15px; /* More vertical gap, tight horizontal gap */
+  }
+  
+  .benefit-item {
+    min-width: 0; /* Reset for grid */
+    width: 100%;
+  }
+
+  .benefit-icon {
+    width: 30px;
+    height: 30px;
+    margin-bottom: 0.8rem;
+  }
+
+  .benefit-text {
+    font-size: 0.65rem;
+    letter-spacing: 0.8px;
+    padding: 0 5px;
+  }
+}
+
+/* Very Small Screens (iphone SE etc) */
+@media (max-width: 360px) {
+    .benefits-wrapper {
+        gap: 2rem 10px;
+    }
+    .benefit-text {
+        font-size: 0.6rem;
+    }
+}

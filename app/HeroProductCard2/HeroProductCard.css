@@ -1,0 +1,180 @@
+/* --- SHARED BANNER DIMENSIONS --- */
+.hero-banner-wrapper {
+  padding: 20px;
+  width: 100%;
+  box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+}
+
+.hero-banner-container {
+  width: 100%;
+  height: 275px; /* Fixed height for the banner */
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  background-color: #f8f8f8;
+  display: flex; /* Horizontal Layout */
+  box-shadow: 0 4px 30px rgba(0,0,0,0.03);
+  border: 1px solid #f0f0f0;
+}
+
+/* --- LEFT SECTION (Visuals) --- */
+.hero-visual-section {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.hero-product-image {
+  z-index: 2;
+  width: 85%;
+  position: relative;
+  top: 100px;
+}
+
+/* --- RIGHT SECTION (Info) --- */
+.hero-info-section {
+  flex: 1.2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 60px;
+  text-align: center;
+}
+
+.info-content-wrapper {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.hero-description {
+  font-weight: 700;
+  font-size: 1.6rem;
+  line-height: 1.2;
+  color: #000;
+  margin-bottom: 30px;
+}
+
+.highlight-text {
+  color: #000000;
+}
+
+/* --- SWATCHES & DIVIDER --- */
+.swatch-divider-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.swatch-group {
+  display: flex;
+}
+
+.swatch-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  margin-right: -15px; /* Overlapping */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.vertical-divider {
+  width: 1.5px;
+  height: 45px;
+  background-color: #333;
+}
+
+.swatch-label {
+  text-align: left;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  margin: 0;
+  line-height: 1.2;
+}
+
+/* --- BUTTON & DECORATION --- */
+.cta-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.add-to-bag-btn {
+  background-color: #000;
+  color: #fff;
+  padding: 20px 0;
+  width: 100%;
+  max-width: 380px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: transform 0.2s ease;
+  z-index: 2;
+}
+
+.add-to-bag-btn:hover {
+  transform: scale(1.02);
+}
+
+/* Decorative Arrows (Optional: use SVG or icons here) */
+.decor-arrow {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  opacity: 0.8;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.arrow-left {
+  left: -10px;
+  top: -20px;
+  /* Add arrow image url here */
+}
+
+.arrow-right {
+  right: -10px;
+  top: -20px;
+  /* Add arrow image url here */
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 900px) {
+  .hero-banner-container {
+    flex-direction: column;
+    height: auto;
+    padding-bottom: 40px;
+  }
+
+  .hero-visual-section {
+    height: 350px;
+    margin-bottom: 20px;
+  }
+
+  .hero-info-section {
+    padding: 0 20px;
+  }
+
+  .hero-description {
+    font-size: 1.3rem;
+  }
+  .hero-product-image {
+  z-index: 2;
+  width: 100%;
+  position: relative;
+  top: 0;
+}
+}

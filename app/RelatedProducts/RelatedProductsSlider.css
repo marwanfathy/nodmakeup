@@ -1,0 +1,105 @@
+/* Container Layout */
+.related-product-slider-container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 4rem auto; /* Centers the whole block vertically and horizontally */
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+  
+/* Title Styling */
+.related-slider-title {
+    text-align: center;
+    font-size: 3.5rem;
+    font-weight: 300;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #333;
+    margin-bottom: 2.9rem;
+}
+  
+/* Swiper Container Spacing */
+.related-slider-content {
+    padding-bottom: 40px; /* Space for pagination dots */
+    display: flex;
+    justify-content: center; /* Ensures content wrapper is centered */
+}
+
+/* Ensure the Swiper instance takes full width to calculate gestures correctly */
+.related-product-swiper {
+    width: 100%;
+}
+  
+/* Swiper Pagination Dots */
+.related-product-swiper .swiper-pagination-bullet {
+    width: 10px;
+    height: 10px;
+    background: #ccc;
+    opacity: 1;
+    transition: background-color 0.3s;
+}
+
+.related-product-swiper .swiper-pagination-bullet-active {
+    background-color: #000;
+}
+  
+/* --- RESPONSIVE SKELETON GRID --- */
+.related-slider-loading-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    padding: 10px 0 40px 0;
+    width: 100%;
+    justify-content: center; /* Centers the grid items */
+}
+  
+/* Tablet */
+@media (min-width: 640px) {
+    .related-slider-loading-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+}
+
+/* Small Laptop */
+@media (min-width: 768px) {
+    .related-slider-loading-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 25px;
+    }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+    .related-slider-loading-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 30px;
+    }
+}
+
+/* Large Screens */
+@media (min-width: 1280px) {
+    .related-slider-loading-grid {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 30px;
+    }
+}
+
+/* --- MOBILE RESPONSIVENESS --- */
+@media (max-width: 768px) {
+    .related-product-slider-container {
+        margin: 2rem auto;
+        padding-left: 15px; 
+        padding-right: 15px;
+    }
+  
+    .related-slider-title {
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+        font-weight: 500;
+    }
+    
+    .related-slider-loading-grid {
+        gap: 15px;
+    }
+}

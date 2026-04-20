@@ -1,0 +1,123 @@
+/* src/components/Product/ProductImageGallery.css */
+
+.product-gallery-wrapper {
+  max-width: 100%;
+  width: 100%;
+  margin: 0;
+}
+
+.product-image-gallery {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+}
+
+/* Main Image Container: Removed aspect-ratio */
+.main-image-container {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: var(--pv-spacing-md); /* Use page variable from ProductViewPage.css or define locally */
+  border: none;
+  width: 100%;
+  background-color: var(--pv-bg-alt, #f9f9f9); /* Use page variable or fallback */
+  cursor: zoom-in;
+  padding: 0;
+  /* aspect-ratio: 1 / 1; /* REMOVED to prevent forced square */
+  border-radius: var(--pv-border-radius, 4px); /* Use page variable or fallback */
+}
+/* If zoom isn't active, reset cursor */
+.main-image-container:not(.zooming) {
+   /* cursor: default; */ /* Keep zoom-in or default as preferred */
+}
+
+
+/* Main Image Element: Ensure it fills and contains */
+.main-product-image {
+  display: block;
+  width: 100%;
+  /* Let height be auto to respect aspect ratio */
+  height: auto;
+  max-height: 70vh; /* Optional: prevent excessively tall images */
+  object-fit: contain; /* Ensure whole image is visible */
+  transition: opacity 0.1s linear;
+  border-radius: inherit; /* Inherit radius from container */
+}
+.main-image-container.zooming .main-product-image {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* Zoom Preview Overlay */
+.inline-zoom-preview {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background-color: #fff; background-repeat: no-repeat;
+  pointer-events: none; z-index: 5; opacity: 0; visibility: hidden;
+  transition: opacity 0.1s linear, visibility 0.1s linear;
+  border-radius: inherit; /* Inherit radius */
+}
+.main-image-container.zooming .inline-zoom-preview {
+  opacity: 1; visibility: visible;
+}
+
+/* --- Thumbnail Styling --- */
+.thumbnail-container {
+  display: flex;
+  flex-wrap: wrap;
+  /* Use page variables or define locally */
+  gap: var(--pv-spacing-sm, 10px);
+  justify-content: flex-start;
+  width: 100%;
+  padding: 0;
+  margin-top: var(--pv-spacing-sm, 10px);
+}
+.thumbnail-button {
+  padding: 2px;
+  border: 1px solid transparent;
+  background-color: transparent;
+  cursor: pointer;
+  transition: border-color 0.2s ease, opacity 0.2s ease;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  /* Use page variables or define locally */
+  border-radius: var(--pv-border-radius, 4px);
+  opacity: 0.7;
+}
+.thumbnail-button:focus {
+   outline: none;
+   /* Use page variable or define locally */
+   border-color: var(--vs-focus-ring-color, dodgerblue);
+   opacity: 1;
+}
+
+/* Thumbnail Image: Corrected width */
+.thumbnail-image {
+  display: block;
+  width: 100%;   /* CORRECTED: Fill the inner space of the button */
+  height: 100%;  /* Fill the inner space of the button */
+  object-fit: contain; /* Fit image within the space */
+  /* Use page variable or define locally */
+  border-radius: calc(var(--pv-border-radius, 4px) - 2px);
+}
+.thumbnail-button:hover {
+  /* Use page variable or define locally */
+  border-color: var(--pv-secondary-color, #888);
+  opacity: 1;
+}
+.thumbnail-button.active {
+  /* Use page variable or define locally */
+  border-color: var(--pv-primary-color, #1a1a1a);
+  opacity: 1;
+}
+
+/* Responsive adjustments */
+@media (hover: none) {
+  .main-image-container { cursor: default; }
+}
+@media (max-width: 768px) {
+    .thumbnail-button { width: 50px; height: 50px; }
+}

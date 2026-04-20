@@ -1,0 +1,704 @@
+/* frontend/src/components/Nav/nav.css */
+@import url("../Fonts/fonts.css");
+
+/* ==========================================================================
+   1. Wrapper & Main States
+   ========================================================================== */
+
+.navbar-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  transition: background-color 0.4s ease, box-shadow 0.4s ease;
+  background-color: #f0f0f0;
+  box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.05);
+}
+
+/* Homepage Transparent State */
+.navbar-wrapper.on-homepage:not(.scrolled) {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.navbar {
+  width: 100%;
+  max-width: 1400px; /* Standard wide screen max-width */
+  margin: 0 auto;
+  padding: 0 1.618rem; /* Golden Ratio padding */
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+   2. Colors & Typography
+   ========================================================================== */
+
+/* Default Text Colors */
+.navbar-logo .logo,
+.region-display,
+.cart-button,
+.navbar-main-links a {
+  color: #333;
+  transition: color 0.4s ease;
+}
+
+/* Transparent State Colors */
+.navbar-wrapper.on-homepage:not(.scrolled) .navbar-logo .logo,
+.navbar-wrapper.on-homepage:not(.scrolled) .region-display,
+.navbar-wrapper.on-homepage:not(.scrolled) .cart-button,
+.navbar-wrapper.on-homepage:not(.scrolled) .navbar-main-links a {
+  color: #ffffff;
+}
+
+/* Star Decorator */
+.star-decorator {
+  color: #a1a1a1;
+  transition: color 0.4s ease;
+}
+.navbar-wrapper.on-homepage:not(.scrolled) .star-decorator {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Border adjustments */
+.navbar-bottom {
+  border-top: 1px solid #e0e0e0;
+  transition: border-color 0.4s ease;
+}
+.navbar-wrapper.on-homepage:not(.scrolled) .navbar-bottom {
+  border-top-color: rgba(255, 255, 255, 0.2);
+}
+
+/* ==========================================================================
+   3. Navbar Structure (Symmetry Logic)
+   ========================================================================== */
+
+/* 
+   GRID LAYOUT FOR PERFECT SYMMETRY 
+   Columns: 1fr (Left) | Auto (Logo) | 1fr (Right)
+*/
+.navbar-top {
+  display: grid; 
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0.618rem 0; /* Adjusted vertical padding */
+  min-height: 50px;
+}
+
+/* Left Section (Region) - Aligned Start */
+.navbar-top-left {
+  justify-self: start;
+  display: flex;
+}
+
+/* Right Section (Cart) - Aligned End */
+.navbar-top-right {
+  justify-self: end;
+  display: flex;
+}
+
+/* Center Section (Logo) - Aligned Center */
+.navbar-logo {
+  justify-self: center;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Logo Typography - Golden Ratio (Base 16px * 1.618 * 1.618 approx 42px) */
+.navbar-logo .logo, .logo-font {
+  width: 100px;
+}
+
+/* Navbar Bottom (Links) */
+.navbar-bottom {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 40px;
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   4. Utility Components (Golden Ratio: Base / 1.27 approx 12.5px)
+   ========================================================================== */
+
+.region-display {
+letter-spacing: .5px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  font-family: rubic, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  display: flex;
+}
+
+.region-display .flag-icon {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.cart-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px; /* Larger hit area */
+  line-height: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.cart-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.cart-icon {
+  width: 22px; /* Slightly larger for visual balance */
+  height: auto;
+  display: block;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background-color: #c02332;
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #f0f0f0;
+}
+
+/* ==========================================================================
+   5. Main Navigation Links (Golden Ratio: Base 16px)
+   ========================================================================== */
+
+.navbar-main-links ul {
+  display: inline-flex;
+  flex-direction: row;
+  gap: 0;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.navbar-main-links li {
+  cursor: pointer;
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  padding: 0 1.618rem; /* Wide spacing for elegance */
+}
+
+.navbar-main-links a {
+  letter-spacing: 1.6px;
+  text-transform: capitalize;
+  padding: 5px 0;
+  font-family: rubic, sans-serif;
+  font-size: 14px;
+  text-decoration: none;
+  transition: opacity .3s;
+  display: inline-block;
+  position: relative;
+}
+
+.navbar-main-links a:hover {
+  opacity: 0.7;
+}
+
+/* ==========================================================================
+   6. Cart Sidebar (Unchanged Logic, visual tweaks)
+   ========================================================================== */
+/* ... Keeping your functional sidebar CSS intact ... */
+/* Free Shipping Progress Bar */
+.cart-shipping-progress {
+    padding: 15px 20px;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+}
+
+.shipping-message {
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.shipping-message.success {
+    color: #2e7d32; /* Green color for success */
+}
+
+.progress-bar-bg {
+    width: 100%;
+    height: 6px;
+    background-color: #e0e0e0;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background-color: #000; /* Black bar, fits the luxury aesthetic */
+    transition: width 0.3s ease-out;
+}
+.cart-sidebar-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1050;
+  pointer-events: none;
+  visibility: hidden;
+  display: flex;
+  justify-content: flex-end;
+}
+.cart-sidebar-container.open {
+  pointer-events: auto;
+  visibility: visible;
+}
+.cart-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+.cart-sidebar-container.open .cart-overlay {
+  opacity: 1;
+}
+.cart-sidebar {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  max-width: 420px;
+  background-color: #ffffff;
+  box-shadow: -4px 0 15px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.3s ease-in-out;
+  color: #1a1a1a;
+  font-family: "Inter", sans-serif;
+}
+.cart-sidebar-container.open .cart-sidebar {
+  transform: translateX(0);
+}
+.cart-sidebar-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+.cart-sidebar-header h4 {
+  font-size: 1.25rem; /* ~20px */
+  font-weight: 600;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.close-cart-btn {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #888;
+  padding: 0;
+  transition: color 0.2s;
+}
+.cart-sidebar-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+.cart-empty-message {
+  text-align: center;
+  padding: 40px 20px;
+  color: #888;
+  font-size: 1rem;
+}
+
+/* Cart Items */
+.cart-item-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.cart-item {
+  display: flex;
+  gap: 16px;
+  position: relative;
+  padding-right: 20px;
+}
+.cart-item-image {
+  width: 90px;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+  background-color: #f5f5f5;
+}
+.cart-item-details {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+.cart-item-name {
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.4;
+  margin: 0;
+  color: #1a1a1a;
+}
+.cart-item-variant {
+  font-size: 0.85rem;
+  color: #666;
+  margin: 4px 0 0 0;
+  text-transform: capitalize;
+}
+.cart-item-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+.quantity-control {
+  display: flex;
+  align-items: center;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+}
+.quantity-control button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  font-size: 1.2rem;
+  color: #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+.quantity-control button:hover {
+  background-color: #f5f5f5;
+}
+.quantity-control span {
+  font-size: 0.9rem;
+  font-weight: 500;
+  min-width: 40px;
+  text-align: center;
+}
+.cart-item-price-total {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+.cart-item-remove-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  line-height: 1;
+  color: #aaa;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s;
+}
+.cart-item-remove-btn:hover {
+  color: #e53e3e;
+}
+.cart-sidebar-footer {
+background-color: #fff;
+  border-top: 1px solid #f0f0f0;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 16px;
+  padding: 35px;
+  display: flex;
+  box-shadow: 0 -4px 12px #0000000d;
+  border-radius: 50px 50px 50px;
+}
+.cart-subtotal {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.cart-sidebar-footer .checkout-btn {
+  width: 100%;
+  padding: 10px; /* Slightly larger button */
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-radius: 20px;
+  border: none;
+  background-color: #000000;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.cart-sidebar-footer .checkout-btn:hover:not(:disabled) {
+  background-color: #333;
+}
+.cart-sidebar-footer .checkout-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* ==========================================================================
+   7. Discover Link & Stars
+   ========================================================================== */
+
+.discover-link-wrapper {
+  position: relative;
+  padding: 0 25px;
+}
+.star-decorator {
+  position: absolute;
+  display: inline-block;
+  line-height: 0;
+  z-index: -1;
+  animation: star-glow 2s ease-in-out infinite alternate;
+}
+@keyframes star-glow {
+  0% {
+    opacity: 0.3;
+    transform: scale(0.9) rotate(-10deg);
+    filter: drop-shadow(0 0 1px rgba(94, 94, 94, 0.5));
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.1) rotate(10deg);
+    filter: drop-shadow(0 0 4px rgba(54, 54, 54, 0.8));
+  }
+}
+.star--top-left { top: -2px; left: 0px; }
+.star--top-right { top: 1px; right: 3px; animation-delay: 0.1s; }
+.star--bottom-left { bottom: 0px; left: 5px; animation-delay: 0.2s; }
+.star--bottom-right { bottom: -1px; right: -1px; animation-delay: 0.3s; }
+
+/* ==========================================================================
+   8. Responsive Styles
+   ========================================================================== */
+
+@media (max-width: 992px) {
+  .navbar {
+    padding: 0 1rem;
+  }
+  .navbar-top {
+    min-height: 50px;
+  }
+  /* Reduce fonts slightly on tablet but keep hierarchy */
+  .navbar-logo .logo { font-size: 32px; letter-spacing: 4px; }
+  .navbar-main-links a { font-size: 14px; }
+  .navbar-main-links li { padding: 0 12px; }
+}
+
+@media (max-width: 768px) {
+  .navbar-top {
+    /* On mobile, we might keep grid or switch to flex depending on design.
+       Keeping Grid ensures logo stays center even if icons change. */
+    min-height: 50px;
+  }
+  
+  .navbar-logo .logo {
+    font-size: 26px; /* Base * 1.618 */
+    letter-spacing: 3px;
+  }
+  
+  /* Hide desktop utility texts/links */
+  .region-display span, 
+  .navbar-bottom {
+    display: none;
+  }
+
+  /* Keep flag visible if desired, or hide region entirely */
+  .region-display {
+    display: none; 
+  }
+}
+/* --- Base Hamburger Styles (Hidden by default on desktop) --- */
+.hamburger-btn {
+  display: none; /* Hidden on desktop */
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  color: #000;
+}
+
+/* --- Mobile Menu Container --- */
+.mobile-menu-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2000; /* Higher than regular content */
+  visibility: hidden;
+  transition: visibility 0.3s;
+}
+
+.mobile-menu-container.open {
+  visibility: visible;
+}
+
+/* --- Mobile Menu Overlay --- */
+.mobile-menu-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.mobile-menu-container.open .mobile-menu-overlay {
+  opacity: 1;
+}
+
+/* --- Mobile Menu Sidebar --- */
+.mobile-menu-sidebar {
+  position: absolute;
+  top: 0;
+  left: 0; /* Slides in from the LEFT */
+  width: 80%;
+  max-width: 300px;
+  height: 100%;
+  background-color: #fff;
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+}
+
+.mobile-menu-container.open .mobile-menu-sidebar {
+  transform: translateX(0);
+}
+
+/* --- Mobile Menu Header --- */
+.mobile-menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+}
+
+.mobile-menu-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.close-menu-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #000;
+}
+
+/* --- Mobile Links --- */
+.mobile-nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.mobile-link {
+  font-size: 1.1rem;
+  text-decoration: none;
+  color: #111;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: color 0.2s;
+}
+
+.mobile-link:hover {
+  color: #666;
+}
+
+/* --- Mobile Footer (Region) --- */
+.mobile-menu-footer {
+  margin-top: auto; /* Pushes to bottom */
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.region-display-mobile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+/* =========================================
+   RESPONSIVE MEDIA QUERIES
+   ========================================= */
+
+@media (max-width: 768px) {
+  /* 1. Hide the bottom navbar (the row of links) */
+  .navbar-bottom {
+    display: none;
+  }
+
+  /* 2. Show the Hamburger button */
+  .hamburger-btn {
+    display: block;
+  }
+
+  /* 3. Hide the region display in the top bar (moved to mobile menu) */
+  .navbar-top-left .region-display {
+    display: none;
+  }
+
+  /* 4. Adjust Top Bar Layout */
+  .navbar-top {
+    padding: 10px 15px;
+  }
+
+  .navbar-logo h1 {
+    font-size: 1.8rem; /* Slightly smaller logo on mobile */
+  }
+}
