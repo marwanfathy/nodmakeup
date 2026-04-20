@@ -1,8 +1,6 @@
 "use client";
 
 import React, { createContext, useState, useContext, useEffect, useCallback, ReactNode } from 'react';
-// --- CORRECT ---
-// Only import functions from your API layer and types.
 import {
     getCart,
     addItemToCart as apiAddItemToCart,
@@ -10,19 +8,12 @@ import {
     removeItemFromCart as apiRemoveItemFromCart,
     CartObject,
     CartItemPublic
-} from '../../lib/api'; // This is the "waiter"
-
-// --- INCORRECT - DELETE THESE LINES IF THEY EXIST ---
-// import asyncHandler from 'express-async-handler'; // This is backend-only
-// import { v4 as uuidv4 } from 'uuid'; // This is okay, but not needed here
-// import prisma from '../../config/prismaClient'; // THIS IS THE MAIN ERROR - BACKEND ONLY
-// import { applyPriceLogic } from '../../utils/priceUtils'; // This is backend-only
+} from '../../lib/api';
 
 import { toast, ToastContainer } from 'react-toastify';
 // @ts-ignore
 import 'react-toastify/dist/ReactToastify.css';
 
-// --- TYPE DEFINITIONS ---
 interface CartContextType {
     cart: CartObject | null;
     isCartLoading: boolean;
@@ -35,7 +26,6 @@ interface CartContextType {
     removeItem: (cartItemId: number) => Promise<void>;
 }
 
-// --- CONTEXT CREATION ---
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const useCart = (): CartContextType => {
@@ -46,15 +36,24 @@ export const useCart = (): CartContextType => {
     return context;
 };
 
+const CART_SESSION_KEY = 'cart_session_id';
+
 export const CartProvider = ({ children }: { children: ReactNode }) => {
     const [cart, setCart] = useState<CartObject | null>(null);
     const [isCartLoading, setIsCartLoading] = useState(true);
     const [isCartOpen, setIsCartOpen] = useState(false);
+    const [isHydrated, setIsHydrated] = useState(false);
+
+    // Save cart session ID whenever cart changes
+    useEffect(() => {
+        if (cart?.cart_session_id) {
+            localStorage.setItem(CART_SESSION_KEY, cart.cart_session_id);
+        }
+    }, [cart?.cart_session_id]);
 
     const fetchCart = useCallback(async () => {
         setIsCartLoading(true);
         try {
-            // This correctly calls the "waiter" (api.ts)
             const fetchedCart = await getCart();
             setCart(fetchedCart);
         } catch (error: any) {
@@ -68,12 +67,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         }
     }, []);
 
+    // Initialize cart on mount
     useEffect(() => {
+        setIsHydrated(true);
         fetchCart();
     }, [fetchCart]);
-
-    // All the functions below correctly use the imported API functions.
-    // They do NOT use prisma directly. This is the correct pattern.
 
     const addItemToCart = async (variantId: number, quantity: number, options?: { openCart?: boolean }): Promise<boolean> => {
         try {
