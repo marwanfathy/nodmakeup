@@ -9,9 +9,7 @@ import {
     CartObject,
     CartItemPublic
 } from '../../lib/api';
-
 import { toast, ToastContainer } from 'react-toastify';
-// @ts-ignore
 import 'react-toastify/dist/ReactToastify.css';
 
 interface CartContextType {
@@ -30,9 +28,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const useCart = (): CartContextType => {
     const context = useContext(CartContext);
-    if (context === undefined) {
-        throw new Error('useCart must be used within a CartProvider');
-    }
+    if (context === undefined) throw new Error('useCart must be used within a CartProvider');
     return context;
 };
 
@@ -42,12 +38,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isHydrated, setIsHydrated] = useState(false);
 
-    /**
-     * HELPER: Sync Session ID to LocalStorage
-     * This fulfills the "Persistence Check" requirement.
-     */
     const syncSessionId = useCallback((cartObj: CartObject) => {
-        if (cartObj.cart_session_id) {
+        if (cartObj && cartObj.cart_session_id) {
             localStorage.setItem('fallback_cart_id', cartObj.cart_session_id);
         }
     }, []);
@@ -57,22 +49,17 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         try {
             const fetchedCart = await getCart();
             setCart(fetchedCart);
-            
-            // PUBLIC FIX: Save the ID for persistence
             syncSessionId(fetchedCart);
         } catch (error: any) {
             console.error("Failed to fetch cart:", error);
-            // Only show toast if it's a real server error (not just an empty/new session)
-            if (error.response?.status !== 404 && error.response?.status !== 401) {
-                toast.error("Could not load your shopping bag.");
-            }
-            setCart({ cart_session_id: '', items: [], summary: { subtotal: 0, itemCount: 0 } });
+            // On failure, keep an empty object but preserve the session ID if it exists
+            const existingId = localStorage.getItem('fallback_cart_id') || '';
+            setCart({ cart_session_id: existingId, items: [], summary: { subtotal: 0, itemCount: 0 } } as any);
         } finally {
             setIsCartLoading(false);
         }
     }, [syncSessionId]);
 
-    // Initialize cart on mount
     useEffect(() => {
         setIsHydrated(true);
         fetchCart();
@@ -82,88 +69,51 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         try {
             const updatedCart = await apiAddItemToCart(variantId, quantity);
             setCart(updatedCart);
-            
-            // PUBLIC FIX: Ensure session is saved after adding first item
             syncSessionId(updatedCart);
-
             toast.success("Item added to your bag!");
-            const shouldOpenCart = options?.openCart ?? true;
-            if (shouldOpenCart) {
-                setIsCartOpen(true);
-            }
+            if (options?.openCart !== false) setIsCartOpen(true);
             return true;
         } catch (error: any) {
-            const errorMessage = error.response?.data?.message || "Could not add item to bag.";
-            toast.error(errorMessage);
-            console.error("Add to cart error:", error);
+            toast.error(error.response?.data?.message || "Could not add item.");
             return false;
         }
     };
 
     const updateItemQuantity = async (cartItemId: number, newQuantity: number) => {
-        if (newQuantity <= 0) {
-            return removeItem(cartItemId);
-        }
-        
+        if (newQuantity <= 0) return removeItem(cartItemId);
         const originalCart = cart;
-        if (cart) {
-            const updatedItems = cart.items.map((item: CartItemPublic) =>
-                item.cart_item_id === cartItemId ? { ...item, quantity: newQuantity } : item
-            );
-            const optimisticCart = { ...cart, items: updatedItems };
-            setCart(optimisticCart);
-        }
-
         try {
             const updatedCartFromServer = await apiUpdateItemQuantity(cartItemId, newQuantity);
             setCart(updatedCartFromServer);
             syncSessionId(updatedCartFromServer);
         } catch (error: any) {
-            toast.error(error.response?.data?.message || "Could not update item quantity.");
+            toast.error("Could not update quantity.");
             setCart(originalCart);
         }
     };
 
     const removeItem = async (cartItemId: number) => {
         const originalCart = cart;
-        if (cart) {
-            const updatedItems = cart.items.filter((item: CartItemPublic) => item.cart_item_id !== cartItemId);
-            const optimisticCart = { ...cart, items: updatedItems };
-            setCart(optimisticCart);
-        }
         try {
             const updatedCartFromServer = await apiRemoveItemFromCart(cartItemId);
-            toast.info("Item removed from your bag.");
+            toast.info("Item removed.");
             setCart(updatedCartFromServer);
             syncSessionId(updatedCartFromServer);
         } catch (error: any) {
-            toast.error(error.response?.data?.message || "Could not remove item.");
+            toast.error("Could not remove item.");
             setCart(originalCart);
         }
     };
 
-    const contextValue: CartContextType = {
-        cart,
-        isCartLoading,
-        isCartOpen,
-        setIsCartOpen,
-        itemCount: cart?.summary?.itemCount || 0,
-        fetchCart,
-        addItemToCart,
-        updateItemQuantity,
-        removeItem,
-    };
-
-    // Prevent hydration mismatch by not rendering until hydrated
     if (!isHydrated) return null;
 
     return (
-        <CartContext.Provider value={contextValue}>
-            <ToastContainer
-                position="bottom-right"
-                autoClose={4000}
-                theme="light"
-            />
+        <CartContext.Provider value={{
+            cart, isCartLoading, isCartOpen, setIsCartOpen,
+            itemCount: cart?.summary?.itemCount || 0,
+            fetchCart, addItemToCart, updateItemQuantity, removeItem
+        }}>
+            <ToastContainer position="bottom-right" autoClose={2000} theme="light" />
             {children}
         </CartContext.Provider>
     );
