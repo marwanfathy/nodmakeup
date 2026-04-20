@@ -199,6 +199,19 @@ const apiClient = axios.create({
     withCredentials: true,
 });
 
+// Add interceptor to include cart session in headers if available
+apiClient.interceptors.request.use((config) => {
+    const sessionId = typeof window !== 'undefined' 
+        ? localStorage.getItem('cart_session_id') 
+        : null;
+    
+    if (sessionId) {
+        config.headers['X-Cart-Session'] = sessionId;
+    }
+    
+    return config;
+});
+
 const unwrapData = <T>(response: AxiosResponse<{ data: T }>): T => response.data.data;
 
 
