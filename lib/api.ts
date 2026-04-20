@@ -197,8 +197,39 @@ export interface ApiStoryGroup {
 const apiClient = axios.create({
     baseURL: API_URL,
     withCredentials: true,
+    headers: {
+        // This bypasses the Ngrok warning page so the API works immediately
+        "ngrok-skip-browser-warning": "true", 
+    }
+});
+// In your api.ts
+
+// 1. Request Interceptor: Attach the ID to every outgoing request
+apiClient.interceptors.request.use((config) => {
+    const savedId = localStorage.getItem('fallback_cart_id');
+    
+    if (savedId) {
+        // Send the ID in a custom header the backend can read
+        config.headers['x-cart-session-id'] = savedId;
+    }
+
+    // Required for Ngrok to work without the manual warning page
+    config.headers['ngrok-skip-browser-warning'] = 'true';
+    
+    return config;
 });
 
+// 2. Response Interceptor: Save the ID when the backend creates a new cart
+apiClient.interceptors.response.use((response) => {
+    // Check if the response contains the cart object with a session ID
+    const cartData = response.data?.data;
+    if (cartData && cartData.cart_session_id) {
+        localStorage.setItem('fallback_cart_id', cartData.cart_session_id);
+    }
+    return response;
+}, (error) => {
+    return Promise.reject(error);
+});
 const unwrapData = <T>(response: AxiosResponse<{ data: T }>): T => response.data.data;
 
 
@@ -274,13 +305,6 @@ export const removeItemFromCart = async (cartItemId: number): Promise<CartObject
     const response = await apiClient.delete<{ data: CartObject }>(`/api/public/cart/items/${cartItemId}`);
     return unwrapData(response);
 };
-apiClient.interceptors.request.use((config) => {
-    const fallbackId = localStorage.getItem('fallback_cart_id');
-    if (fallbackId) {
-        config.headers['x-cart-session-id'] = fallbackId;
-    }
-    return config;
-});
 
 // ===============================================
 //           ORDERS & CHECKOUT API
