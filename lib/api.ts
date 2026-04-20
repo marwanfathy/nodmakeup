@@ -193,10 +193,13 @@ export interface ApiStoryGroup {
 //           AXIOS INSTANCE & HELPERS
 // ===============================================
 
-// UPDATED: Using the imported API_URL from config instead of process.env/hardcoded string
 const apiClient = axios.create({
     baseURL: API_URL,
-    withCredentials: true,
+    withCredentials: true, // MANDATORY: For cart cookies
+    headers: {
+        // TIP: This bypasses the ngrok splash screen that causes "Network Error"
+        'ngrok-skip-browser-warning': 'true',
+    }
 });
 
 const unwrapData = <T>(response: AxiosResponse<{ data: T }>): T => response.data.data;
