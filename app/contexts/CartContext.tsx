@@ -36,7 +36,6 @@ export const useCart = (): CartContextType => {
     return context;
 };
 
-const CART_SESSION_KEY = 'cart_session_id';
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
     const [cart, setCart] = useState<CartObject | null>(null);
@@ -45,11 +44,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     const [isHydrated, setIsHydrated] = useState(false);
 
     // Save cart session ID whenever cart changes
-    useEffect(() => {
-        if (cart?.cart_session_id) {
-            localStorage.setItem(CART_SESSION_KEY, cart.cart_session_id);
-        }
-    }, [cart?.cart_session_id]);
 
     const fetchCart = useCallback(async () => {
         setIsCartLoading(true);
