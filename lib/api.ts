@@ -202,7 +202,13 @@ const apiClient = axios.create({
         "ngrok-skip-browser-warning": "true", 
     }
 });
-
+apiClient.interceptors.request.use((config) => {
+    const id = localStorage.getItem('fallback_cart_id');
+    if (id) {
+        config.headers['x-cart-session-id'] = id;
+    }
+    return config;
+});
 const unwrapData = <T>(response: AxiosResponse<{ data: T }>): T => response.data.data;
 
 
