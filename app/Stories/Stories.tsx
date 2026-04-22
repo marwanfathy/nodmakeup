@@ -78,7 +78,7 @@ const Stories: React.FC = () => {
     return (
         <>  
             <div className="stories-tray-container">
-                                <h1 className='title-story-section'>Events</h1><span className='title-story-section-separite'>|</span>
+                                <h1 className='title-story-section'>Stories</h1><span className='title-story-section-separite'>|</span>
 
                 <Swiper
                     className="story-swiper"
