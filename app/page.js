@@ -5,10 +5,13 @@ import HeroSlider from './HeroProductCard/HeroSlider';
 import BenefitsBar from './BenefitsBar/BenefitsBar';
 import HeroProductSection from './HeroProductCard2/HeroSection'
 import Stories from "./Stories/Stories";
+import WelcomeUser from './Welcome';
+
 const HomePage = () => {
   return (
     // Set the background color here to match the loader
     <div>
+      <WelcomeUser />
       <Stories />
       <Lan_Banner />
       <HeroProductSection />

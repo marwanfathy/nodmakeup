@@ -1,0 +1,83 @@
+/* --- Desktop / Default Styles --- */
+.welcome-user-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: #0b0b0b;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 1s ease-out;
+    padding: 20px; /* Add padding to prevent text touching edges */
+    box-sizing: border-box;
+}
+
+.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.text-content {
+    text-align: center;
+    color: white;
+    animation: scaleIn 0.8s ease-out;
+    width: 100%; /* Ensure it takes full width for centering */
+}
+
+.text-content h1 {
+    font-size: 2rem;
+    font-weight: 300;
+    margin-bottom: 10px;
+    color: #888;
+}
+
+.username-text {
+    font-size: 4rem; /* Big font for PC */
+    font-weight: 900;
+    text-transform: capitalize;
+    background: linear-gradient(90deg, #fed425, #fff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+    line-height: 1.2; /* Helps if name wraps to two lines */
+    word-wrap: break-word; /* Prevents long names from breaking layout */
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* =========================================
+   RESPONSIVE DESIGN (Media Queries)
+   ========================================= */
+
+/* Tablets and Small Laptops (Max Width: 1024px) */
+@media (max-width: 1024px) {
+    .username-text {
+        font-size: 3rem;
+    }
+}
+
+/* Mobile Phones (Max Width: 768px) */
+@media (max-width: 768px) {
+    .text-content h1 {
+        font-size: 1.5rem;
+    }
+    .username-text {
+        font-size: 2.5rem; /* Significant reduction for mobile */
+    }
+}
+
+/* Very Small Phones (Max Width: 480px) */
+@media (max-width: 480px) {
+    .text-content h1 {
+        font-size: 1.2rem;
+    }
+    .username-text {
+        font-size: 2rem; 
+    }
+}
