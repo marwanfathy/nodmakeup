@@ -5,7 +5,7 @@ import HeroSlider from './HeroProductCard/HeroSlider';
 import BenefitsBar from './BenefitsBar/BenefitsBar';
 import HeroProductSection from './HeroProductCard2/HeroSection'
 import Stories from "./Stories/Stories";
-import WelcomeUser from './Welcome';
+import WelcomeUser from './welcome.js';
 
 const HomePage = () => {
   return (
