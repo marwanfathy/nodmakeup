@@ -12,12 +12,12 @@ const HomePage = () => {
     // Set the background color here to match the loader
     <div>
       <WelcomeUser />
-      <Stories />
+      {/*<Stories />
       <Lan_Banner />
       <HeroProductSection />
       <ProductCollectionSlider slug="la-vie-en-rose" title="Our Bestsellers" />
-      {/* <HeroSlider slug="tttt" /> */}
-      <BenefitsBar />
+       <HeroSlider slug="tttt" /> 
+      <BenefitsBar />*/}
     </div>
   );
 };
