@@ -22,7 +22,7 @@ const HomePage = () => {
       <Lan_Banner />
       <HeroProductSection />
       <ProductCollectionSlider slug="la-vie-en-rose" title="Our Bestsellers" />
-      <HeroSlider slug="tttt" /> 
+      {/*<HeroSlider slug="tttt" /> */}
       <BenefitsBar />
       
     </main>
