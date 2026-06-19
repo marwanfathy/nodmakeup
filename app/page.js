@@ -11,20 +11,20 @@ const HomePage = () => {
   return (
     <main>
       {/* This will stay on screen permanently */}
-      <WelcomeUser />
+      {/*<WelcomeUser />*/}
 
       {/* 
         The rest of the site is hidden/commented out. 
         When you are ready to go live, you can uncomment these.
       */}
-      {/*
+      
       <Stories />
       <Lan_Banner />
       <HeroProductSection />
       <ProductCollectionSlider slug="la-vie-en-rose" title="Our Bestsellers" />
       <HeroSlider slug="tttt" /> 
       <BenefitsBar />
-      */}
+      
     </main>
   );
 };
