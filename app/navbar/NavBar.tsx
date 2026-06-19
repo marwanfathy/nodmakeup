@@ -8,7 +8,7 @@ import CartSidebar from "./CartSidebar"; // <--- Import the separated component
 import "./NavBar.css";
 
 // --- Configuration ---
-const apiBaseUrl = process.env.NEXT_PUBLIC_MEDIA_URL || "https://f22d-105-36-96-27.ngrok-free.app";
+const apiBaseUrl = "https://f22d-105-36-96-27.ngrok-free.app";
 const cartIconPath = "/uploads/assets/icons/shopping-bag.png";
 const flagIconPath = "/uploads/assets/icons/flag-egypt.svg";
 const logo = "/uploads/images/image(1).png"
