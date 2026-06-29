@@ -2,7 +2,7 @@
 
 import "./Lan_banner.css";
 
-const apiBaseUrl = "https://f22d-105-36-96-27.ngrok-free.app";
+const apiBaseUrl = "https://ea2f-197-54-67-24.ngrok-free.app";
 // Replace with your actual image path
 const BannerImg = '/uploads/images/WhatsApp Image 2026-04-08 at 4.52.06 AM(1).jpeg'
 
