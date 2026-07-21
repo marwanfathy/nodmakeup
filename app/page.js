@@ -11,14 +11,14 @@ const HomePage = () => {
   return (
     <main>
       {/* This will stay on screen permanently*/}
-      <WelcomeUser />  
- {/*
+    {/*  <WelcomeUser />  */}
+ 
       <Stories />
       <Lan_Banner />
       <HeroProductSection />
       <ProductCollectionSlider slug="la-vie-en-rose" title="Our Bestsellers" />
      <HeroSlider slug="tttt" />
-      <BenefitsBar />  */}
+      <BenefitsBar />  
     </main>
   );
 };
