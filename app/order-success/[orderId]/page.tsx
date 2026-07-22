@@ -8,7 +8,7 @@ import { getPublicOrderDetails, OrderDetails } from '@/lib/api';
 import Spinner from '@/app/Common/spinn'; 
 // @ts-ignore
 import './OrderSuccess.css';
-const audiosrc = "https://f22d-105-36-96-27.ngrok-free.app/uploads/audio/successfx.mp3";
+const audiosrc = "https://783f-197-54-65-11.ngrok-free.app/uploads/audio/successfx.mp3";
 
 export default function OrderSuccessPage() {
     const params = useParams();
