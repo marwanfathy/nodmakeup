@@ -143,9 +143,11 @@ export function allowOrigin(origin: string | null | undefined, allowlist: Iterab
 
 // ---------------------------------------------------------------------------
 // Client base-URL resolution (used by the admin panel and the storefront).
-// Build-time inlined URLs (REACT_APP_* / NEXT_PUBLIC_*) point at the dev
-// machine; in the browser we re-derive protocol + host from the page the user
-// actually opened, keeping the port (or omitting 443/80 in production).
+// Build-time inlined URLs (REACT_APP_* / NEXT_PUBLIC_*). A non-loopback env
+// URL (tunnel or production domain) wins verbatim. In local dev (empty or
+// loopback env) we re-derive protocol + host from the page the user actually
+// opened so localhost / LAN-IP browsing both work, keeping the service port
+// (or omitting 443/80 in production).
 // ---------------------------------------------------------------------------
 
 function safeParseUrl(raw: string | undefined | null): URL | null {
@@ -168,22 +170,24 @@ export interface DeriveClientBaseUrlInput {
 export function deriveClientBaseUrl({ kind, envUrl, browserLocation }: DeriveClientBaseUrlInput): string {
   const defaultPort = defaultPortOf(kind);
   const env = safeParseUrl(envUrl);
+  const isLoopback = env ? ['localhost', '127.0.0.1', '::1'].includes(env.hostname) : false;
+  const envPort = env?.port || '';
 
+  // Production mode: the env URL names a real host (tunnel or domain). It wins
+  // verbatim — the page origin (e.g. the storefront's Vercel URL) is a
+  // DIFFERENT server and can never serve the API/media content, so browser
+  // location must not override the configured host here.
+  if (env && !isLoopback) {
+    return `${env.protocol}//${env.hostname}${env.port ? `:${env.port}` : ''}`;
+  }
+
+  // Dev mode: no env URL, or a loopback one. The page may be opened via
+  // localhost or the machine's LAN IP, so re-derive the host from the page the
+  // user actually opened; scheme follows the page, port comes from the env URL
+  // (or the service default when none is set).
   const host = browserLocation?.hostname || env?.hostname || 'localhost';
   const scheme = browserLocation?.protocol || env?.protocol || 'http:';
-
-  // Port rules:
-  //  - explicit port in the env URL  -> use it (dropped later for 443/80)
-  //  - loopback env URL without port -> dev default (localhost:5xxx)
-  //  - non-loopback env URL without port -> production domain, omit (443/80)
-  //  - no env URL at all -> dev default port on the page host
-  const envPort = env?.port || '';
-  const isLoopback = env ? ['localhost', '127.0.0.1', '::1'].includes(env.hostname) : false;
-  const port = envPort || (!env ? String(defaultPort) : isLoopback ? String(defaultPort) : '');
-
-  const isDefaultForScheme =
-    (scheme === 'https:' && port === '443') || (scheme === 'http:' && port === '80');
-  const portSuffix = !port || isDefaultForScheme ? '' : `:${port}`;
-
-  return `${scheme}//${host}${portSuffix}`;
+  const port = envPort || String(defaultPort);
+  const isDefaultPort = (scheme === 'https:' && port === '443') || (scheme === 'http:' && port === '80');
+  return `${scheme}//${host}${isDefaultPort ? '' : `:${port}`}`;
 }
