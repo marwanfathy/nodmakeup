@@ -1,0 +1,19 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  // Node project without package.json "main": entry points are the app root,
+  // the outbox worker runtimes, seeds and the test runner config.
+  "entry": [
+    "server.ts",
+    "workers/run.ts",
+    "workers/outboxWorker.ts",
+    "prisma/**/*.ts",
+    "vitest.config.ts"
+  ],
+  "project": ["**/*.ts"],
+  "ignoreDependencies": [
+    // Runtime-only / ambient deps knip cannot see through (worker runtimes,
+    // prisma generators, native/binary packages).
+    "prisma",
+    "nodemon"
+  ]
+}

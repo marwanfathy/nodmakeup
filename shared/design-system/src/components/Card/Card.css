@@ -1,0 +1,113 @@
+/* Card Component Styles — Apple-inspired */
+
+.ds-card {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-sans);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-elevated);
+  transition: all var(--transition-normal);
+}
+
+/* Variants */
+.ds-card--default {
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border-light);
+}
+
+.ds-card--elevated {
+  box-shadow: var(--shadow-md);
+  border: none;
+}
+
+.ds-card--outlined {
+  box-shadow: none;
+  border: 1px solid var(--color-border-light);
+}
+
+/* Padding */
+.ds-card--padding-none {
+  padding: 0;
+}
+
+.ds-card--padding-sm {
+  padding: var(--space-3);
+}
+
+.ds-card--padding-md {
+  padding: var(--space-5);
+}
+
+.ds-card--padding-lg {
+  padding: var(--space-7);
+}
+
+/* Hoverable */
+.ds-card--hoverable:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.ds-card--outlined:hover {
+  border-color: var(--color-border-medium);
+}
+
+/* Header */
+.ds-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border-light);
+  margin-bottom: var(--space-3);
+}
+
+.ds-card__header-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.ds-card__title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-tight);
+}
+
+.ds-card__subtitle {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+}
+
+.ds-card__action {
+  flex-shrink: 0;
+  margin-left: var(--space-3);
+}
+
+/* Body */
+.ds-card__body {
+  flex: 1;
+}
+
+/* Footer */
+.ds-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border-light);
+  margin-top: var(--space-3);
+}
+
+/* RTL Support */
+[dir="rtl"] .ds-card__action {
+  margin-left: 0;
+  margin-right: var(--space-3);
+}

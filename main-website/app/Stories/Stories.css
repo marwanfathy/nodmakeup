@@ -1,0 +1,335 @@
+@import url("../Fonts/fonts.css");
+
+/* ==========================================================================
+   1. Stories Tray (The horizontal avatar list)
+   ========================================================================== */
+
+.stories-tray-container {
+box-sizing: border-box;
+  background-color: #f8f8f8;
+  width: 97.5%;
+  padding: 2rem 0;
+  display: flex;
+  border-radius: 20px;
+  margin: 20px;
+}
+.title-story-section{
+    font-size: 2rem;
+    position: relative;
+    left: 6rem;
+    top: 5px;
+    text-transform: uppercase;
+    letter-spacing: 5px;
+}
+.title-story-section-separite{
+    text-transform: uppercase;
+    color: #26262667;
+    font-size: 2.5rem;
+    position: relative;
+    left: 6.5rem;
+    bottom: 4px;
+    font-weight:lighter;
+}
+.story-swiper {
+    padding: 0 16px !important;
+}
+
+.story-avatar-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px; /* Tighter gap between ring and name */
+    cursor: pointer;
+    width: 76px; /* Adjusted width */
+    user-select: none;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.story-avatar-wrapper:active {
+    transform: scale(0.95);
+}
+
+/* --- THE INSTAGRAM RING --- */
+.story-avatar {
+border-radius: 50%;
+  justify-content: center;
+  align-items: center;
+  width: 66px;
+  height: 66px;
+  display: flex;
+  position: relative;
+}
+
+/* Optional: Class for "Seen" stories (Grey Ring) 
+   You would need to conditionally add this class in React */
+.story-avatar.seen {
+    background: #e1e1e1; /* Light grey for seen */
+}
+
+.story-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    
+    /* This creates the whitespace gap between the ring and the image */
+    border: 2.5px solid #ffffff; 
+    background-color: #fff;
+    display: block;
+}
+
+.story-username {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 11px;
+    color: #262626;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    letter-spacing: 0.01em;
+}
+
+/* ==========================================================================
+   2. Story Viewer (The full-screen modal)
+   ========================================================================== */
+
+.story-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    /* Darker, blurred backdrop */
+    background-color: rgba(26, 26, 26, 0.95);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    animation: overlay-fade-in 0.2s ease-out;
+}
+
+@keyframes overlay-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.story-viewer {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    
+    /* Mobile-like sizing on desktop */
+    max-width: 400px; 
+    max-height: 85vh; /* Gives a bit of breathing room on desktop */
+    
+    background-color: #000;
+    border-radius: 12px; /* Slightly tighter radius */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    user-select: none;
+    animation: viewer-pop-in 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+    /* Enforce 9:16 Aspect Ratio */
+    aspect-ratio: 9 / 16;
+}
+
+@keyframes viewer-pop-in {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* --- Progress Bars --- */
+.progress-bar-container {
+    position: absolute;
+    top: 14px;
+    left: 10px;
+    right: 10px;
+    display: flex;
+    gap: 4px;
+    z-index: 20;
+    height: 2px; /* Thinner bars like IG */
+}
+
+.progress-segment-wrapper {
+    flex: 1;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.35);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progress-segment-fill {
+    height: 100%;
+    background-color: #ffffff;
+    border-radius: 2px;
+    transition: width 0.1s linear;
+    box-shadow: 0 0 2px rgba(0,0,0,0.3);
+}
+
+/* --- Story Header --- */
+.story-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 28px 16px 16px 16px; /* More padding top for bars */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 20;
+    
+    /* Subtle gradient to make text pop against any image */
+    background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 100%);
+    
+    color: white;
+}
+
+.story-header-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.story-avatar-placeholder {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #fff;
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.story-admin-name {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.3px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.story-timestamp {
+    font-size: 13px;
+    opacity: 0.7;
+    margin-left: 4px;
+    font-weight: 400;
+}
+
+.close-story-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 28px; /* Slightly smaller */
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+    opacity: 0.9;
+    transition: transform 0.2s;
+}
+
+.close-story-btn:hover {
+    transform: scale(1.1);
+}
+
+/* --- Story Content Area --- */
+.story-content {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #1a1a1a;
+    width: 100%;
+    height: 100%;
+}
+
+.story-media {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Crops to fill screen */
+    display: block;
+}
+
+/* --- Navigation Overlays (Invisible Click Zones) --- */
+.story-nav-overlay {
+    position: absolute;
+    top: 70px; /* Below header */
+    bottom: 0;
+    width: 35%; /* Wider click areas */
+    z-index: 15;
+    cursor: pointer;
+    /* background: rgba(255,0,0,0.1); Debugging zone */ 
+}
+
+.story-nav-overlay.prev {
+    left: 0;
+}
+
+.story-nav-overlay.next {
+    right: 0;
+}
+
+/* --- Pause Indicator --- */
+.story-pause-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 30;
+    color: rgba(255,255,255,0.8);
+    font-size: 24px;
+    opacity: 0;
+    animation: fade-in 0.2s forwards;
+}
+
+@keyframes fade-in {
+    to { opacity: 1; }
+}
+@media (max-width: 480px) {
+        .story-viewer {
+        max-width: 85%;
+        max-height: 85%;
+        border-radius: 20px;
+        position: relative;
+        bottom: 40px;
+    }
+    .stories-tray-container {
+        max-width: 95.5%;
+        position: relative;
+        z-index: 500;
+        right: 10px;
+    }
+    .story-avatar {
+  width: 60px;
+  height: 60px;
+}
+.title-story-section{
+text-transform: uppercase;
+  letter-spacing: 5px;
+  font-size: 1rem;
+  margin-right: 20px;
+  position: relative;
+  left: 15px;
+  top: 20px;
+}
+.title-story-section-separite{
+    text-transform: uppercase;
+    color: #26262667;
+    font-size: 2.5rem;
+    position: relative;
+    left: 0.2rem;
+    bottom: 4px;
+    font-weight:lighter;
+}
+}

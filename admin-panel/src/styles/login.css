@@ -1,0 +1,58 @@
+/* =====================================================================
+   Login page — flat black canvas, hairline divider, no gradients
+   ===================================================================== */
+.nd-login {
+    min-height: 100vh; display: grid; grid-template-columns: minmax(420px, 1.1fr) 460px;
+    background: var(--paper);
+}
+.nd-login > * { min-width: 0; }
+.nd-login-brand {
+    padding: 72px calc(var(--space-page) + 24px);
+    border-right: 1px solid var(--hairline);
+    background: var(--paper);
+    display: flex; flex-direction: column; justify-content: center; gap: var(--sp-7);
+    color: var(--ink);
+}
+.nd-login-wordmark { display: flex; align-items: center; gap: 12px; margin-bottom: var(--sp-6); }
+.nd-login-brand h1 {
+    font-family: var(--font-display); font-size: 40px; font-weight: 600; line-height: 1.1;
+    margin: 0 0 var(--sp-4); letter-spacing: -0.02em; color: var(--ink);
+}
+.nd-login-brand p { color: var(--ink-soft); max-width: 34rem; margin: 0; }
+.nd-login-wordmark .nd-wordmark { font-size: 24px; }
+.nd-login-principle {
+    display: flex; gap: var(--sp-6); border-top: 1px solid var(--hairline);
+    padding-top: var(--sp-5); max-width: 34rem;
+}
+.nd-login-principle > div { flex: 1; }
+.nd-login-principle span {
+    font-family: var(--font-sans); font-size: var(--step-caption); font-weight: 600; letter-spacing: 0.02em;
+    text-transform: none; color: var(--accent);
+}
+.nd-login-principle p { font-size: var(--step-sm); color: var(--ink-faint); margin-top: 6px; }
+.nd-login-center {
+    display: flex; align-items: center; justify-content: center; padding: var(--sp-6);
+    background: var(--paper);
+}
+.nd-login-form {
+    width: 100%; max-width: 400px; padding: var(--sp-6) var(--sp-5);
+    box-shadow: var(--shadow-2);
+    background: var(--paper-raised);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+}
+.nd-login-form .nd-field { margin-bottom: var(--sp-4); }
+.nd-login-error {
+    margin-top: 4px; padding: 10px 12px; border-radius: var(--r-sm);
+    border: 1px solid rgba(255, 69, 58, 0.35); background: var(--clay-tint);
+    color: var(--clay); font-family: var(--font-sans); font-size: var(--step-caption);
+}
+.nd-login-meta { margin-top: var(--sp-4); font-family: var(--font-sans); font-size: var(--step-caption); color: var(--ink-faint); }
+.nd-login-meta .nd-dot-flux { color: var(--accent); font-weight: 600; }
+
+@media (max-width: 900px) {
+    .nd-login { grid-template-columns: 1fr; }
+    .nd-login-brand { border-right: none; border-bottom: 1px solid var(--hairline); padding: var(--sp-6); gap: var(--sp-5); }
+    .nd-login-brand h1 { font-size: 28px; }
+    .nd-login-center { padding: var(--sp-6) var(--sp-5); }
+}

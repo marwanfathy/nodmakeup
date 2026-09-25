@@ -1,0 +1,88 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+/* globals.css */
+
+/* --- 1. The Full Screen Loader Container --- */
+.loader-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 99999; /* Must be very high */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #08020d; /* Deep Purple Background */
+  
+  /* Transition for fading away the background color */
+  transition: background-color 0.8s ease-in-out, visibility 0.8s step-end;
+}
+
+/* --- 2. The Typography (Mirelle) --- */
+.loader-text {
+  font-family: 'Times New Roman', serif; /* Matches your screenshot */
+  font-size: 5rem; /* Large text */
+  color: #ffffff;
+  
+  /* Typewriter setup */
+  overflow: hidden; /* Hides the letters before they are typed */
+  border-right: .15em solid orange; /* The cursor color */
+  white-space: nowrap; /* Keeps it on one line */
+  margin: 0 auto; /* Center it */
+  width: 0; /* Start with 0 width */
+  
+  /* Prepare for the Zoom effect later */
+  transform-origin: center center;
+  transition: transform 1s ease-in, opacity 0.5s ease-in;
+  
+  /* ANIMATION: 
+     - type: 3 seconds to type 7 characters. 
+     - blink: standard blinking cursor.
+  */
+  animation: 
+    typing 2.5s steps(7, end) forwards, 
+    blink-caret .75s step-end infinite;
+}
+
+/* --- 3. Animations --- */
+
+/* Typing: animate width from 0 to 7 characters (length of Mirelle) */
+@keyframes typing {
+  from { width: 0 }
+  to { width: 7ch; } 
+}
+
+/* Blinking Cursor */
+@keyframes blink-caret {
+  from, to { border-color: transparent }
+  50% { border-color: rgba(255,255,255,0.7); }
+}
+
+/* --- 4. The "Zoom/Fly Through" State --- */
+/* This class is added by JS when loading is done */
+.loader-container.zoom-active {
+  background-color: transparent; /* Fade out background */
+  pointer-events: none; /* Allow clicking underlying site */
+}
+
+.loader-container.zoom-active .loader-text {
+  transform: scale(50); /* Zoom text massively */
+  opacity: 0; /* Fade text out as it gets huge */
+  border-right: none; /* Remove cursor during zoom */
+}
+
+/* --- 5. Remove completely --- */
+.loader-container.hidden {
+  display: none;
+}

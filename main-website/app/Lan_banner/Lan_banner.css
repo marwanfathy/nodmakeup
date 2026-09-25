@@ -1,0 +1,97 @@
+/* Container Spacing (to give it that "floating card" look) */
+.lan-banner-wrapper {
+  padding: 20px; /* Space around the whole banner */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.lan-banner-container {
+  width: 100%;
+  height: 600px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px; /* Rounded corners like the Rhode image */
+  background-color: #000;
+}
+
+.lan-banner-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* The Overlay - No box, just text on image */
+.lan-banner-overlay {
+  position: absolute;
+  bottom: 60px; /* Positioned at the bottom */
+  left: 60px;   /* Positioned at the left */
+  z-index: 10;
+  color: #ffffff;
+  max-width: 600px;
+}
+
+/* Tagline: Small, Uppercase, Spaced */
+.lan-tagline {
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  margin-bottom: 8px;
+}
+
+/* Title: Lowercase, "Rhode" style spacing */
+.lan-title {
+  font-size: 3.5rem;
+  font-weight: 400;
+  margin-bottom: 24px;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+/* The Pill Button (Rhode Ghost Style) */
+.lan-pill-button {
+  background: transparent;
+  color: #ffffff;
+  border: 1.5px solid #ffffff; /* White border only */
+  padding: 12px 32px;
+  border-radius: 50px; /* Makes it a pill shape */
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.lan-pill-button:hover {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+/* MOBILE RESPONSIVENESS */
+@media (max-width: 768px) {
+  .lan-banner-wrapper {
+    padding: 10px;
+  }
+  
+  .lan-banner-container {
+    height: 80vh; /* Taller for mobile */
+    border-radius: 16px;
+  }
+
+  .lan-banner-overlay {
+    bottom: 40px;
+    left: 30px;
+    right: 30px;
+  }
+
+  .lan-title {
+    font-size: 2.2rem;
+  }
+
+  .lan-pill-button {
+    width: 100%; /* Full width button on phone */
+    text-align: center;
+  }
+}

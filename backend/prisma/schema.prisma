@@ -1,0 +1,480 @@
+// This is your FINAL Prisma schema file.
+// All entity primary keys and foreign keys are UUID strings.
+// Business keys (orderNumber, couponCode, sku, slug) stay untouched.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// -------------------------------------------
+// --- AUTH & ADMIN MODELS ---
+// -------------------------------------------
+
+model Admin {
+  id        String   @id @default(uuid()) @map("admin_id") @db.VarChar(36)
+  firstName String   @map("first_name") @db.VarChar(100)
+  lastName  String   @map("last_name") @db.VarChar(100)
+  email     String   @unique @db.VarChar(255)
+  password  String   @map("passwordHash") @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+
+  logs          AdminLog[]
+  managedOrders Order[]
+  stories       Story[]
+  blockedTokens TokenBlocklist[]
+  customerNotes CustomerNote[]
+
+  @@map("admins")
+}
+
+model AdminLog {
+  id             String          @id @default(uuid()) @map("log_id") @db.VarChar(36)
+  adminId        String          @map("admin_id") @db.VarChar(36)
+  actionType     AdminActionType @map("action_type")
+  targetResource String?         @map("target_resource") @db.VarChar(100)
+  targetId       String?         @map("target_id") @db.VarChar(36)
+  details        Json?
+  createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamp(0)
+  admin          Admin           @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  @@index([adminId], map: "idx_admin_id")
+  @@index([actionType], map: "idx_action_type")
+  @@map("admin_logs")
+}
+
+model TokenBlocklist {
+  id        String   @id @default(uuid()) @db.VarChar(36)
+  jti       String   @unique @db.VarChar(255)
+  adminId   String   @map("admin_id") @db.VarChar(36)
+  expiresAt DateTime @map("expires_at") @db.Timestamp(0)
+  admin     Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  @@index([expiresAt], map: "idx_expires_at")
+  @@map("token_blocklist")
+}
+
+// -------------------------------------------
+// --- E-COMMERCE CORE MODELS ---
+// -------------------------------------------
+
+model Product {
+  id               String            @id @default(uuid()) @map("product_id") @db.VarChar(36)
+  name             String            @db.VarChar(255)
+  slug             String            @unique @db.VarChar(265)
+  description      String?           @db.Text
+  shortDescription String?           @map("short_description") @db.VarChar(255)
+  categoryId       String            @map("category_id") @db.VarChar(36)
+  brandId          String            @map("brand_id") @db.VarChar(36)
+  isActive         Boolean           @default(true) @map("is_active")
+  isArchived       Boolean           @default(false) @map("is_archived")
+  discountId       String?           @map("discount_id") @db.VarChar(36)
+  isHero           Boolean           @default(false) @map("is_hero")
+  category         Category          @relation(fields: [categoryId], references: [id])
+  brand            Brand             @relation(fields: [brandId], references: [id])
+  discount         Discount?         @relation(fields: [discountId], references: [id], onDelete: SetNull)
+  variants         ProductVariant[]
+  collections      ProductCollection[]
+  orderItems       OrderItem[]
+  @@map("products")
+}
+
+model ProductVariant {
+  id            String             @id @default(uuid()) @map("variant_id") @db.VarChar(36)
+  productId     String             @map("product_id") @db.VarChar(36)
+  sku           String             @unique @db.VarChar(100)
+  price         Decimal            @db.Decimal(10, 2)
+  stockQuantity Int                @default(0) @map("stock_quantity")
+  colorName     String?            @map("color_name") @db.VarChar(50)
+  size          String?            @db.VarChar(50)
+  hexCode       String?            @map("hex_code") @db.VarChar(7)
+  product       Product            @relation(fields: [productId], references: [id], onDelete: Cascade)
+  images        ProductImage[]
+  orderItems    OrderItem[]
+  cartItems     ShoppingCartItem[]
+  @@map("product_variants")
+}
+
+model ProductImage {
+  id           String         @id @default(uuid()) @map("image_id") @db.VarChar(36)
+  imageUrl     String         @map("image_url") @db.VarChar(255)
+  altText      String?        @map("alt_text") @db.VarChar(255)
+  displayOrder Int?           @default(0) @map("display_order")
+  variantId    String         @map("variant_id") @db.VarChar(36)
+  variant      ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  @@map("product_images")
+}
+
+model Category {
+  id       String   @id @default(uuid()) @map("category_id") @db.VarChar(36)
+  name     String   @db.VarChar(100)
+  slug     String   @unique @db.VarChar(110)
+  imageUrl String?  @map("image_url") @db.VarChar(255)
+  isActive Boolean  @default(true) @map("is_active")
+  products Product[]
+  @@map("categories")
+}
+
+model Brand {
+  id       String   @id @default(uuid()) @map("brand_id") @db.VarChar(36)
+  name     String   @db.VarChar(100)
+  slug     String   @unique @db.VarChar(110)
+  logoUrl  String?  @map("logo_url") @db.VarChar(255)
+  products Product[]
+  @@map("brands")
+}
+
+model Collection {
+  id          String              @id @default(uuid()) @map("collection_id") @db.VarChar(36)
+  name        String              @db.VarChar(255)
+  slug        String              @unique @db.VarChar(265)
+  description String?
+  isPublished Boolean             @default(false) @map("is_published")
+  publishAt   DateTime?           @map("publish_at")
+  endsAt      DateTime?           @map("ends_at")
+  products    ProductCollection[]
+  @@map("collections")
+}
+
+model ProductCollection {
+  productId    String     @map("product_id") @db.VarChar(36)
+  collectionId String     @map("collection_id") @db.VarChar(36)
+  product      Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  @@id([productId, collectionId])
+  @@map("product_collections")
+}
+
+model Order {
+  id                   String            @id @default(uuid()) @map("order_id") @db.VarChar(36)
+  orderNumber          String            @unique @map("order_number") @db.VarChar(50)
+  checkoutKey          String?           @unique @map("checkout_key") @db.VarChar(36)
+  statusId             String            @map("order_status_id") @db.VarChar(36)
+  managedByAdminId     String?           @map("managed_by_admin_id") @db.VarChar(36)
+  customerName         String            @map("customer_name") @db.VarChar(200)
+  customerPhoneNumber  String            @map("customer_phone_number") @db.VarChar(20)
+  shippingAddressLine1 String            @map("shipping_address_line1") @db.VarChar(255)
+  shippingGovernorate  String            @map("shipping_governorate") @db.VarChar(100)
+  totalPrice           Decimal           @map("total_price") @db.Decimal(10, 2)
+  shippingCost         Decimal           @default(0.00) @map("shipping_cost") @db.Decimal(10, 2)
+  totalDiscount        Decimal           @default(0.00) @map("total_discount") @db.Decimal(10, 2)
+  customerNotes        String?           @map("customer_notes") @db.Text
+  isRewardSent         Boolean           @default(false) @map("is_reward_sent")
+  createdAt            DateTime          @default(now()) @map("created_at") @db.Timestamp(0)
+  status               OrderStatus       @relation(fields: [statusId], references: [id])
+  managedBy            Admin?            @relation(fields: [managedByAdminId], references: [id], onDelete: SetNull)
+  items                OrderItem[]
+  appliedDiscounts     OrderAppliedDiscount[]
+  transactions         Transaction[]
+  @@index([createdAt], map: "idx_orders_created_at")
+  @@map("orders")
+}
+
+model OrderItem {
+  id              String         @id @default(uuid()) @map("order_item_id") @db.VarChar(36)
+  orderId         String         @map("order_id") @db.VarChar(36)
+  variantId       String         @map("variant_id") @db.VarChar(36)
+  quantity        Int
+  priceAtPurchase Decimal        @map("price_at_purchase") @db.Decimal(10, 2)
+  productId       String         @map("product_id") @db.VarChar(36)
+  product         Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  order           Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variant         ProductVariant @relation(fields: [variantId], references: [id])
+  @@index([variantId], map: "idx_order_items_variant_id")
+  @@index([productId], map: "idx_order_items_product_id")
+  @@map("order_items")
+}
+
+model OrderStatus {
+  id         String  @id @default(uuid()) @map("order_status_id") @db.VarChar(36)
+  statusName String  @unique @map("status_name") @db.VarChar(50) // Added unique constraint for safety
+  orders     Order[]
+  @@map("order_statuses")
+}
+
+model Transaction {
+  id              String            @id @default(uuid()) @map("transaction_id") @db.VarChar(36)
+  orderId         String            @map("order_id") @db.VarChar(36)
+  amount          Decimal           @db.Decimal(10, 2)
+  // --- CRITICAL CHANGE: paymentMethod field removed ---
+  // paymentMethod   PaymentMethod     @map("payment_method")
+  status          TransactionStatus
+  gatewayTxnId    String?           @map("gateway_txn_id") @db.VarChar(255)
+  transactionDate DateTime          @default(now()) @map("transaction_date") @db.Timestamp(0)
+  order           Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  @@map("transactions")
+}
+
+model Discount {
+  id              String                 @id @default(uuid()) @map("discount_id") @db.VarChar(36)
+  name            String                 @db.VarChar(255)
+  couponCode      String?                @unique @map("coupon_code") @db.VarChar(50)
+  type            DiscountType           @map("discount_type")
+  value           Decimal                @db.Decimal(10, 2)
+  isActive        Boolean                @default(true) @map("is_active")
+  maxUsages       Int      @default(1) @map("max_usages")       // 1 = One time use
+  currentUsages   Int      @default(0) @map("current_usages")   // Tracks how many times used
+  assignedPhone   String?  @map("assigned_phone") @db.VarChar(20) // Only this phone can use it
+  category        String   @default("PUBLIC") @db.VarChar(50) // e.g., "PUBLIC", "CLIENT_REWARD"
+  products        Product[]
+  appliedToOrders OrderAppliedDiscount[]
+  @@map("discounts")
+}
+
+model OrderAppliedDiscount {
+  orderId        String   @map("order_id") @db.VarChar(36)
+  discountId     String   @map("discount_id") @db.VarChar(36)
+  amountDeducted Decimal  @map("amount_deducted") @db.Decimal(10, 2)
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  discount       Discount @relation(fields: [discountId], references: [id], onDelete: Cascade)
+  @@id([orderId, discountId])
+  @@map("order_applied_discounts")
+}
+
+model ShippingZone {
+  id                      String   @id @default(uuid()) @map("zone_id") @db.VarChar(36)
+  governorate             String   @unique @db.VarChar(100)
+  shippingCost            Decimal  @map("shipping_cost") @db.Decimal(10, 2)
+  freeShippingThreshold Decimal? @map("free_shipping_threshold") @db.Decimal(10, 2)
+  // --- CRITICAL CHANGE: availablePaymentMethods field removed ---
+  // availablePaymentMethods Json     @default("[]") @map("available_payment_methods")
+  @@map("shipping_zones")
+}
+
+model ShoppingCartSession {
+  id        String             @id @map("cart_session_id") @db.VarChar(128)
+  createdAt DateTime           @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt DateTime           @updatedAt @map("updated_at") @db.Timestamp(0)
+  appliedCouponCode String?            @map("applied_coupon_code") @db.VarChar(50)
+  items     ShoppingCartItem[]
+  @@map("shopping_cart_sessions")
+}
+
+model ShoppingCartItem {
+  id            String              @id @default(uuid()) @map("cart_item_id") @db.VarChar(36)
+  cartSessionId String              @map("cart_session_id") @db.VarChar(128)
+  variantId     String              @map("variant_id") @db.VarChar(36)
+  quantity      Int
+  session       ShoppingCartSession @relation(fields: [cartSessionId], references: [id], onDelete: Cascade)
+  variant       ProductVariant      @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  @@unique([cartSessionId, variantId], map: "uq_cart_variant")
+  @@map("shopping_cart_items")
+}
+
+model Story {
+  id           String    @id @default(uuid()) @map("story_id") @db.VarChar(36)
+  adminId      String    @map("admin_id") @db.VarChar(36)
+  mediaUrl     String    @map("media_url") @db.VarChar(255)
+  thumbnailUrl String?   @map("thumbnail_url") @db.VarChar(255)
+  bundleId     String
+  mediaType    MediaType @map("media_type")
+  viewCount    Int       @default(0) @map("view_count")
+  clickCount   Int       @default(0) @map("click_count")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+  expiresAt    DateTime  @map("expires_at") @db.Timestamp(0)
+  admin        Admin     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  @@map("stories")
+}
+
+// Nightly-pruned heartbeat table (retention job), used for session / revisit math.
+model LiveSession {
+  sessionId   String   @id @map("session_id") @db.VarChar(191)
+  lastActive  DateTime @default(now()) @map("last_active")
+
+  @@index([lastActive])
+  @@map("live_sessions")
+}
+
+// Path history per session. visitor_id = first-party persistent identity (repeat visitors).
+model SiteVisit {
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  sessionId  String   @map("session_id") @db.VarChar(191)
+  visitorId  String?  @map("visitor_id") @db.VarChar(191)
+  path       String   @db.VarChar(255)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt, sessionId])
+  @@index([visitorId, createdAt])
+  @@map("site_visits")
+}
+
+// Behavioral event captured from the storefront (clicks, scroll depth, exits...)
+model UserEvent {
+  id        String   @id @default(uuid()) @db.VarChar(36)
+  sessionId String   @map("session_id") @db.VarChar(191)
+  visitorId String?  @map("visitor_id") @db.VarChar(191)
+  type      String   @db.VarChar(32) // CLICK | SCROLL | EXIT_LINK | VIEW
+  target    String?  @db.VarChar(255) @map("target")
+  label     String?  @db.VarChar(255) @map("label")
+  href      String?  @db.VarChar(255) @map("href")
+  value     Int?
+  path      String?  @db.VarChar(255) @map("path")
+  meta      Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@index([type, createdAt])
+  @@index([target, createdAt])
+  @@index([label, createdAt])
+  @@index([visitorId, createdAt])
+  @@map("user_events")
+}
+
+model HeroSection {
+  id          String      @id @default(uuid()) @map("hero_section_id") @db.VarChar(36)
+  title       String      @unique @db.VarChar(255)
+  description String?     @db.Text
+  slug        String      @unique @db.VarChar(255)
+  isActive    Boolean     @default(false) @map("is_active")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  slides      HeroSlide[]
+  @@map("hero_sections")
+}
+
+model HeroSlide {
+  id            String      @id @default(uuid()) @map("hero_slide_id") @db.VarChar(36)
+  heroSectionId String      @map("hero_section_id") @db.VarChar(36)
+  title         String      @db.VarChar(255)
+  subtitle      String?     @db.VarChar(255)
+  linkUrl       String      @map("link_url") @db.VarChar(255)
+  thumbnailUrl  String      @map("thumbnail_url") @db.VarChar(255)
+  displayOrder  Int         @default(0) @map("display_order")
+  heroSection   HeroSection @relation(fields: [heroSectionId], references: [id], onDelete: Cascade)
+  mediaItems    HeroMediaItem[]
+  @@map("hero_slides")
+}
+
+model HeroMediaItem {
+  id           String          @id @default(uuid()) @map("hero_media_item_id") @db.VarChar(36)
+  slideId      String          @map("slide_id") @db.VarChar(36)
+  mediaUrl     String          @map("media_url") @db.VarChar(255)
+  mediaType    HeroMediaType   @map("media_type")
+  altText      String?         @map("alt_text") @db.VarChar(255)
+  displayOrder Int             @default(0) @map("display_order")
+  layoutStyle  HeroLayoutStyle @default(BACKGROUND_FULL) @map("layout_style")
+  slide        HeroSlide       @relation(fields: [slideId], references: [id], onDelete: Cascade)
+  @@map("hero_media_items")
+}
+
+// -------------------------------------------
+// --- ENUMS ---
+// -------------------------------------------
+
+enum AdminActionType {
+  LOGIN_SUCCESS
+  LOGIN_FAILURE
+  LOGOUT
+  PRODUCT_CREATE
+  PRODUCT_UPDATE
+  PRODUCT_DELETE
+  ORDER_STATUS_UPDATE
+  CATEGORY_CREATE
+  CATEGORY_UPDATE
+  CATEGORY_DELETE
+  ADMIN_CREATE
+  ADMIN_DELETE
+  DISCOUNT_CREATE
+  DISCOUNT_UPDATE
+  DISCOUNT_DELETE
+  STORY_CREATE
+  STORY_DELETE
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
+  FREE_SHIPPING
+}
+
+// --- CRITICAL CHANGE: PaymentMethod enum removed ---
+// enum PaymentMethod {
+//   CashOnDelivery @map("Cash on Delivery")
+//   Instapay
+//   Wallet
+// }
+
+enum TransactionStatus {
+  Completed
+  Pending
+  Failed
+  Refunded
+}
+
+enum MediaType {
+  image
+  video
+}
+
+enum HeroMediaType {
+  IMAGE
+  VIDEO
+}
+
+enum HeroLayoutStyle {
+  BACKGROUND_FULL
+  FOREGROUND_LEFT
+  FOREGROUND_RIGHT
+  FOREGROUND_CENTER
+  FOREGROUND_FLOAT_1
+  FOREGROUND_FLOAT_2
+}
+// -------------------------------------------
+// --- RELIABILITY / OUTBOX MODEL ---
+// -------------------------------------------
+
+model OutboxEvent {
+  id          String    @id @default(uuid()) @map("outbox_event_id") @db.VarChar(36)
+  eventType   String    @map("event_type") @db.VarChar(50)
+  aggregateId String?   @map("aggregate_id") @db.VarChar(36)
+  payload     Json
+  status      String    @default("PENDING") @db.VarChar(20)
+  attempts    Int       @default(0)
+  lastError   String?   @map("last_error") @db.Text
+  processedAt DateTime? @map("processed_at") @db.Timestamp(0)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+
+  @@index([status, attempts], map: "idx_outbox_status_attempts")
+  @@index([eventType], map: "idx_outbox_event_type")
+  @@map("outbox_events")
+}
+
+// -------------------------------------------
+// --- CRM MODELS ---
+// -------------------------------------------
+
+model CustomerProfile {
+  id          String         @id @default(uuid()) @map("customer_profile_id") @db.VarChar(36)
+  name        String         @map("customer_name") @db.VarChar(200)
+  phone       String         @unique @map("customer_phone") @db.VarChar(20)
+  email       String?        @map("email") @db.VarChar(200)
+  governorate String?        @map("governorate") @db.VarChar(100)
+  address     String?        @map("address") @db.VarChar(255)
+  tags        Json           @default("[]") @map("tags")
+  segment     String         @default("NEW") @map("segment") @db.VarChar(50)
+  totalOrders Int            @default(0) @map("total_orders")
+  totalSpent  Decimal        @default(0) @map("total_spent") @db.Decimal(10, 2)
+  lastOrderAt DateTime?      @map("last_order_at") @db.Timestamp(0)
+  createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt   DateTime       @updatedAt @map("updated_at") @db.Timestamp(0)
+
+  notes CustomerNote[]
+
+  @@map("customer_profiles")
+}
+
+model CustomerNote {
+  id         String          @id @default(uuid()) @map("customer_note_id") @db.VarChar(36)
+  customerId String          @map("customer_profile_id") @db.VarChar(36)
+  adminId    String?         @map("admin_id") @db.VarChar(36)
+  note       String          @db.Text
+  createdAt  DateTime        @default(now()) @map("created_at") @db.Timestamp(0)
+
+  customer   CustomerProfile @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  admin      Admin?          @relation(fields: [adminId], references: [id], onDelete: SetNull)
+
+  @@index([customerId], map: "idx_customer_notes_customer_id")
+  @@map("customer_notes")
+}

@@ -1,0 +1,286 @@
+/* --- Variables for Consistency --- */
+:root {
+  --lux-black: #111111;
+  --lux-grey: #666666;
+  --lux-light-grey: #f4f4f4;
+  --lux-border: #e0e0e0;
+  --lux-font-heading: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --lux-font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* --- Layout Structure --- */
+.product-page-wrapper {
+  background-color: #fff;
+  width: 100%;
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+
+.product-grid-container {
+  max-width: 1300px; /* Luxury width */
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr; /* Image takes more space */
+  gap: 60px; /* Huge negative space */
+}
+
+/* --- Loader & Error --- */
+.loader-center, .error-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60vh;
+  font-family: var(--lux-font-body);
+  color: var(--lux-grey);
+}
+
+/* --- Left Column: Gallery --- */
+.product-gallery-section {
+  width: 100%;
+}
+
+/* --- Right Column: Sticky Info --- */
+.product-info-section {
+  position: relative;
+}
+
+.sticky-wrapper {
+  position: sticky;
+  top: 40px; /* Stays fixed as you scroll images */
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* --- Typography & Header --- */
+.product-brand {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--lux-grey);
+  font-weight: 600;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.product-title {
+  font-family: var(--lux-font-heading);
+  font-size: 2.5rem;
+  font-weight: 400; /* Elegant thin weight */
+  line-height: 1.1;
+  color: var(--lux-black);
+  margin: 0 0 20px 0;
+}
+
+/* --- Price --- */
+.price-block {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.price-current {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--lux-black);
+}
+
+.price-current.sale {
+  color: #c0392b; /* Subtle red for sale */
+}
+
+.price-original {
+  font-size: 1rem;
+  text-decoration: line-through;
+  color: #999;
+}
+
+.price-discount-tag {
+  background-color: var(--lux-black);
+  color: #fff;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* --- Quantity Selector --- */
+.quantity-wrapper {
+  margin-top: 25px;
+}
+
+.quantity-wrapper .label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  color: var(--lux-black);
+}
+
+.qty-control {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--lux-border);
+  height: 45px;
+  width: 140px;
+}
+
+.qty-control button {
+  width: 40px;
+  height: 100%;
+  border: none;
+  background: transparent;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: var(--lux-black);
+  transition: background 0.2s;
+}
+
+.qty-control button:hover:not(:disabled) {
+  background-color: var(--lux-light-grey);
+}
+
+.qty-control button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.qty-control span {
+  flex: 1;
+  text-align: center;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+/* --- Action Buttons --- */
+.product-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.btn-main, .btn-outline {
+  width: 100%;
+  height: 52px;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid var(--lux-black);
+}
+
+.btn-main {
+  background-color: var(--lux-black);
+  color: #fff;
+}
+
+.btn-main:hover {
+  background-color: #333;
+  border-color: #333;
+}
+
+.btn-main.disabled {
+  background-color: #ccc;
+  border-color: #ccc;
+  cursor: not-allowed;
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--lux-black);
+}
+
+.btn-outline:hover {
+  background-color: var(--lux-black);
+  color: #fff;
+}
+
+/* --- Trust Signals --- */
+.trust-signals {
+  border-bottom: 1px solid var(--lux-border);
+  padding-bottom: 25px;
+  margin-bottom: 10px;
+}
+
+.stock-warning {
+  color: #e67e22;
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.shipping-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--lux-grey);
+  font-size: 0.85rem;
+}
+
+/* --- Description --- */
+.product-description-container {
+  color: var(--lux-black);
+}
+
+.desc-heading {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 1px solid var(--lux-black);
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+  display: inline-block;
+}
+
+.desc-content {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: #444;
+}
+
+/* Fix generic HTML from API */
+.desc-content p { margin-bottom: 15px; }
+.desc-content ul { padding-left: 20px; margin-bottom: 15px; }
+.desc-content li { margin-bottom: 5px; }
+
+/* --- RESPONSIVE MOBILE --- */
+@media (max-width: 900px) {
+  .product-grid-container {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .product-info-section {
+    padding: 0 10px;
+  }
+
+  /* Disable sticky on mobile so user can scroll naturally */
+  .sticky-wrapper {
+    position: static; 
+  }
+
+  .product-title {
+    font-size: 2rem;
+  }
+
+  /* Make buttons sticky at bottom of screen on mobile (Conversion trick) */
+   /* Optional: Uncomment to enable sticky mobile buy button  */
+  .product-actions {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: white;
+    padding: 15px;
+    z-index: 100;
+    border-top: 1px solid #eee;
+    margin: 0;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+  } 
+}

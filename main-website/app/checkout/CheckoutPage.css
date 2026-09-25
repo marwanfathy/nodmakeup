@@ -1,0 +1,549 @@
+/* src/components/pages/public/CheckoutPage/CheckoutPage.css */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modern-checkout-page {
+  background-color: #ffffff;
+  color: #121212;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.checkout-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  min-height: 100vh;
+}
+
+@media (min-width: 992px) {
+  .checkout-container {
+    grid-template-columns: 55fr 45fr;
+  }
+}
+
+.checkout-form-column {
+  padding: 2.5rem 2rem;
+  order: 1;
+  border-right: 1px solid #e1e3e5;
+}
+
+@media (min-width: 992px) {
+  .checkout-form-column {
+    padding: 3rem 5%;
+    order: 0;
+  }
+}
+
+.order-summary-column {
+  background-color: #fafafa;
+  padding: 2.5rem 2rem;
+  order: 0;
+}
+
+@media (min-width: 992px) {
+  .order-summary-column {
+    padding: 3rem 5%;
+    order: 1;
+  }
+}
+
+.checkout-header {
+  margin-bottom: 2.5rem;
+}
+
+.checkout-header h2 {
+  font-family: 'logo4', 'Segoe UI', sans-serif;
+  /* Added fallback fonts */
+  font-size: 1.75rem;
+  letter-spacing: 2px;
+  color: #121212;
+  margin-bottom: 0.25rem;
+  text-decoration: none;
+}
+.logo {
+  color: #121212;
+  text-decoration: none;
+}
+
+.checkout-header p {
+  color: #737373;
+  margin: 0;
+}
+
+
+.form-section {
+  margin-bottom: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  /* Gap between form elements */
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  /* Reduced margin as gap is now on .form-section */
+}
+
+/* Style for the SVG icons used in the JS */
+.section-header svg {
+  width: 24px;
+  height: 24px;
+  color: #545454;
+}
+
+/* CORRECTED: The JSX uses h3, not h2 */
+.section-header h3 {
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* CORRECTED: Removed .form-group dependency to style inputs directly */
+.form-section input,
+.form-section select,
+.form-section textarea {
+  width: 100%;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid #d3d3d3;
+  border-radius: 6px;
+  background-color: #fff;
+  font-size: 0.95rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.form-section input:focus,
+.form-section select:focus,
+.form-section textarea:focus {
+  outline: none;
+  border-color: #262626;
+  box-shadow: 0 0 0 1px #262626;
+}
+
+.form-section textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.payment-option {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid #d3d3d3;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.payment-option input[type="radio"]:checked+span {
+  font-weight: 600;
+}
+
+.payment-option:has(input[type="radio"]:checked) {
+  border-color: #262626;
+  box-shadow: 0 0 0 1px #262626;
+  background-color: #f8f8f8;
+}
+
+.payment-option input[type="radio"] {
+  margin-right: 1rem;
+  width: auto;
+  /* Override default width */
+}
+
+.no-payment-methods {
+  color: #8a6d3b;
+  background-color: #fcf8e3;
+  padding: 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.checkout-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.return-to-cart-link {
+  font-size: 0.9rem;
+  color: #545454;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.return-to-cart-link:hover {
+  color: #121212;
+}
+
+.place-order-button {
+  background-color: #1a1a1a;
+  color: white;
+  border: none;
+  padding: 1rem 2.5rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+  /* Allow button to grow on small screens */
+}
+
+@media (min-width: 480px) {
+  .place-order-button {
+    flex-grow: 0;
+    /* Revert on larger screens */
+  }
+}
+
+.place-order-button:hover:not(:disabled) {
+  background-color: #333;
+}
+
+.place-order-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+/* Order Summary Column */
+.order-summary-box {
+  animation: fadeIn 0.5s 0.1s ease-out backwards;
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid #e1e3e5;
+}
+
+.summary-item:last-of-type {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.summary-item-image {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.summary-item-image img {
+  width: 64px;
+  height: 64px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid #e1e3e5;
+}
+
+.summary-item-quantity {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background-color: #737373;
+  color: white;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fafafa;
+}
+
+/* CORRECTED: Changed .summary-item-info to .summary-item-details */
+.summary-item-details {
+  flex-grow: 1;
+}
+
+/* CORRECTED: The JSX uses h4, not h3 */
+.summary-item-details h4 {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.summary-item-price {
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: right;
+}
+
+.discount-section {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1.25rem 0;
+  margin: 1.25rem 0;
+  border-top: 1px solid #e1e3e5;
+}
+
+.discount-section input {
+  flex-grow: 1;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid #d3d3d3;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.discount-section input:focus {
+  outline: none;
+  border-color: #262626;
+  box-shadow: 0 0 0 1px #262626;
+}
+
+.discount-section button {
+  background-color: #efefef;
+  color: #545454;
+  border: 1px solid #d3d3d3;
+  padding: 0 1.5rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 80px;
+  height: 45px;
+}
+
+.discount-section button:hover:not(:disabled) {
+  background-color: #e5e5e5;
+}
+
+.discount-section button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  background-color: #efefef !important;
+  /* Keep bg color when coupon is applied */
+}
+
+.discount-section input:disabled {
+  background-color: #f5f5f5;
+}
+
+
+.cost-summary {
+  padding-top: 1.25rem;
+  border-top: 1px solid #e1e3e5;
+}
+
+.cost-line {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.cost-line span:first-child {
+  color: #545454;
+}
+
+.cost-line.total {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e1e3e5;
+}
+
+.total .total-price {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #121212;
+}
+
+.cost-line.discount span:first-child {
+  color: #16a34a;
+  /* A nice green color for discounts */
+}
+
+.cost-line.discount span:last-child {
+  font-weight: 500;
+  color: #16a34a;
+}
+
+/* Add these styles to your CheckoutPage.css file if you haven't already */
+.summary-item-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: .5rem
+}
+
+.quantity-control {
+  display: flex;
+  align-items: center;
+  border: 1px solid #d1d5db;
+  border-radius: 6px
+}
+
+.quantity-control button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: #4b5563;
+  padding: .25rem .75rem;
+  line-height: 1
+}
+
+.quantity-control button:hover {
+  background-color: #f3f4f6
+}
+
+.quantity-control span {
+  font-size: .95rem;
+  font-weight: 500;
+  padding: 0 .5rem;
+  min-width: 20px;
+  text-align: center
+}
+
+.remove-item-btn {
+  background: 0 0;
+  border: none;
+  color: #ef4444;
+  font-size: .8rem;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0
+}
+
+.remove-item-btn:hover {
+  color: #dc2626
+}
+/* Add this to your src/components/pages/public/CheckoutPage/CheckoutPage.css file */
+
+.free-shipping-display {
+  color: #16a34a; /* Green color for positive message */
+  font-weight: 500;
+}
+
+.free-shipping-display del {
+  color: #9ca3af; /* Light grey for the strikethrough text */
+  margin-right: 0.5rem;
+  font-weight: 400;
+}
+
+.cost-line.discount {
+color: #16a34a; 
+}
+
+/* =========================================
+   ADD TO BOTTOM OF CSS FILE
+   (Only affects screens smaller than 992px)
+   ========================================= */
+
+/* --- TABLET & MOBILE (Max 991px) --- */
+@media (max-width: 991px) {
+  /* 1. Switch Grid to Flex Column to stack Summary on top of Form */
+  .checkout-container {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* 2. Summary goes on Top */
+  .order-summary-column {
+    order: 0;
+    /* Add a thick divider to separate summary from the form below */
+    border-bottom: 8px solid #f4f4f4; 
+    /* Remove any side borders */
+    border-right: none;
+    border-left: none;
+  }
+
+  /* 3. Form goes on Bottom */
+  .checkout-form-column {
+    order: 1;
+    border-right: none;
+  }
+}
+
+/* --- SMALL MOBILE SCREENS (Max 480px) --- */
+@media (max-width: 480px) {
+  
+  /* 1. ADD PADDING: Ensures content doesn't touch the edges */
+  .checkout-form-column,
+  .order-summary-column {
+    padding: 1.5rem 1.25rem !important; /* 20px - 24px padding */
+  }
+
+  /* 2. Fix Header Font Size */
+  .checkout-header h2 {
+    font-size: 1.5rem; /* Smaller heading for mobile */
+    text-align: center;
+  }
+  
+  .checkout-header p {
+    text-align: center;
+  }
+
+  /* 3. Make Inputs Mobile Friendly (Prevents iOS Zoom) */
+  .form-section input,
+  .form-section select,
+  .discount-section input {
+    font-size: 16px !important; /* Critical: prevents auto-zoom on iPhone */
+    padding: 12px; /* Larger touch target */
+  }
+
+  /* 4. Action Buttons: Full Width and Stacked */
+  .checkout-actions {
+    flex-direction: column-reverse; /* Button on top, Link below */
+    gap: 1rem;
+    width: 100%;
+    margin-top: 1.5rem;
+  }
+
+  .place-order-button {
+    width: 100%; /* Full width */
+    height: 55px; /* Taller for easier tapping */
+    font-size: 1.1rem;
+    margin: 0;
+  }
+
+  .return-to-cart-link {
+    width: 100%;
+    text-align: center;
+    padding: 10px;
+    display: block;
+  }
+
+  /* 5. Stack Discount Field for space */
+  .discount-section {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .discount-section button {
+    width: 100%;
+    height: 48px;
+  }
+}

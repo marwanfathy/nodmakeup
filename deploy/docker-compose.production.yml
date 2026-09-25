@@ -1,0 +1,207 @@
+name: nod-production
+
+# Secrets + URLs come from deploy/.env (see deploy/.env.example). Base URLs here
+# are the SINGLE prod source of truth and must be mirrored in the frontends'
+# build-time env (deploy/env/frontends.env) and nginx server_name block.
+
+networks:
+  frontend:
+    driver: bridge
+    ipam:
+      config: [{ subnet: "172.28.0.0/24" }]
+  internal:
+    driver: bridge
+    ipam:
+      config: [{ subnet: "172.29.0.0/24" }]
+
+volumes:
+  mysql-data:
+  redis-data:
+  media-public:
+  wwebjs-auth:
+  wwebjs-cache:
+  certbot-conf:
+  certbot-www:
+
+services:
+  # ============ DATA TIER (internal only) ============
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --innodb-buffer-pool-size=1G
+      - --innodb-log-file-size=256M
+      - --max-connections=200
+      - --binlog-expire-logs-seconds=86400
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set in deploy/.env}
+      MYSQL_DATABASE: nod_makeup
+      MYSQL_USER: nod
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?set in deploy/.env}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks: [internal]
+    cpus: 2.0
+    mem_limit: 2g
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2g
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    security_opt: [no-new-privileges:true]
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "384mb", "--maxmemory-policy", "noeviction"]
+    volumes:
+      - redis-data:/data
+    networks: [internal]
+    cpus: 0.5
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # ============ APPLICATION TIER ============
+  api:
+    build:
+      context: ..
+      dockerfile: deploy/docker/Dockerfile.api
+    image: nod/api:latest
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: "5001"
+      DATABASE_URL: mysql://nod:${MYSQL_PASSWORD}@mysql:3306/nod_makeup
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:?set in deploy/.env}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1d}
+      GATEWAY_URL: ${GATEWAY_URL:-https://api.nodmakeup.com}
+      MEDIA_BASE_URL: ${MEDIA_BASE_URL:-https://media.nodmakeup.com}
+      ADMIN_PANEL_URL: ${ADMIN_PANEL_URL:-https://admin.nodmakeup.com}
+      MEDIA_API_KEY: ${MEDIA_API_KEY:?set in deploy/.env}
+      SAFE_ORIGINS: ${SAFE_ORIGINS:-https://nodmakeup.com,https://admin.nodmakeup.com}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_ADMIN_CHAT_ID: ${TELEGRAM_ADMIN_CHAT_ID:-}
+    depends_on:
+      mysql: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    networks: [frontend, internal]
+    cpus: 2.0
+    mem_limit: 1g
+    security_opt: [no-new-privileges:true]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:5001/readyz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  worker:
+    build:
+      context: ..
+      dockerfile: deploy/docker/Dockerfile.worker
+    image: nod/worker:latest
+    restart: unless-stopped
+    shm_size: "1gb"                       # Chromium shared memory
+    environment:
+      NODE_ENV: production
+      PORT: "5001"
+      DATABASE_URL: mysql://nod:${MYSQL_PASSWORD}@mysql:3306/nod_makeup
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:?set in deploy/.env}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1d}
+      GATEWAY_URL: ${GATEWAY_URL:-https://api.nodmakeup.com}
+      MEDIA_BASE_URL: ${MEDIA_BASE_URL:-https://media.nodmakeup.com}
+      ADMIN_PANEL_URL: ${ADMIN_PANEL_URL:-https://admin.nodmakeup.com}
+      MEDIA_API_KEY: ${MEDIA_API_KEY:?set in deploy/.env}
+      SAFE_ORIGINS: ${SAFE_ORIGINS:-https://nodmakeup.com,https://admin.nodmakeup.com}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_ADMIN_CHAT_ID: ${TELEGRAM_ADMIN_CHAT_ID:-}
+    volumes:
+      - wwebjs-auth:/wd/backend/.wwebjs_auth      # persistent WhatsApp session
+      - wwebjs-cache:/wd/backend/.wwebjs_cache
+    depends_on:
+      mysql: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      api: { condition: service_started }
+    networks: [frontend, internal]
+    cpus: 2.0
+    mem_limit: 2g
+    security_opt: [no-new-privileges:true]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:5001/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  media:
+    build:
+      context: ..
+      dockerfile: deploy/docker/Dockerfile.media
+    image: nod/media:latest
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: "5002"
+      MEDIA_BASE_URL: ${MEDIA_BASE_URL:-https://media.nodmakeup.com}
+      SAFE_ORIGINS: ${SAFE_ORIGINS:-https://nodmakeup.com,https://admin.nodmakeup.com}
+      MEDIA_API_KEY: ${MEDIA_API_KEY:?set in deploy/.env}
+    volumes:
+      - media-public:/wd/media-server/public
+    networks: [frontend, internal]
+    cpus: 1.0
+    mem_limit: 512m
+    security_opt: [no-new-privileges:true]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:5002/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # ============ EDGE TIER ============
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ../admin-panel/build:/usr/share/nginx/admin:ro
+      - certbot-www:/var/www/certbot:ro
+      - certbot-conf:/etc/letsencrypt:ro
+    depends_on:
+      api: { condition: service_healthy }
+      media: { condition: service_started }
+    networks: [frontend]
+    cpus: 0.5
+    mem_limit: 256m
+    security_opt: [no-new-privileges:true]
+
+  certbot:
+    image: certbot/certbot:latest
+    restart: unless-stopped
+    volumes:
+      - certbot-www:/var/www/certbot
+      - certbot-conf:/etc/letsencrypt
+    # One-time bootstrap (after DNS points here):
+    #   docker compose run --rm certbot certonly --webroot \
+    #     -w /var/www/certbot -d api.nodmakeup.com -d media.nodmakeup.com -d admin.nodmakeup.com
+    # Automatic renewal every 12h. nginx reload runs from the HOST cron (the wiki
+    # `docker compose exec` pattern does not work inside the certbot image):
+    #   cd /opt/nod && docker compose exec nginx nginx -s reload
+    entrypoint: /bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done'
+    networks: [frontend]

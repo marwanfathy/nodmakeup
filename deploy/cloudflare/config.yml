@@ -1,0 +1,46 @@
+# NOD Makeup — Cloudflare Tunnel Configuration
+# Run with: cloudflared tunnel --config /opt/nod/deploy/cloudflare/config.yml run nod-production
+# Or install as systemd service: deploy/cloudflare/cloudflared.service
+
+tunnel: nod-production
+credentials-file: /opt/nod/deploy/cloudflare/credentials.json
+
+# Ingress rules route traffic to local services
+ingress:
+  # API backend
+  - hostname: api.nodmakeup.com
+    service: http://localhost:5001
+    originRequest:
+      connectTimeout: 30s
+      tlsTimeout: 10s
+      keepAliveConnections: 10
+      keepAliveTimeout: 90s
+      noTLSVerify: true
+
+  # Media server
+  - hostname: media.nodmakeup.com
+    service: http://localhost:5002
+    originRequest:
+      connectTimeout: 30s
+      tlsTimeout: 10s
+      keepAliveConnections: 10
+      keepAliveTimeout: 90s
+      noTLSVerify: true
+
+  # Admin panel (served by nginx on port 80/443 locally)
+  - hostname: admin.nodmakeup.com
+    service: http://localhost:80
+    originRequest:
+      connectTimeout: 30s
+      tlsTimeout: 10s
+      keepAliveConnections: 10
+      keepAliveTimeout: 90s
+      noTLSVerify: true
+
+  # Main website (on Vercel - DNS only, no tunnel needed)
+  # - hostname: nodmakeup.com
+  #   service: https://nodmakeup.vercel.app
+  #   originRequest: {}
+
+  # Catch-all: return 404 for unmatched hostnames
+  - service: http_status:404

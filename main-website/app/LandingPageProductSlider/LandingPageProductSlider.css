@@ -1,0 +1,105 @@
+/* --- MAIN CONTAINER --- */
+.landing-product-slider-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 6rem auto; /* Increased margin for more "air" */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centers the title and slider horizontally */
+  justify-content: center;
+}
+
+/* --- THE TITLE (node Style) --- */
+.slider-title {
+  text-align: center;
+  /* Using the wide letter spacing we discussed */
+  font-size: 3.5rem; 
+  font-weight: 300;
+  letter-spacing: 0.25em; /* This gives it the "Rhode" / Premium feel */
+  text-transform: uppercase;
+  color: #000; /* Pure black for high contrast */
+  margin-bottom: 4rem;
+  width: 100%;
+}
+
+/* --- THE SLIDER --- */
+.product-slider {
+  width: 100%;
+  padding-bottom: 60px; /* More space for pagination */
+  display: flex;
+  justify-content: center;
+}
+
+.product-swiper {
+  width: 100%;
+}
+
+/* Ensure individual slides center their content (the bottles) */
+.swiper-slide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+/* --- NAVIGATION & PAGINATION --- */
+.product-swiper .swiper-button-next,
+.product-swiper .swiper-button-prev {
+  color: #000;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease;
+}
+
+.product-swiper .swiper-button-next:hover,
+.product-swiper .swiper-button-prev:hover {
+  transform: scale(1.1);
+}
+
+.product-swiper .swiper-pagination-bullet-active {
+  background-color: #000;
+  width: 12px;
+  height: 12px;
+}
+
+/* --- LOADING GRID (Centered) --- */
+.product-slider-loading-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+  width: 100%;
+  justify-items: center; /* Centers items inside the grid cells */
+  justify-content: center; /* Centers the grid itself */
+  padding: 10px 0 40px 0;
+}
+
+/* Responsive Grid Columns */
+@media (min-width: 768px) { .product-slider-loading-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 1024px) { .product-slider-loading-grid { grid-template-columns: repeat(4, 1fr); } }
+
+/* --- MOBILE RESPONSIVENESS --- */
+@media (max-width: 768px) {
+  .landing-product-slider-container {
+    margin: 3rem auto;
+    padding: 0 20px;
+  }
+
+  .slider-title {
+    font-size: 1.8rem; /* Scaled down for mobile */
+    letter-spacing: 0.2em; /* Slightly tighter but still airy */
+    margin-bottom: 2rem;
+  }
+
+  .product-swiper .swiper-button-next,
+  .product-swiper .swiper-button-prev {
+    display: none !important; /* Keep mobile clean, rely on touch swipe */
+  }
+
+  .product-slider-loading-grid {
+    gap: 15px;
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

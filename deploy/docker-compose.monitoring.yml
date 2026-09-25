@@ -1,0 +1,145 @@
+# NOD Makeup — Monitoring stack (Prometheus + Grafana + Exporters)
+# Run with: docker compose -f deploy/docker-compose.production.yml -f deploy/docker-compose.monitoring.yml up -d
+# Requires: deploy/.env with GRAFANA_ADMIN_PASSWORD, MYSQL_EXPORTER_PASSWORD
+
+services:
+  # ============================================================
+  # Prometheus — metrics collection & alerting
+  # ============================================================
+  prometheus:
+    image: prom/prometheus:v2.54.0
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus-data:/prometheus
+    networks:
+      - frontend
+      - internal
+    cpus: 0.5
+    mem_limit: 512m
+    security_opt: [no-new-privileges:true]
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ============================================================
+  # Node Exporter — host-level metrics (CPU, memory, disk, net)
+  # ============================================================
+  node-exporter:
+    image: prom/node-exporter:v1.7.0
+    restart: unless-stopped
+    pid: host
+    volumes:
+      - '/:/host:ro,rslave'
+    command:
+      - '--path.rootfs=/host'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - internal
+    cpus: 0.2
+    mem_limit: 128m
+    security_opt: [no-new-privileges:true]
+
+  # ============================================================
+  # MySQL Exporter — database metrics
+  # ============================================================
+  mysqld-exporter:
+    image: prom/mysqld-exporter:v0.15.0
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_NAME: 'exporter:${MYSQL_EXPORTER_PASSWORD}@(mysql:3306)/'
+    networks:
+      - internal
+    depends_on:
+      mysql:
+        condition: service_healthy
+    cpus: 0.2
+    mem_limit: 128m
+    security_opt: [no-new-privileges:true]
+
+  # ============================================================
+  # Redis Exporter — cache metrics
+  # ============================================================
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.58.0
+    restart: unless-stopped
+    command:
+      - '--redis.addr=redis://redis:6379'
+    networks:
+      - internal
+    depends_on:
+      redis:
+        condition: service_healthy
+    cpus: 0.1
+    mem_limit: 128m
+    security_opt: [no-new-privileges:true]
+
+  # ============================================================
+  # Nginx Prometheus Exporter — ingress metrics
+  # Requires nginx with ngx_http_stub_status_module enabled
+  # ============================================================
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:1.4.0
+    restart: unless-stopped
+    command:
+      - '--nginx.scrape-uri=http://nginx/nginx_status'
+    networks:
+      - frontend
+    depends_on:
+      nginx:
+        condition: service_started
+    cpus: 0.1
+    mem_limit: 64m
+    security_opt: [no-new-privileges:true]
+
+  # ============================================================
+  # Grafana — visualization & dashboards
+  # ============================================================
+  grafana:
+    image: grafana/grafana:10.4.0
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+      GF_USERS_ALLOW_SIGN_UP: 'false'
+      GF_INSTALL_PLUGINS: 'grafana-piechart-panel'
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/dashboards:/etc/grafana/provisioning/dashboards:ro
+    networks:
+      - frontend
+      - internal
+    ports:
+      - "3000:3000"
+    cpus: 0.5
+    mem_limit: 512m
+    security_opt: [no-new-privileges:true]
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  frontend:
+    external: true
+    name: nod-production_frontend
+  internal:
+    external: true
+    name: nod-production_internal

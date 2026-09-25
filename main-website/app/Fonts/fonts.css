@@ -1,0 +1,41 @@
+@font-face {
+    font-family: 'logo1';
+    src: url(./AlexBrush-Regular.ttf);
+}
+@font-face {
+    font-family: 'logo2';
+    src: url(./Thesignature.otf);
+}
+@font-face {
+    font-family: 'Montserrat';
+    src: url(./Montserrat-VariableFont_wght.ttf);
+}
+@font-face {
+    font-family: 'cairo';
+    src: url(./CairRubik/Cairo/Cairo-VariableFont_slnt\,wght.ttf);
+}
+@font-face {
+    font-family: 'rubic';
+    src: url(./CairRubik/Rubik/Rubik-VariableFont_wght.ttf);
+}
+@font-face {
+    font-family: 'logo3';
+    src: url(./ravensara-antiqua-stencil/RavensaraAntiquaStencil-Regular.ttf);
+}
+@font-face {
+    font-family: 'banner';
+    src: url(./Bodoni_Moda/BodoniModa-VariableFont_opsz\,wght.ttf);
+}
+@font-face {
+    font-family: 'logo4';
+    src: url(./blair-itc-medium_freefontdownload_org/blair-itc-medium.woff);
+}
+
+@font-face {
+    font-family: 'logo5';
+    src: url(./Bodoni_Moda/BodoniModa-Italic-VariableFont_opsz\,wght.ttf);
+}
+@font-face {
+    font-family: 'handwriting';
+    src: url(./valentine-coolday/Valentine\ Coolday\ -\ Demo.otf);
+}

@@ -1,0 +1,255 @@
+{
+  "dashboard": {
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    },
+    "editable": true,
+    "gnetId": null,
+    "graphTooltip": 0,
+    "id": null,
+    "iteration": 1657285355088,
+    "links": [],
+    "panels": [
+      {
+        "datasource": "Prometheus",
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "red", "value": 1}
+              ]
+            },
+            "unit": "short"
+          },
+          "overrides": []
+        },
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+        "id": 1,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
+          "textMode": "auto"
+        },
+        "pluginVersion": "8.0.0",
+        "targets": [
+          {
+            "expr": "up{job=\"nod-api\"}",
+            "legendFormat": "API",
+            "refId": "A"
+          },
+          {
+            "expr": "up{job=\"nod-worker\"}",
+            "legendFormat": "Worker",
+            "refId": "B"
+          },
+          {
+            "expr": "up{job=\"mysqld-exporter\"}",
+            "legendFormat": "MySQL",
+            "refId": "C"
+          },
+          {
+            "expr": "up{job=\"redis-exporter\"}",
+            "legendFormat": "Redis",
+            "refId": "D"
+          }
+        ],
+        "title": "Service Health",
+        "type": "stat"
+      },
+      {
+        "datasource": "Prometheus",
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "custom": {"lineWidth": 1},
+            "mappings": [],
+            "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+            "unit": "s"
+          },
+          "overrides": []
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 6, "y": 0},
+        "id": 2,
+        "options": {
+          "legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom"},
+          "tooltip": {"mode": "single"}
+        },
+        "pluginVersion": "8.0.0",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(nod_http_requests_duration_seconds_bucket{job=\"nod-api\"}[5m])) by (le))",
+            "legendFormat": "p95",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.99, sum(rate(nod_http_requests_duration_seconds_bucket{job=\"nod-api\"}[5m])) by (le))",
+            "legendFormat": "p99",
+            "refId": "B"
+          }
+        ],
+        "title": "API Latency (p95 / p99)",
+        "type": "timeseries"
+      },
+      {
+        "datasource": "Prometheus",
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "custom": {"lineWidth": 1},
+            "mappings": [],
+            "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+            "unit": "percentunit"
+          },
+          "overrides": []
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 18, "y": 0},
+        "id": 3,
+        "options": {
+          "legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom"},
+          "tooltip": {"mode": "single"}
+        },
+        "pluginVersion": "8.0.0",
+        "targets": [
+          {
+            "expr": "sum(rate(nod_http_requests_total{job=\"nod-api\",status=~\"5..\"}[5m])) / sum(rate(nod_http_requests_total{job=\"nod-api\"}[5m]))",
+            "legendFormat": "5xx rate",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(rate(nod_http_requests_total{job=\"nod-api\",status=~\"4..\"}[5m])) / sum(rate(nod_http_requests_total{job=\"nod-api\"}[5m]))",
+            "legendFormat": "4xx rate",
+            "refId": "B"
+          }
+        ],
+        "title": "API Error Rates",
+        "type": "timeseries"
+      },
+      {
+        "datasource": "Prometheus",
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "custom": {"lineWidth": 1},
+            "mappings": [],
+            "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 250}, {"color": "red", "value": 500}]},
+            "unit": "short"
+          },
+          "overrides": []
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+        "id": 4,
+        "options": {
+          "legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom"},
+          "tooltip": {"mode": "single"}
+        },
+        "pluginVersion": "8.0.0",
+        "targets": [
+          {
+            "expr": "nod_outbox_queue_total{state=\"wait\",job=\"nod-api\"}",
+            "legendFormat": "API wait",
+            "refId": "A"
+          },
+          {
+            "expr": "nod_outbox_queue_total{state=\"wait\",job=\"nod-worker\"}",
+            "legendFormat": "Worker wait",
+            "refId": "B"
+          },
+          {
+            "expr": "nod_outbox_queue_total{state=\"active\",job=\"nod-api\"}",
+            "legendFormat": "API active",
+            "refId": "C"
+          }
+        ],
+        "title": "Outbox Queue Depth",
+        "type": "timeseries"
+      },
+      {
+        "datasource": "Prometheus",
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "custom": {"lineWidth": 1},
+            "mappings": [],
+            "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 0.7}, {"color": "red", "value": 0.85}]},
+            "unit": "percentunit"
+          },
+          "overrides": []
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+        "id": 5,
+        "options": {
+          "legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom"},
+          "tooltip": {"mode": "single"}
+        },
+        "pluginVersion": "8.0.0",
+        "targets": [
+          {
+            "expr": "redis_memory_used_bytes / redis_memory_max_bytes",
+            "legendFormat": "Memory %",
+            "refId": "A"
+          }
+        ],
+        "title": "Redis Memory Usage",
+        "type": "timeseries"
+      },
+      {
+        "datasource": "Prometheus",
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "custom": {"lineWidth": 1},
+            "mappings": [],
+            "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 0.8}, {"color": "red", "value": 0.9}]},
+            "unit": "percentunit"
+          },
+          "overrides": []
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 24, "y": 8},
+        "id": 6,
+        "options": {
+          "legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom"},
+          "tooltip": {"mode": "single"}
+        },
+        "pluginVersion": "8.0.0",
+        "targets": [
+          {
+            "expr": "rate(mysql_global_status_threads_connected[5m]) / mysql_global_variables_max_connections",
+            "legendFormat": "Connections %",
+            "refId": "A"
+          }
+        ],
+        "title": "MySQL Connection Usage",
+        "type": "timeseries"
+      }
+    ],
+    "refresh": "10s",
+    "schemaVersion": 27,
+    "style": "dark",
+    "tags": ["nod", "production"],
+    "templating": {"list": []},
+    "time": {"from": "now-1h", "to": "now"},
+    "timepicker": {},
+    "timezone": "",
+    "title": "NOD Makeup - Production Overview",
+    "uid": "nod-production-overview",
+    "version": 1
+  },
+  "overwrite": true
+}

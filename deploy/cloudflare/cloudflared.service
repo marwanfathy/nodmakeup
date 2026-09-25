@@ -1,0 +1,34 @@
+[Unit]
+Description=Cloudflare Tunnel - NOD Production
+After=network.target docker.service
+Requires=docker.service
+
+[Service]
+Type=notify
+User=root
+WorkingDirectory=/opt/nod
+ExecStartPre=/usr/bin/docker compose -f deploy/docker-compose.production.yml up -d
+ExecStart=/usr/bin/cloudflared tunnel --config /opt/nod/deploy/cloudflare/config.yml run nod-production
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+RestartSec=5
+TimeoutStartSec=300
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/nod/deploy/cloudflare /var/log/cloudflared
+
+# Environment — token lives on the server, never in git.
+# Create /opt/nod/deploy/cloudflare/cloudflared.env (chmod 600) containing:
+#   CLOUDFLARE_API_TOKEN=<your token>
+EnvironmentFile=/opt/nod/deploy/cloudflare/cloudflared.env
+
+# Logging
+StandardOutput=append:/var/log/cloudflared/cloudflared.log
+StandardError=append:/var/log/cloudflared/cloudflared-error.log
+
+[Install]
+WantedBy=multi-user.target

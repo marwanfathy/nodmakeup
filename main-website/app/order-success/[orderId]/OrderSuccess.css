@@ -1,0 +1,134 @@
+.order-success-page {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f9f9f9;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* --- Card Style --- */
+.success-card, .error-card {
+    background: white;
+    max-width: 500px;
+    width: 100%;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    text-align: center;
+    animation: slideUp 0.5s ease-out;
+}
+
+/* --- Icon Animation --- */
+.success-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    background-color: #e8f5e9; /* Light Green */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.success-icon {
+    width: 40px;
+    height: 40px;
+    color: #2e7d32; /* Dark Green */
+    animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s both;
+}
+
+/* --- Typography --- */
+.success-title {
+    font-size: 2rem;
+    color: #1a1a1a;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.success-subtitle {
+    color: #666;
+    font-size: 1rem;
+    margin-bottom: 30px;
+}
+
+/* --- Details Box --- */
+.order-details-box {
+    background-color: #fafafa;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+    text-align: left;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 0.95rem;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-row span {
+    color: #666;
+}
+
+.detail-row strong {
+    color: #000;
+    font-weight: 600;
+}
+
+/* --- Buttons --- */
+.success-actions {
+    margin-bottom: 20px;
+}
+
+.btn-continue, .btn-home {
+    display: inline-block;
+    background-color: #000;
+    color: white;
+    text-decoration: none;
+    padding: 14px 30px;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: background 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.btn-continue:hover, .btn-home:hover {
+    background-color: #333;
+}
+
+.email-note {
+    font-size: 0.85rem;
+    color: #888;
+    margin-top: 20px;
+}
+
+/* --- Animations --- */
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0); }
+    to { transform: scale(1); }
+}
+
+/* --- Mobile Responsive --- */
+@media (max-width: 480px) {
+    .success-card {
+        padding: 30px 20px;
+    }
+    .success-title {
+        font-size: 1.5rem;
+    }
+}

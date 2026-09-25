@@ -1,0 +1,21 @@
+/* =====================================================================
+   Responsive
+   ===================================================================== */
+@media (max-width: 1240px) {
+    :root { --space-page: 24px; }
+}
+@media (max-width: 900px) {
+    :root { --space-page: 16px; }
+    .nd-topbar-section { display: none; }
+    .nd-dock { width: 56px; margin-left: 12px; }
+    .nd-dock-btn { width: 40px; height: 40px; }
+    .nd-dock-btn:hover::after { display: none; }
+    .nd-kpi-value { font-size: 26px; }
+}
+@media (max-width: 720px) {
+    .nd-user-meta { display: none; }
+    .nd-live { display: none; }
+    .nd-user { padding-left: 10px; }
+    .nd-wordmark { font-size: 18px; }
+    .nd-topbar-inner { gap: var(--sp-3); }
+}

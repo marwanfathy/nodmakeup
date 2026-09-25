@@ -1,0 +1,495 @@
+/* --- Main container and placeholder styles --- */
+.hero-slider-container {
+  display: flex;
+  width: 100%;
+  max-width: 1280px;
+  margin: 2rem auto;
+  background-color: #fff;
+  min-height: 550px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  text-align:center;
+}
+.hero-slider-placeholder {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  max-width: 1280px;
+  margin: 2rem auto;
+  min-height: 550px;
+  background-color: #ffffff;
+  border-radius: 1rem;
+  color: #ffffff;
+  
+}
+.hero-slider-placeholder.error {
+  color: #d32f2f;
+}
+
+/* --- Left Side: Content Panel (No changes here) --- */
+.hero-slider-content {
+  flex: 1;
+  padding: 4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.hero-main-title {
+  font-size: 2.5rem;
+  font-weight: 300;
+  color: #333;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+.hero-main-desc {
+  font-size: 1.4rem;
+  font-weight: 180;
+  color: #777777c5;
+  letter-spacing: 0.5px;
+  margin: 0 0 2rem 0;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+.hero-slider-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.hero-play-pause {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  background-color: transparent;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  font-weight: bold;
+  color: #000;
+  text-align: center;
+}
+.hero-play-pause .icon {
+  z-index: 2;
+}
+.progress-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+  z-index: 1;
+}
+.progress-background {
+  fill: none;
+  stroke: #e6e6e6;
+  stroke-width: 1.5;
+}
+.progress-bar {
+  fill: none;
+  stroke: #000;
+  stroke-width: 1.5;
+  stroke-dasharray: 100.53;
+  stroke-dashoffset: 100.53;
+  animation: progress-fill 5s linear infinite;
+}
+@keyframes progress-fill {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.hero-thumbnails {
+  display: flex;
+  gap: 0.5rem;
+}
+.hero-thumbnail {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  padding: 2px;
+  cursor: pointer;
+  background-color: transparent;
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+.hero-thumbnail.active {
+  border-color: #000;
+}
+.hero-thumbnail:hover {
+  border-color: #000;
+}
+.hero-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.hero-slide-text-wrapper {
+  /* Increased from 135px to 180px to fit the description without overlapping */
+  height: 180px; 
+  width: 100%;
+  overflow: hidden;
+  margin-bottom: 1.5rem; /* Space between text and "Shop Now" button */
+  margin-top: 1rem;      /* Space between controls and text */
+}
+.hero-slide-text-inner {
+  transition: transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1);
+  /* This moves the whole list up/down */
+}
+
+/* 3. The Individual Slide Item */
+.hero-slide-text-item {
+  /* MUST match the wrapper height exactly (180px) for alignment */
+  height: 180px; 
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Vertically center the content */
+  align-items: center;     /* Horizontally center the text */
+  padding: 0 1rem;         /* Prevent text from touching edges */
+}
+/* 4. The Dynamic Title */
+.hero-slide-title {
+  font-size: 2rem;
+  font-weight: 400;
+  color: #000;
+  margin: 0 0 0.8rem 0; /* Add gap between Title and Description */
+  line-height: 1.2;
+}
+
+.hero-slide-subtitle {
+  font-size: 1rem;
+  color: #666;
+  margin: 0;
+  line-height: 1.5; /* Improve readability */
+  max-width: 90%;   /* Keep lines from getting too wide */
+}
+.hero-cta-button {
+  background-color: #fff;
+  color: #000;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  padding: 10px 24px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s;
+}
+.hero-cta-button:hover {
+  background-color: #000000;
+  border-color: #ccc;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  color: #fff;
+}
+
+/* --- Right Side: Image Panel --- */
+.hero-slider-image-panel {
+  flex: 1.3;
+  position: relative; /* This is the anchor for all media items */
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.hero-swiper-instance {
+  width: 100%;
+  height: 100%;
+}
+
+/* --- NEW: Container for the layered media inside a single slide --- */
+.hero-media-composition {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* --- NEW: Base styles for ALL media items --- */
+.hero-slide-media {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: all 0.5s ease-in-out;
+}
+
+/* --- NEW: Layout Style Modifiers --- */
+.hero-media-item--background_full {
+  z-index: 1; /* Always at the back */
+}
+.hero-media-item--foreground_center {
+border-radius: 1.5rem;
+  width: 339px;
+  height: 97%;
+  top: 50%;
+  left: 28%;
+  transform: translate(-50%, -50%);
+}
+.hero-media-item--foreground_left {
+aspect-ratio: 1;
+  border-radius: 1.5rem;
+  width: 265px;
+  height: 300px;
+  top: 74.55%;
+  left: 77%;
+  transform: translate(-50%, -50%);
+}
+.hero-media-item--foreground_right {
+aspect-ratio: 1;
+  border-radius: 1.5rem;
+  width: 265px;
+  height: 300px;
+  top: 25.5%;
+  left: 77%;
+  transform: translate(-50%, -50%);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .hero-slider-container {
+    flex-direction: column;
+  }
+  .hero-slider-content {
+    order: 2;
+    padding: 2rem;
+  }
+  .hero-slider-image-panel {
+    order: 1;
+    height: 60vh;
+  }
+  .hero-main-title {
+    font-size: 2rem;
+  }
+  .hero-slide-title {
+    font-size: 1.5rem;
+  }
+}
+/* =========================================
+   RESPONSIVE MOBILE STYLES (Max-width 900px)
+   ========================================= */
+@media (max-width: 900px) {
+  
+  /* 1. Main Container: Turn into a Column */
+  .hero-slider-container {
+    flex-direction: column;
+    height: auto;
+    min-height: auto;
+    padding-bottom: 2rem;
+    position: relative;
+    width: 95%; 
+    margin: 1rem auto;
+  }
+
+  /* 2. "Unwrap" the Left Content Panel to reorder children */
+  .hero-slider-content {
+    display: contents; 
+  }
+
+  /* --- REORDERING ELEMENTS --- */
+
+  /* Order 1: Main Title ("MEET OUR ICONS") */
+  .hero-main-title {
+    order: 1;
+    font-size: 1.8rem;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    width: 100%;
+    text-align: center;
+  }
+
+  .hero-main-desc {
+    display: none; /* Optional: hide main description on mobile to save space */
+  }
+
+  /* Order 2: Controls (Icons) */
+  .hero-slider-controls {
+    order: 2;
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    padding-top: 0.5rem;
+  }
+
+  /* Order 3: The Image Composition */
+  .hero-slider-image-panel {
+    order: 3;
+    flex: none;
+    width: 100%;
+    height: 380px; /* Fixed height for the image mosaic */
+    margin-bottom: 1rem;
+    border-radius: 0;
+  }
+
+  /* Order 4: The Text Slider (ANIMATION FIX) */
+  .hero-slide-text-wrapper {
+    order: 4;
+    width: 100%;
+    /* IMPORTANT: Must be fixed height to match JS (180px) for animation to work */
+    height: 180px; 
+    overflow: hidden; /* Masks the sliding text */
+    margin: 0 0 0.5rem 0;
+  }
+
+  /* Ensure the inner items match the wrapper height */
+  .hero-slide-text-item {
+    height: 180px; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0 1rem;
+  }
+  
+  .hero-slide-title {
+    font-size: 1.5rem;
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+  
+  .hero-slide-subtitle {
+    font-size: 0.9rem;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  /* Order 5: The CTA Button */
+  .hero-cta-button {
+    order: 5;
+    margin: 0 auto;
+    width: fit-content;
+  }
+
+  /* --- MOBILE IMAGE COMPOSITION (Mosaic Layout) --- */
+  
+  /* Reset */
+  .hero-media-item--foreground_center,
+  .hero-media-item--foreground_left,
+  .hero-media-item--foreground_right {
+    transform: none !important; 
+    border-radius: 12px;
+    object-fit: cover;
+  }
+
+  /* Left Big Image */
+  .hero-media-item--foreground_center {
+    width: 48%;       
+    height: 100%;     
+    top: 0;
+    left: 0;
+  }
+
+  /* Top Right Image */
+  .hero-media-item--foreground_right {
+    width: 48%;       
+    height: 48%;      
+    top: 0;
+    left: auto;       
+    right: 0;         
+  }
+
+  /* Bottom Right Image */
+  .hero-media-item--foreground_left {
+    width: 48%;       
+    height: 48%;      
+    top: auto;        
+    bottom: 0;        
+    left: auto;       
+    right: 0;         
+  }
+  .hero-media-item--background_full{
+    border-radius: 1.5em;
+    width: 90%;
+    height: 90%;
+    left: 20px;
+  }
+}
+/* =========================================
+   SKELETON LOADING STYLES
+   ========================================= */
+
+@keyframes shimmer-hero {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton-bg {
+  background: #f0f0f0;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer-hero 1.5s infinite linear;
+  border-radius: 4px;
+}
+
+/* Specific Element Sizes */
+
+.skeleton-title-main {
+  width: 70%;
+  height: 40px;
+  margin-bottom: 20px;
+}
+
+.skeleton-desc-main {
+  width: 40%;
+  height: 20px;
+  margin-bottom: 30px;
+}
+
+.skeleton-circle-big {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
+
+.skeleton-circle-small {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
+
+.skeleton-slide-title {
+  width: 60%;
+  height: 30px;
+  margin-bottom: 10px;
+}
+
+.skeleton-slide-subtitle {
+  width: 90%;
+  height: 14px;
+  margin-bottom: 8px;
+}
+
+.skeleton-button {
+  width: 140px;
+  height: 45px;
+  border-radius: 20px;
+}
+
+.skeleton-image-block {
+  width: 100%;
+  height: 100%;
+  border-radius: 1rem;
+}
+
+/* Mobile Tweaks for Skeleton */
+@media (max-width: 900px) {
+  .skeleton-title-main {
+    margin: 1.5rem auto 0.5rem auto;
+  }
+  .skeleton-desc-main {
+    display: none;
+  }
+  .skeleton-button {
+    margin: 0 auto;
+  }
+  .skeleton-image-block {
+    border-radius: 0;
+  }
+}

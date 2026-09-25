@@ -1,0 +1,80 @@
+/* =====================================================================
+   NOD STUDIO — Design tokens (Apple dark-mode admin console)
+   Adapted from the Apple design-language analysis: single Action Blue
+   accent, near-black tile surfaces, SF Pro type, pill-shaped actions,
+   hairline dividers, and exactly one reserved shadow treatment.
+   ===================================================================== */
+:root {
+    color-scheme: dark;
+
+    /* Surfaces — near-black tiles, true black reserved for nav/void */
+    --paper: #000000;
+    --paper-deep: #000000;
+    --paper-raised: #1d1d1f;
+    --paper-raised-2: #232325;
+    --paper-sunken: #131315;
+
+    /* Ink = writing color (on-dark) */
+    --ink: #ffffff;
+    --ink-soft: #cccccc;
+    --ink-faint: #86868b;
+
+    /* Hairlines — soft dividers only, never a decorative border */
+    --hairline: rgba(255, 255, 255, 0.08);
+    --hairline-strong: rgba(255, 255, 255, 0.16);
+
+    /* Single accent — Apple's Action Blue, dark-surface variant */
+    --accent: #2997ff;
+    --accent-2: #2997ff;      /* alias kept for compatibility — one accent, no second brand color */
+    --accent-focus: #0071e3;
+    --accent-soft: rgba(41, 151, 255, 0.14);
+
+    /* System feedback hues (not brand accents — status only) */
+    --moss: #32d74b;
+    --moss-tint: rgba(50, 215, 75, 0.14);
+    --clay: #ff453a;
+    --clay-tint: rgba(255, 69, 58, 0.14);
+    --amber: #ff9f0a;
+    --amber-tint: rgba(255, 159, 10, 0.14);
+    --steel: var(--accent);
+    --steel-tint: var(--accent-soft);
+
+    /* Type — SF Pro Display / SF Pro Text, Inter as the open-source substitute */
+    --font-display: "SF Pro Display", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    --font-sans: "SF Pro Text", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --font-serif: var(--font-display); /* compatibility alias */
+
+    --step-t1: 32px;        /* page large title — display-lg scale */
+    --step-t2: 22px;        /* section title */
+    --step-t3: 17px;        /* card title — tagline scale */
+    --step-body: 15px;      /* default reading size, nodding to Apple's 17px body */
+    --step-sm: 13px;
+    --step-caption: 12px;
+    --step-micro: 11px;
+
+    /* Spacing — 8px base, 17px nod to Apple's md token */
+    --sp-1: 4px;
+    --sp-2: 8px;
+    --sp-3: 12px;
+    --sp-4: 17px;
+    --sp-5: 24px;
+    --sp-6: 32px;
+    --sp-7: 48px;
+
+    /* Geometry — Apple's radius ladder: sm / md / lg / pill, nothing between */
+    --r-sm: 8px;
+    --r-md: 11px;
+    --r-lg: 18px;
+    --r-full: 9999px;
+
+    /* Elevation — one quiet shadow family, no color, no glow */
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.35), 0 2px 10px rgba(0, 0, 0, 0.28);
+    --shadow-2: 0 6px 20px rgba(0, 0, 0, 0.4);
+    --shadow-3: 0 16px 48px rgba(0, 0, 0, 0.5);
+
+    --space-page: 40px;
+
+    --transition-fast: 120ms ease;
+    --transition: 220ms cubic-bezier(0.4, 0, 0.2, 1);
+}

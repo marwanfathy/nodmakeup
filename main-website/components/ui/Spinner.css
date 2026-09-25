@@ -1,0 +1,25 @@
+.spinner {
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s ease-in-out infinite;
+  margin: 0 auto;
+}
+
+/* A smaller version for buttons */
+.spinner.small {
+    width: 16px;
+    height: 16px;
+    border-width: 2px;
+    /* For dark text on light buttons */
+    border-color: rgba(0, 0, 0, 0.2);
+    border-top-color: #1a1a1a;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

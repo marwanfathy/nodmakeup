@@ -1,0 +1,171 @@
+/* =====================================================================
+   App shell · dock navigation · topbar · content
+   Flat black chrome, one hairline border, zero decorative gradients —
+   the product/content is what should speak, per the Apple system.
+   ===================================================================== */
+.nd-app { display: flex; height: 100vh; overflow: hidden; position: relative; }
+
+/* ---------- DOCK — flat black nav rail ---------- */
+.nd-dock {
+    width: 70px;
+    padding: 14px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    align-self: center;
+    border-radius: var(--r-lg);
+    background: var(--paper-raised);
+    border: 1px solid var(--hairline);
+    z-index: 30;
+}
+.nd-dock-brand {
+    width: 44px; height: 44px; border-radius: var(--r-md);
+    display: flex; align-items: center; justify-content: center;
+    background: var(--paper-sunken);
+    border: 1px solid var(--hairline);
+    margin-bottom: 6px;
+}
+.nd-dock-group {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    width: 100%; padding: 8px 0;
+    border-top: 1px solid var(--hairline);
+}
+.nd-dock-group:first-of-type { border-top: none; padding-top: 0; }
+.nd-dock-btn {
+    width: 46px; height: 46px; border-radius: var(--r-md);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-faint); background: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast),
+                border-color var(--transition-fast), transform var(--transition-fast);
+    position: relative;
+    text-decoration: none;
+}
+.nd-dock-btn:hover { color: var(--ink); background: rgba(255, 255, 255, 0.06); }
+.nd-dock-btn:active { transform: scale(0.95); }
+.nd-dock-btn:hover::after {
+    content: attr(data-label);
+    position: absolute; left: 58px; top: 50%; transform: translateY(-50%);
+    background: var(--paper-raised-2); border: 1px solid var(--hairline-strong);
+    color: var(--ink-soft); font-size: var(--step-caption); font-weight: 500; letter-spacing: 0;
+    padding: 5px 10px; border-radius: var(--r-sm); white-space: nowrap;
+    font-family: var(--font-sans); pointer-events: none;
+}
+.nd-dock-btn.active {
+    color: #ffffff;
+    background: var(--accent);
+    border-color: transparent;
+}
+.nd-dock-btn.active::before {
+    content: ''; position: absolute; left: -16px; top: 50%; transform: translateY(-50%);
+    width: 3px; height: 18px; border-radius: 3px;
+    background: var(--accent);
+}
+.nd-dock-btn.danger:hover { color: var(--clay); background: var(--clay-tint); }
+.nd-dock-avatar { margin-top: 6px; padding-top: 8px; border-top: 1px solid var(--hairline); }
+
+/* ---------- Brand mark ---------- */
+.nd-brand-mark {
+    width: 20px; height: 20px;
+    background: var(--accent);
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+    display: block; flex-shrink: 0;
+}
+
+/* ---------- Main column ---------- */
+.nd-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+/* ---------- TOPBAR ---------- */
+.nd-topbar {
+    background: rgba(0, 0, 0, 0.86);
+    backdrop-filter: saturate(150%) blur(20px);
+    -webkit-backdrop-filter: saturate(150%) blur(20px);
+    border-bottom: 1px solid var(--hairline);
+    position: relative; z-index: 20;
+}
+.nd-topbar-inner {
+    display: flex; align-items: center; gap: var(--sp-5);
+    padding: 14px var(--space-page);
+}
+.nd-topbar-brand { display: flex; align-items: center; gap: 14px; }
+.nd-topbar-mark {
+    width: 30px; height: 30px;
+    background: var(--accent);
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+    flex-shrink: 0;
+}
+.nd-wordmark {
+    font-family: var(--font-display);
+    font-size: 20px; font-weight: 600; letter-spacing: -0.01em;
+    line-height: 1; margin: 0;
+    color: var(--ink);
+    white-space: nowrap;
+}
+.nd-wordmark em { font-style: normal; color: var(--accent); }
+.nd-topbar-section { display: flex; flex-direction: column; gap: 2px; padding-left: var(--sp-5); }
+.nd-topbar-section .nd-eyebrow {
+    font-family: var(--font-sans); font-size: var(--step-caption); font-weight: 600; letter-spacing: 0.02em;
+    color: var(--ink-faint); text-transform: none;
+}
+.nd-topbar-title { font-family: var(--font-display); font-size: var(--step-t3); font-weight: 600; letter-spacing: -0.01em; color: var(--ink); line-height: 1.1; }
+
+.nd-page-eyebrow {
+    font-family: var(--font-sans); font-size: var(--step-caption); font-weight: 600; letter-spacing: 0.02em;
+    text-transform: none; color: var(--ink-faint); display: flex; align-items: center; gap: 8px;
+}
+.nd-page-eyebrow::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+.nd-page-title {
+    font-family: var(--font-display);
+    font-size: var(--step-t1); font-weight: 600; letter-spacing: -0.02em;
+    color: var(--ink); margin: 2px 0 0; line-height: 1.1;
+}
+.nd-topbar-sub { font-size: var(--step-sm); color: var(--ink-faint); margin-top: 4px; }
+
+.nd-topbar-actions { display: flex; align-items: center; gap: 16px; margin-left: auto; }
+.nd-live {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-sans); font-size: var(--step-caption); font-weight: 500; letter-spacing: 0;
+    text-transform: none; color: var(--ink-soft); white-space: nowrap;
+}
+.nd-live::before {
+    content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--moss);
+    animation: ndPulse 2.4s ease-in-out infinite;
+}
+@keyframes ndPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+.nd-user { display: flex; align-items: center; gap: 10px; padding-left: 16px; border-left: 1px solid var(--hairline); }
+.nd-avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--paper-raised-2);
+    border: 1px solid var(--hairline-strong);
+    color: var(--accent);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; letter-spacing: 0;
+}
+.nd-user-meta { line-height: 1.15; }
+.nd-user-name { font-family: var(--font-display); font-size: var(--step-sm); font-weight: 600; }
+.nd-user-role { font-family: var(--font-sans); font-size: var(--step-caption); color: var(--ink-faint); }
+
+.nd-content { flex: 1; overflow-y: auto; padding: var(--space-page); }
+
+/* ---------- Typography helpers ---------- */
+.nd-eyebrow {
+    font-family: var(--font-sans); font-size: var(--step-caption); font-weight: 600; letter-spacing: 0.02em;
+    text-transform: none; color: var(--ink-faint);
+}
+.nd-title1 { font-family: var(--font-display); font-size: var(--step-t1); font-weight: 600; letter-spacing: -0.02em; margin: 0; }
+.nd-title2 { font-family: var(--font-display); font-size: var(--step-t2); font-weight: 600; letter-spacing: -0.01em; margin: 0; }
+.nd-title3 { font-family: var(--font-display); font-size: var(--step-t3); font-weight: 600; margin: 0; }
+.nd-muted { color: var(--ink-soft); }
+.nd-faint { color: var(--ink-faint); }
+.nd-serif { font-family: var(--font-serif); }
+.nd-mono { font-family: var(--font-mono); }
+.nd-num { font-variant-numeric: tabular-nums; font-family: var(--font-mono); }
+.nd-rule { border: none; border-top: 1px solid var(--hairline); margin: var(--sp-5) 0; }
+
+/* Page header inside content */
+.nd-page-head {
+    display: flex; align-items: flex-end; justify-content: space-between; gap: var(--sp-5);
+    margin-bottom: var(--sp-6); flex-wrap: wrap;
+}
