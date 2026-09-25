@@ -43,14 +43,18 @@ node scripts/sync-env.mjs     # validate + render deploy/.env
 
 The storefront lives at `main-website/` inside this repo — **fully self-contained**,
 because Vercel builds it with Root Directory = `main-website`, which forbids `..`
-and access to files outside that folder. `vercel.json` at the repo root sets
-`rootDirectory`, `framework` and the build command:
+and access to files outside that folder. `vercel.json` at the repo root sets the
+framework and build command:
+
+> **Root Directory is a dashboard-only setting** — it is NOT a `vercel.json`
+> property (Vercel rejects `rootDirectory` with "should NOT have additional
+> property"). Set it in Project → Settings → General → Root Directory.
 
 | Setting | Value |
 |---|---|
-| Root Directory | `main-website` |
+| Root Directory | `main-website` (dashboard, not vercel.json) |
 | Framework Preset | Next.js |
-| Build Command | `npm run build` (default; `prebuild` vendors `shared/`) |
+| Build Command | `npm run build` |
 
 **Vendored shared:** `@nod/shared` ships from a committed mirror at
 `main-website/vendor/shared/` (source only). During `postinstall`/`prebuild` a

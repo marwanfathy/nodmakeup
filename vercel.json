@@ -1,5 +1,4 @@
 {
-  "rootDirectory": "main-website",
   "framework": "nextjs",
   "buildCommand": "npm run build"
 }
