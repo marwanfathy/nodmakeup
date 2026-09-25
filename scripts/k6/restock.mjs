@@ -9,8 +9,9 @@
 //   node scripts/k6/restock.mjs            # sets every variant to 250 units
 //   node scripts/k6/restock.mjs -- 5000    # …or pass the quantity
 //
-// Backs directly onto the backend's Prisma client (DATABASE_URL read from
-// backend/.env), so it always matches the schema — no HTTP, no auth needed.
+// Backs directly onto the backend's Prisma client (DATABASE_URL read from the
+// root .env — the single source of truth), so it always matches the schema —
+// no HTTP, no auth needed.
 // =============================================================================
 
 import { createRequire } from 'node:module';
@@ -26,8 +27,8 @@ if (!Number.isFinite(qty) || qty < 0) {
   process.exit(1);
 }
 
-// Load DATABASE_URL from backend/.env (dotenv-parse by hand; no deps).
-const envPath = path.join(backendDir, '.env');
+// Load DATABASE_URL from the root .env (dotenv-parse by hand; no deps).
+const envPath = path.join(root, '.env');
 if (!fs.existsSync(envPath)) {
   console.error(`missing ${envPath}`);
   process.exit(1);
@@ -41,7 +42,7 @@ for (const line of fs.readFileSync(envPath, 'utf8').split('\n')) {
   }
 }
 if (!process.env.DATABASE_URL) {
-  console.error('DATABASE_URL not found in backend/.env');
+  console.error('DATABASE_URL not found in root .env');
   process.exit(1);
 }
 

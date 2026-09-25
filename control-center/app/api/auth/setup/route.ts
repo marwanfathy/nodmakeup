@@ -1,8 +1,9 @@
 // /api/auth/setup — first-run operator creation (only while unconfigured).
-// Writes CC_USERNAME + CC_PASSWORD_HASH (bcrypt, cost 12) into control-center/.env.
+// Writes CC_USERNAME + CC_PASSWORD_HASH (bcrypt, cost 12) into the ROOT .env —
+// the single source of truth shared by every service (see @/lib/config).
 import bcrypt from 'bcryptjs';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { CC_ENV_FILE, configured, refreshOperator } from '@/lib/config';
+import { ROOT_ENV_FILE, configured, refreshOperator } from '@/lib/config';
 import { createSession, csrfTokenFor, sessionCookie } from '@/lib/session';
 import { logAudit } from '@/lib/audit';
 import { gateSetupOnly } from '@/lib/auth';
@@ -30,7 +31,7 @@ export async function POST(request: Request) {
   }
   const hash = bcrypt.hashSync(password, 12);
 
-  const lines = existsSync(CC_ENV_FILE) ? readFileSync(CC_ENV_FILE, 'utf8').split(/\r?\n/) : [];
+  const lines = existsSync(ROOT_ENV_FILE) ? readFileSync(ROOT_ENV_FILE, 'utf8').split(/\r?\n/) : [];
   const setLine = (key: string, value: string): void => {
     const idx = lines.findIndex((l) => l.startsWith(`${key}=`));
     const row = `${key}=${value}`;
@@ -39,7 +40,7 @@ export async function POST(request: Request) {
   };
   setLine('CC_USERNAME', username);
   setLine('CC_PASSWORD_HASH', hash);
-  writeFileSync(CC_ENV_FILE, lines.join('\n') + '\n');
+  writeFileSync(ROOT_ENV_FILE, lines.join('\n') + '\n');
   refreshOperator();
 
   const sid = createSession(username);

@@ -39,7 +39,7 @@ export default function SetupForm() {
         <div className="auth-eyebrow">First run</div>
         <h1 className="auth-title">Set up the console</h1>
         <p className="auth-sub">
-          Create the operator account. This writes a bcrypt hash into <code>control-center/.env</code>.
+          Create the operator account. This writes a bcrypt hash into the root <code>.env</code> (the single source of truth).
         </p>
         <label>
           Username

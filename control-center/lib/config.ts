@@ -16,10 +16,11 @@ export const RUN_DIR = resolve(ROOT, 'run');
 export const LOGS_DIR = resolve(ROOT, 'logs');
 export const RUNTIME_DIR = resolve(CC_DIR, '.runtime');
 export const ROOT_ENV_FILE = resolve(ROOT, '.env');
-export const CC_ENV_FILE = resolve(CC_DIR, '.env');
 
 // ---------------------------------------------------------------------------
-// control-center .env (its own file; the root .env is the platform's truth)
+// ONE source of truth: the root .env (repo root). The control center reads
+// its operator credentials (CC_USERNAME / CC_PASSWORD_HASH) from the same
+// file every other service reads — there are no per-service .env copies.
 // ---------------------------------------------------------------------------
 function parseEnvText(text: string): { raw: string; key: string | null; value: string | null }[] {
   const out: { raw: string; key: string | null; value: string | null }[] = [];
@@ -32,15 +33,19 @@ function parseEnvText(text: string): { raw: string; key: string | null; value: s
 
 function loadCcEnv(): Record<string, string> {
   const env: Record<string, string> = {};
-  if (existsSync(CC_ENV_FILE)) {
-    for (const { key, value } of parseEnvText(readFileSync(CC_ENV_FILE, 'utf8'))) {
-      if (key) env[key] = value ?? '';
+  if (existsSync(ROOT_ENV_FILE)) {
+    // Read with our own parser — NOT Next's env loader — so $VAR references
+    // inside values (e.g. bcrypt CC_PASSWORD_HASH=$2a$12$...) are never
+    // expanded/corrupted. Only keys this process owns (CC_*) are pulled in.
+    for (const { key, value } of parseEnvText(readFileSync(ROOT_ENV_FILE, 'utf8'))) {
+      if (key && key.startsWith('CC_')) env[key] = value ?? '';
     }
   }
-  // process.env fills only keys the cc .env does not define. This is
+  // process.env fills only keys the root .env does not define. This is
   // deliberate: Next's env loader expands $VAR references, which corrupts
   // bcrypt hashes (CC_PASSWORD_HASH=$2a$12$...) — the file's own values must
-  // win for keys it defines. Orchestration can still override absent keys.
+  // win for keys it defines. Orchestration can still override absent keys
+  // (e.g. CC_PORT injected by start.sh / processControl).
   for (const [key, value] of Object.entries(process.env)) {
     if (value !== undefined && !(key in env)) env[key] = value;
   }

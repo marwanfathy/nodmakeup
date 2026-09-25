@@ -225,8 +225,9 @@ if [ "$DO_UPDATE" -eq 1 ]; then
     (cd "$ROOT/shared" && npm run build)
   fi
 
-  # ONE generator writes every per-service .env from the root .env, merging
-  # the dev host into SAFE_ORIGINS. No source files are ever sed-edited.
+  # ONE source of truth: the root .env. sync-env validates it, merges the dev
+  # host into SAFE_ORIGINS, and renders the deploy/.env production bundle.
+  # Every service reads the root .env directly — no per-service copies.
   node "$ROOT/scripts/sync-env.mjs" \
     --base "$BASE" \
     --proto "$PROTO" \

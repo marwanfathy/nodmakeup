@@ -1,10 +1,12 @@
 // lib/envEditor.ts
-// Guarded root-.env editing. Validation rules per known key family (ports,
-// urls, booleans, secrets); unknown keys are accepted as plain strings. Writes
-// preserve the file's existing line order + comments, and every apply re-runs
-// scripts/sync-env.mjs so per-service .env files stay in lockstep. Values of
-// secret keys are never echoed back to the UI (masked) and never logged.
-// Direct TS port.
+// Guarded root-.env editing. The root .env is the ONE source of truth — every
+// service reads it directly (backend, media-server, control-center) or derives
+// client URLs in the browser (admin-panel, main-website). Validation rules per
+// known key family (ports, urls, booleans, secrets); unknown keys are accepted
+// as plain strings. Writes preserve the file's existing line order + comments,
+// and every apply re-runs scripts/sync-env.mjs which validates + renders the
+// deploy/.env bundle. Values of secret keys are never echoed back to the UI
+// (masked) and never logged. Direct TS port.
 import { execFile } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { ROOT, ROOT_ENV_FILE, rootEnvValue } from './config';
@@ -18,6 +20,7 @@ const SECRET_KEYS = new Set([
   'TELEGRAM_BOT_TOKEN', 'TELEGRAM_ADMIN_CHAT_ID', 'GRAFANA_ADMIN_PASSWORD',
   'MYSQL_EXPORTER_PASSWORD', 'BACKUP_PASSPHRASE', 'DATABASE_URL',
   'REDIS_URL', 'SESSION_SECRET', 'ENCRYPTION_KEY', 'RCLONE_REMOTE',
+  'CC_USERNAME', 'CC_PASSWORD_HASH',
 ]);
 
 const PORT_KEYS = new Set(['PORT', 'MEDIA_PORT', 'ADMIN_PORT', 'WEB_PORT', 'CC_PORT', 'BACKEND_PORT']);
