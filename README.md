@@ -41,8 +41,10 @@ node scripts/sync-env.mjs     # validate + render deploy/.env
 
 ## Vercel (main website only)
 
-The storefront lives at `main-website/` inside this repo. In the **Vercel
-dashboard** for the project connected to `github.com/marwanfathy/nodmakeup`:
+The storefront lives at `main-website/` inside this repo. A committed
+[`vercel.json`](./vercel.json) sets `rootDirectory` to `main-website`, so Vercel
+builds the right folder automatically. In the **Vercel dashboard** for the
+project connected to `github.com/marwanfathy/nodmakeup`, confirm:
 
 | Setting | Value |
 |---|---|
