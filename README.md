@@ -41,16 +41,26 @@ node scripts/sync-env.mjs     # validate + render deploy/.env
 
 ## Vercel (main website only)
 
-The storefront lives at `main-website/` inside this repo. A committed
-[`vercel.json`](./vercel.json) sets `rootDirectory` to `main-website`, so Vercel
-builds the right folder automatically. In the **Vercel dashboard** for the
-project connected to `github.com/marwanfathy/nodmakeup`, confirm:
+The storefront lives at `main-website/` inside this repo — **fully self-contained**,
+because Vercel builds it with Root Directory = `main-website`, which forbids `..`
+and access to files outside that folder. `vercel.json` at the repo root sets
+`rootDirectory`, `framework` and the build command:
 
 | Setting | Value |
 |---|---|
 | Root Directory | `main-website` |
 | Framework Preset | Next.js |
 | Build Command | `npm run build` (default; `prebuild` vendors `shared/`) |
+
+**Vendored shared:** `@nod/shared` ships from a committed mirror at
+`main-website/vendor/shared/` (source only). During `postinstall`/`prebuild` a
+self-contained script (`main-website/scripts/materialize-shared.mjs`) copies it
+into `node_modules/@nod/shared` and compiles `dist/` with the storefront's own
+typescript — no access to the repo root needed.
+
+> When `shared/src` changes, refresh the mirror and commit it:
+> `node scripts/sync-main-website-vendor.mjs` (copies source + compiles to verify).
+> If you see `materialize-shared: vendored source missing`, run that first.
 
 Set two **Environment Variables** (Production), then redeploy — they are baked
 at build time:
