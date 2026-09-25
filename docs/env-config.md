@@ -67,14 +67,18 @@ storefront, build-time env for the admin panel:
 
 | Deploy target | Keys |
 |---|---|
-| storefront (Vercel) | `NEXT_PUBLIC_GATEWAY_URL`, `NEXT_PUBLIC_MEDIA_BASE_URL` |
+| storefront (Vercel) | `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_MEDIA_URL` |
 | admin panel (nginx image) | `REACT_APP_API_URL`, `REACT_APP_MEDIA_URL` |
 
-**Do not rename these.** The admin client reads `REACT_APP_API_URL` /
+**Keep these names consistent everywhere.** Renaming a key without updating
+every consumer silently falls back. The admin client reads `REACT_APP_API_URL` /
 `REACT_APP_MEDIA_URL` in `src/api/axiosInstance.js`; a mismatched key (e.g. the
 former `REACT_APP_GATEWAY_URL`) silently falls back to `localhost:5001`. The
-storefront reads `NEXT_PUBLIC_GATEWAY_URL` / `NEXT_PUBLIC_MEDIA_BASE_URL` in
-`lib/config.ts`. Keep the same names in Vercel / the admin build env.
+storefront reads `NEXT_PUBLIC_API_URL` / `NEXT_PUBLIC_MEDIA_URL` in
+`lib/config.ts`. When you change a name, update: `shared/src/runtime/config.ts`
+(the `ENV_CONTRACT`), `main-website/lib/config.ts`, `next.config.ts` (the root
+`.env` mapping), `deploy/env/frontends.env.example`, and every Vercel /
+admin build env var.
 
 ## URL resolution is shared
 

@@ -53,8 +53,8 @@ export const ENV_CONTRACT = {
     envFile: 'main-website/.env',
     defaultPort: 3001,
     keys: {
-      gatewayUrl: 'NEXT_PUBLIC_GATEWAY_URL',
-      mediaBaseUrl: 'NEXT_PUBLIC_MEDIA_BASE_URL',
+      gatewayUrl: 'NEXT_PUBLIC_API_URL',
+      mediaBaseUrl: 'NEXT_PUBLIC_MEDIA_URL',
       allowedDevOrigins: 'ALLOWED_DEV_ORIGINS',
     },
   },

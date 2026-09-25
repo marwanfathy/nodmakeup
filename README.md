@@ -70,8 +70,8 @@ Set two **Environment Variables** (Production), then redeploy — they are baked
 at build time:
 
 ```
-NEXT_PUBLIC_GATEWAY_URL    = https://<api-tunnel>.trycloudflare.com
-NEXT_PUBLIC_MEDIA_BASE_URL = https://<media-tunnel>.trycloudflare.com
+NEXT_PUBLIC_API_URL    = https://<api-tunnel>.trycloudflare.com
+NEXT_PUBLIC_MEDIA_URL = https://<media-tunnel>.trycloudflare.com
 ```
 
 The tunnels are quick/rotating: any time `scripts/tunnel` restarts, the URLs

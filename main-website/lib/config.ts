@@ -18,12 +18,12 @@ const browserLocation = () =>
 
 export const API_URL: string = deriveClientBaseUrl({
   kind: 'api',
-  envUrl: process.env.NEXT_PUBLIC_GATEWAY_URL || '',
+  envUrl: process.env.NEXT_PUBLIC_API_URL || '',
   browserLocation: browserLocation(),
 });
 
 export const MEDIA_URL: string = deriveClientBaseUrl({
   kind: 'media',
-  envUrl: process.env.NEXT_PUBLIC_MEDIA_BASE_URL || '',
+  envUrl: process.env.NEXT_PUBLIC_MEDIA_URL || '',
   browserLocation: browserLocation(),
 });

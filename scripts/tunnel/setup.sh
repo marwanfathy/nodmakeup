@@ -114,6 +114,6 @@ echo "   curl -s -o /dev/null -w '%{http_code}\n' https://${API_HOST}/api/v1/ord
 echo "   curl -s -o /dev/null -w '%{http_code}\n' https://${MEDIA_HOST}/thumbnails/thumb-story-1762642070224.png   # expect 200 image/png"
 echo
 echo "Then set these in the Vercel project dashboard  (Settings -> Environment Variables -> Production):"
-echo "   NEXT_PUBLIC_GATEWAY_URL = https://${API_HOST}"
-echo "   NEXT_PUBLIC_MEDIA_BASE_URL = https://${MEDIA_HOST}"
+echo "   NEXT_PUBLIC_API_URL = https://${API_HOST}"
+echo "   NEXT_PUBLIC_MEDIA_URL = https://${MEDIA_HOST}"
 echo "and redeploy. The GitHub push of the storefront is queued until the tunnel responds."

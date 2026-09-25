@@ -50,8 +50,8 @@ local ingress config). Not needed for the dashboard flow above.
 ```
 browser ─► https://nodmakeup.vercel.app   (storefront, Vercel)
                  │
-                 │ NEXT_PUBLIC_GATEWAY_URL    = https://api.nodmakeup.com
-                 │ NEXT_PUBLIC_MEDIA_BASE_URL = https://media.nodmakeup.com
+                 │ NEXT_PUBLIC_API_URL    = https://api.nodmakeup.com
+                 │ NEXT_PUBLIC_MEDIA_URL = https://media.nodmakeup.com
                  ▼
         Cloudflare edge
                  ▲  two outbound connectors (cloudflared on this box)
@@ -109,8 +109,8 @@ Project dashboard → Settings → Environment Variables (Production):
 
 | Var | Value |
 | --- | ----- |
-| `NEXT_PUBLIC_GATEWAY_URL` | `https://api.nodmakeup.com` |
-| `NEXT_PUBLIC_MEDIA_BASE_URL` | `https://media.nodmakeup.com` |
+| `NEXT_PUBLIC_API_URL` | `https://api.nodmakeup.com` |
+| `NEXT_PUBLIC_MEDIA_URL` | `https://media.nodmakeup.com` |
 
 Redeploy. (NEXT_PUBLIC_* is baked at build time — redeploy after changing.)
 
