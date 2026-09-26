@@ -3,13 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predev": "node ../scripts/materialize-shared.mjs . --design-system",
     "dev": "next dev",
-    "prebuild": "node ../scripts/materialize-shared.mjs . --design-system",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "node ../scripts/materialize-shared.mjs . --design-system",
     "check:radius": "node scripts/check-radius-ratio.mjs"
   },
   "dependencies": {

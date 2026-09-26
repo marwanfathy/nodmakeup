@@ -6,10 +6,10 @@
 // LAN IP. Build-time NEXT_PUBLIC values point at the dev machine; in the
 // browser we re-derive protocol + host from the page the user actually opened
 // (keeping the port, or omitting 443/80 in production). The resolution logic
-// lives in @nod/shared/runtime/config — the one source of truth, shared with
+// lives in shared/runtime/config — the one source of truth, shared with
 // the admin panel.
 
-import { deriveClientBaseUrl } from '@nod/shared/dist/runtime/config';
+import { deriveClientBaseUrl } from '../lib/shared/dist/runtime/config.js';
 
 const browserLocation = () =>
   typeof window !== 'undefined'

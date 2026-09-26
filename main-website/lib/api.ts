@@ -1,7 +1,7 @@
 // ===============================================
 //           STOREFRONT API ADAPTER
 // ===============================================
-// Thin facade over @nod/shared clients. Every path is a code constant from the
+// Thin facade over local shared clients. Every path is a code constant from the
 // shared registry (/api/v1/*); the base gateway + media URLs come ONLY from env
 // (lib/config.ts). Export names + types are kept so app call sites stay intact.
 
@@ -13,7 +13,7 @@ import {
   ordersApi,
   analyticsApi,
   mediaApi,
-} from '@nod/shared';
+} from '../lib/shared/dist/index.js';
 
 // Attach the cart session id (if any) to every request from this browser.
 const sessionHeaders = (): Record<string, string> => {
@@ -60,16 +60,16 @@ export type {
   HeroSlide,
   HeroSection,
   MediaUploadResult,
-} from '@nod/shared';
+} from '../lib/shared/dist/api/types.js';
 
 // Backward-compatible names (fields are camelCase now)
-export type CartItemPublic = import('@nod/shared').CartItem;
-export type CartObject = import('@nod/shared').Cart;
-export type ApiStory = import('@nod/shared').StoryItem;
-export type ApiStoryGroup = import('@nod/shared').StoryBundle;
-export type HeroSectionPublic = import('@nod/shared').HeroSection;
-export type HeroMediaItemPublic = import('@nod/shared').HeroMediaItem;
-export type HeroSlidePublic = import('@nod/shared').HeroSlide;
+export type CartItemPublic = import('../lib/shared/dist/api/types.js').CartItem;
+export type CartObject = import('../lib/shared/dist/api/types.js').Cart;
+export type ApiStory = import('../lib/shared/dist/api/types.js').StoryItem;
+export type ApiStoryGroup = import('../lib/shared/dist/api/types.js').StoryBundle;
+export type HeroSectionPublic = import('../lib/shared/dist/api/types.js').HeroSection;
+export type HeroMediaItemPublic = import('../lib/shared/dist/api/types.js').HeroMediaItem;
+export type HeroSlidePublic = import('../lib/shared/dist/api/types.js').HeroSlide;
 
 // ===============================================
 //           PRODUCTS & DISCOVERY API
@@ -120,7 +120,7 @@ export const removeItemFromCart = (cartItemId: string) => cart.removeItem(cartIt
 //           ORDERS & CHECKOUT API
 // ===============================================
 
-export const createOrder = (data: import('@nod/shared').OrderCreationData) =>
+export const createOrder = (data: import('../lib/shared/dist/api/types.js').OrderCreationData) =>
   orders.createOrder(data);
 
 export const getPublicOrderDetails = (orderId: string) =>
