@@ -1,0 +1,22 @@
+# Build-context exclusions for the repo-root Dockerfiles in deploy/.
+# node_modules/dist are produced inside the image; secrets, dev uploads and
+# build output never enter the context.
+
+**/node_modules
+**/dist
+**/.git
+**/.env
+**/.env.*
+**/*.log
+
+# Local-only runtime content (media): dev uploads + staging are recreated in-image.
+media-server/public
+media-server/temp
+
+# Frontend build output (mounted into nginx from the host at runtime)
+admin-panel/build
+main-website/.next
+main-website/node_modules
+admin-panel/node_modules
+
+tmp/

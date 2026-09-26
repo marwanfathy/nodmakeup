@@ -1,0 +1,246 @@
+/* NOD Makeup Design System — CSS Custom Properties
+   Import this file in your global CSS to use design tokens as CSS variables.
+   Supports both light and dark modes via prefers-color-scheme. */
+
+:root {
+  /* ============ Light Mode (default) ============ */
+  /* --- Backgrounds --- */
+  --color-bg-primary: #FFFFFF;
+  --color-bg-secondary: #F5F5F7;
+  --color-bg-tertiary: #EBEBF0;
+  --color-bg-elevated: #FFFFFF;
+
+  /* --- Text --- */
+  --color-text-primary: #141414;
+  --color-text-secondary: #545454; /* 7.6:1 on white */
+  --color-text-tertiary: #6E6E73; /* 5.1:1 on white */
+  --color-text-inverse: #FFFFFF;
+  --color-text-link: #0071E3;
+  --color-text-link-hover: #0077ED;
+
+  /* --- Brand --- */
+  --color-brand-primary: #0071E3;
+  --color-brand-primary-hover: #0077ED;
+  --color-brand-primary-pressed: #0066CC;
+  --color-brand-secondary: #FF9F0A;
+  --color-brand-success: #34C759;
+  --color-brand-warning: #FF9F0A;
+  --color-brand-error: #FF3B30;
+
+  /* --- Borders --- */
+  --color-border-light: #D1D1D6;
+  --color-border-medium: #6E6E73; /* was #86868B — 5.1:1 */
+  --color-border-focus: #0071E3;
+
+  /* --- Shadows --- */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 1px rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.08);
+  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.16), 0 8px 16px rgba(0, 0, 0, 0.08);
+  --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.04);
+  --shadow-focus: 0 0 0 3px rgba(0, 113, 227, 0.3);
+
+  /* --- Overlays --- */
+  --overlay-light: rgba(0, 0, 0, 0.4);
+  --overlay-heavy: rgba(0, 0, 0, 0.6);
+
+  /* --- Spacing --- */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-9: 36px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-14: 56px;
+  --space-16: 64px;
+
+  /* --- Typography --- */
+  --font-sans: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'SF Mono', 'Fira Code', 'Fira Mono', Menlo, Consolas, monospace;
+  --font-arabic: 'Cairo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  --font-size-xs: 11px;
+  --font-size-sm: 13px;
+  --font-size-base: 15px;
+  --font-size-lg: 17px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 32px;
+  --font-size-4xl: 40px;
+  --font-size-5xl: 48px;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --line-height-tight: 1.1;
+  --line-height-snug: 1.3;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.6;
+
+  /* --- Corner geometry -----------------------------------------------------
+     THE NESTING RATIO. When one rounded shape sits inside another with `p`
+     between their edges, the two curves only read as parallel when
+
+         outer radius = inner radius + p
+
+     Giving both the same radius is what makes nested corners look wrong: the
+     inner curve is too tight for the gap it sits in, so the corner pinches on
+     one side and bulges on the other. Every radius below is therefore either a
+     base value or derived from a real height/padding with that equation, never
+     a number picked by eye. `npm run check:radius` re-derives the declared
+     pairs and fails if one stops satisfying it.
+
+     A pill is not a free choice either: its radius is half its height, so the
+     height is stated once and the radius derived from it. That is also what
+     makes a well around a control computable: (height / 2) + padding. */
+
+  /* Control heights first, because a pill's radius follows from them. */
+  --control-height-sm: 32px;
+  --control-height: 40px;
+  --control-height-lg: 48px;
+  --control-height-xl: 50px;
+
+  /* Base ladder: the shape vocabulary, coarsest surfaces last. */
+  --r-none: 0;
+  --r-sm: 8px; /* chips, thumbs, small tiles */
+  --r-md: 12px; /* fields, and anything nested 8px inside a card */
+  --r-lg: 20px; /* cards and media panels */
+  --r-xl: 32px; /* drawers, modals, hero + banner media */
+  --r-circle: 50%; /* avatars, swatches and icon buttons: true circles */
+
+  /* --- Derived radii: the nesting ratio, applied --------------------------- */
+  /* A pill. 9999px rather than height/2, so a control stays a circle even if
+     its height changes; the height tokens above are what the ratio maths uses,
+     because half the height is a pill's true radius. */
+  --r-control: 9999px;
+  --r-control-sm: calc(var(--control-height-sm) / 2); /* 16px: a real pill */
+  --r-control-lg: calc(var(--control-height-lg) / 2); /* 24px: a real pill */
+
+  /* A card wrapping a pill: the pill's own radius plus the padding around it. */
+  --r-well: calc(var(--control-height) / 2 + var(--space-4)); /* 20 + 16 = 36px */
+  /* Media nested in a card: the card's radius minus the card's own padding. */
+  --r-media-in-card: calc(var(--r-lg) - var(--space-2)); /* 20 - 8 = 12px */
+  /* A panel wrapping a card at 20px of padding: 20 + 20 = 40px. */
+  --r-panel: calc(var(--r-lg) + var(--space-5));
+  /* A panel wrapping a card at 40px of padding: 20 + 40 = 60px. This is why a
+     big padded card needs a big radius — 40px of padding cannot sit inside a
+     32px corner without the inner curve pinching. */
+  --r-panel-lg: calc(var(--r-lg) + var(--space-10));
+  /* A floating bar wrapping a 50px pill at 12px of padding: 25 + 12 = 37px. */
+  --r-floating-bar: calc(var(--control-height-xl) / 2 + var(--space-3));
+  /* A thumb inside its own padding + 1px border: 8 - (2 + 1) = 5px. */
+  --r-inset-thumb: calc(var(--r-sm) - 3px);
+
+  /* --- Semantic roles ------------------------------------------------------
+     Prefer these at the call site over the base ladder, so the intent survives
+     and every ratio stays expressed in one place. */
+  --r-field: var(--r-md); /* inputs, selects, textareas */
+  --r-card: var(--r-lg); /* cards, tiles, media panels */
+  --r-surface: var(--r-xl); /* drawers, modals, hero + banner media */
+  --r-chip: var(--r-control-sm); /* tags, badges, small pills */
+  --r-thumb: var(--r-sm); /* thumbnails and small media tiles */
+  --r-track: var(--r-control); /* progress bars: round both ends */
+
+  /* --- Transitions --- */
+  --transition-fast: 120ms ease-out;
+  --transition-normal: 200ms ease-out;
+  --transition-slow: 300ms ease-out;
+  --transition-spring: 400ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* --- Z-Index --- */
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal: 300;
+  --z-popover: 400;
+  --z-tooltip: 500;
+  --z-toast: 600;
+
+  /* --- Layout --- */
+  --container-max-width: 1280px;
+  --container-padding-mobile: 16px;
+  --container-padding-tablet: 24px;
+  --container-padding-desktop: 32px;
+}
+
+/* ============ Dark Mode ============ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg-primary: #000000;
+    --color-bg-secondary: #1D1D1F;
+    --color-bg-tertiary: #2C2C2E;
+    --color-bg-elevated: #2C2C2E;
+
+    --color-text-primary: #F5F5F7;
+    --color-text-secondary: #AEAEB2; /* was #98989D — brighter on dark */
+    --color-text-tertiary: #8E8E93; /* was #636366 — brighter on dark */
+    --color-text-inverse: #000000;
+    --color-text-link: #0A84FF;
+    --color-text-link-hover: #4DA6FF;
+
+    --color-brand-primary: #0A84FF;
+    --color-brand-primary-hover: #4DA6FF;
+    --color-brand-primary-pressed: #0066CC;
+    --color-brand-secondary: #FF9F0A;
+    --color-brand-success: #30D158;
+    --color-brand-warning: #FF9F0A;
+    --color-brand-error: #FF453A;
+
+    --color-border-light: #38383A;
+    --color-border-medium: #6E6E73; /* was #48484A — more visible on dark */
+    --color-border-focus: #0A84FF;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2), 0 1px 1px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.15);
+    --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.2);
+    --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.5), 0 8px 16px rgba(0, 0, 0, 0.25);
+    --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    --shadow-focus: 0 0 0 3px rgba(10, 132, 255, 0.4);
+
+    --overlay-light: rgba(0, 0, 0, 0.5);
+    --overlay-heavy: rgba(0, 0, 0, 0.7);
+  }
+}
+
+/* ============ RTL Support ============ */
+[dir="rtl"] {
+  --font-sans: 'Cairo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* ============ Utility Classes ============ */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.focus-visible:focus {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,104 @@
+# NOD Makeup — Prometheus scrape configuration
+# Used by deploy/docker-compose.monitoring.yml
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'nod-production'
+    environment: 'production'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []  # Configure if using Alertmanager
+
+rule_files:
+  - '/etc/prometheus/alerts.yml'
+
+scrape_configs:
+  # ============================================================
+  # API application metrics (exposes /metrics via pino-http middleware)
+  # ============================================================
+  - job_name: 'nod-api'
+    honor_labels: true
+    scheme: 'http'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['api:5001']
+        labels:
+          service: 'api'
+          component: 'backend'
+
+  # ============================================================
+  # Worker health + queue metrics (exposes /metrics)
+  # ============================================================
+  - job_name: 'nod-worker'
+    honor_labels: true
+    scheme: 'http'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['worker:5001']
+        labels:
+          service: 'worker'
+          component: 'backend'
+
+  # ============================================================
+  # Node Exporter (host-level metrics: CPU, memory, disk, network)
+  # Runs in host pid namespace for full visibility
+  # ============================================================
+  - job_name: 'node-exporter'
+    honor_labels: true
+    scheme: 'http'
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          service: 'node-exporter'
+          component: 'infrastructure'
+
+  # ============================================================
+  # MySQL Exporter (database metrics: connections, queries, innodb, replication)
+  # ============================================================
+  - job_name: 'mysqld-exporter'
+    honor_labels: true
+    scheme: 'http'
+    static_configs:
+      - targets: ['mysqld-exporter:9104']
+        labels:
+          service: 'mysqld-exporter'
+          component: 'database'
+
+  # ============================================================
+  # Redis Exporter (memory, keyspace, commands, latency)
+  # ============================================================
+  - job_name: 'redis-exporter'
+    honor_labels: true
+    scheme: 'http'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+        labels:
+          service: 'redis-exporter'
+          component: 'cache'
+
+  # ============================================================
+  # Nginx (ingress metrics: request rate, latency, status codes)
+  # Requires nginx with ngx_http_stub_status_module or prometheus exporter
+  # ============================================================
+  - job_name: 'nginx'
+    honor_labels: true
+    scheme: 'http'
+    static_configs:
+      - targets: ['nginx:9113']
+        labels:
+          service: 'nginx'
+          component: 'ingress'
+
+  # ============================================================
+  # Prometheus self-monitoring
+  # ============================================================
+  - job_name: 'prometheus'
+    honor_labels: true
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'prometheus'
+          component: 'monitoring'

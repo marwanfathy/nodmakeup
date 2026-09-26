@@ -1,0 +1,29 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+/* NOTE: design tokens are NOT imported here. A relative @import inside this
+   Tailwind-processed file is dropped from the build, which leaves every
+   var(--r-*) unresolved — and an unresolved radius computes to 0, i.e. every
+   corner silently turns square. They are loaded from app/layout.tsx instead. */
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Center every fitted photo, whatever its size/aspect ratio. A photo that
+   differs from its slot is always anchored to the middle (harmless for
+   images rendered at natural size, where object-position has no effect). */
+img {
+  object-position: center;
+}
+/* The full-screen typewriter loader that used to live here (a purple
+   overlay typing out "LOADING" with a blinking caret) has been removed.
+   Nothing renders .loader-container / .loader-text any more, and waiting is
+   now always shown as a skeleton that mirrors the real layout: on a weak
+   connection a text label just sits there, while a skeleton keeps the page
+   still and already shaped like the content that is coming. */

@@ -1,0 +1,261 @@
+# NOD Makeup — Prometheus alerting rules
+# Loaded by prometheus.yml rule_files
+groups:
+  - name: nod-api
+    interval: 30s
+    rules:
+      # ----------------------------------------------------------
+      # API availability & latency
+      # ----------------------------------------------------------
+      - alert: APIInstanceDown
+        expr: up{job="nod-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: backend
+        annotations:
+          summary: "API instance {{ $labels.instance }} down"
+          description: "API has been down for more than 1 minute."
+
+      - alert: APIHighLatency
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(nod_http_requests_duration_seconds_bucket{job="nod-api"}[5m])) by (le)
+          ) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "API p95 latency > 500ms"
+          description: "API p95 latency is {{ $value | humanizeDuration }} (threshold: 500ms)"
+
+      - alert: APIHighErrorRate
+        expr: |
+          sum(rate(nod_http_requests_total{job="nod-api",status=~"5.."}[5m]))
+          /
+          sum(rate(nod_http_requests_total{job="nod-api"}[5m]))
+          > 0.01
+        for: 2m
+        labels:
+          severity: critical
+          team: backend
+        annotations:
+          summary: "API 5xx error rate > 1%"
+          description: "API 5xx error rate is {{ $value | humanizePercentage }}"
+
+      # ----------------------------------------------------------
+      # Outbox / queue backlog
+      # ----------------------------------------------------------
+      - alert: OutboxQueueBacklog
+        expr: nod_outbox_queue_total{state="wait",job="nod-api"} > 500
+        for: 5m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "Outbox queue backlog > 500"
+          description: "{{ $value }} pending outbox events waiting to be processed."
+
+      - alert: WorkerQueueBacklog
+        expr: nod_outbox_queue_total{state="wait",job="nod-worker"} > 500
+        for: 5m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "Worker queue backlog > 500"
+          description: "{{ $value }} pending worker jobs."
+
+      # ----------------------------------------------------------
+      # Business metrics
+      # ----------------------------------------------------------
+      - alert: FlashSaleStockNegative
+        # This series is now exported (backend/middleware/metrics.ts emits one
+        # gauge per variant on each scrape). Stock is non-negative by
+        # construction — checkout and the admin reopen path both reserve with a
+        # conditional `stockQuantity: { gte }` UPDATE — so a negative value here
+        # means some path bypassed that guard.
+        expr: nod_product_variant_stock{job="nod-api"} < 0
+        for: 1m
+        labels:
+          severity: critical
+          team: backend
+        annotations:
+          summary: "Product variant stock went negative!"
+          description: "Variant {{ $labels.sku }} ({{ $labels.variant_id }}) has {{ $value }} units on hand (oversell detected)."
+
+      - alert: OutboxEventsDeadLettered
+        # Orders are confirmed by an outbox event. A row parked in FAILED means
+        # a customer's order was committed but its notification was abandoned
+        # after MAX_OUTBOX_ATTEMPTS, so someone has to resend it by hand.
+        # Previously nothing was alertable here at all: the Redis-backed
+        # `nod_outbox_queue_total` cannot see PENDING rows whose enqueue never
+        # arrived, which is the exact set this covers.
+        expr: nod_outbox_events{state="FAILED",job="nod-api"} > 0
+        for: 5m
+        labels:
+          severity: critical
+          team: backend
+        annotations:
+          summary: "{{ $value }} outbox event(s) abandoned after max attempts"
+          description: "Order confirmation notifications were not delivered. Resend manually; see workers/outboxHandlers.ts."
+
+      - alert: OutboxEventsStranded
+        # A PROCESSING row older than the claim lease means a worker died
+        # mid-dispatch. The sweeper reclaims it within CLAIM_LEASE_MS, so a
+        # sustained count above zero means the sweeper itself is not running.
+        expr: nod_outbox_events{state="PROCESSING",job="nod-api"} > 0
+        for: 10m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "{{ $value }} outbox event(s) stuck in PROCESSING for >10m"
+          description: "The recovery sweeper should have reclaimed these. Check that the worker process is alive."
+
+  - name: nod-infrastructure
+    interval: 30s
+    rules:
+      # ----------------------------------------------------------
+      # MySQL health
+      # ----------------------------------------------------------
+      - alert: MySQLDown
+        expr: up{job="mysqld-exporter"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: infra
+        annotations:
+          summary: "MySQL exporter down"
+          description: "Cannot scrape MySQL metrics."
+
+      - alert: MySQLHighCPU
+        expr: |
+          rate(mysql_global_status_threads_connected[5m]) / mysql_global_variables_max_connections > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          team: infra
+        annotations:
+          summary: "MySQL connection usage > 80%"
+          description: "MySQL is using {{ $value | humanizePercentage }} of max connections."
+
+      - alert: MySQLReplicationLag
+        expr: mysql_slave_status_seconds_behind_master > 30
+        for: 5m
+        labels:
+          severity: warning
+          team: infra
+        annotations:
+          summary: "MySQL replication lag > 30s"
+          description: "Replica is {{ $value }} seconds behind primary."
+
+      # ----------------------------------------------------------
+      # Redis health
+      # ----------------------------------------------------------
+      - alert: RedisDown
+        expr: up{job="redis-exporter"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: infra
+        annotations:
+          summary: "Redis exporter down"
+          description: "Cannot scrape Redis metrics."
+
+      - alert: RedisHighMemory
+        expr: |
+          redis_memory_used_bytes / redis_memory_max_bytes > 0.7
+        for: 5m
+        labels:
+          severity: warning
+          team: infra
+        annotations:
+          summary: "Redis memory usage > 70%"
+          description: "Redis is using {{ $value | humanizePercentage }} of maxmemory."
+
+      # ----------------------------------------------------------
+      # Node/host health
+      # ----------------------------------------------------------
+      - alert: HostHighCPU
+        expr: |
+          100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 10m
+        labels:
+          severity: warning
+          team: infra
+        annotations:
+          summary: "Host CPU > 80% for 10m"
+          description: "Instance {{ $labels.instance }} CPU usage is {{ $value }}%."
+
+      - alert: HostHighMemory
+        expr: |
+          (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes > 0.85
+        for: 10m
+        labels:
+          severity: warning
+          team: infra
+        annotations:
+          summary: "Host memory > 85%"
+          description: "Instance {{ $labels.instance }} memory usage is {{ $value | humanizePercentage }}."
+
+      - alert: HostDiskFull
+        expr: |
+          (node_filesystem_size_bytes - node_filesystem_free_bytes) / node_filesystem_size_bytes > 0.85
+        for: 5m
+        labels:
+          severity: warning
+          team: infra
+        annotations:
+          summary: "Host disk > 85% full"
+          description: "Instance {{ $labels.instance }} filesystem {{ $labels.mountpoint }} is {{ $value | humanizePercentage }} full."
+
+  - name: nod-nginx
+    interval: 30s
+    rules:
+      - alert: NginxDown
+        expr: up{job="nginx"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: infra
+        annotations:
+          summary: "Nginx down"
+          description: "Nginx exporter or nginx itself is down."
+
+      - alert: NginxHighLatency
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(nginx_http_request_duration_seconds_bucket[5m])) by (le)
+          ) > 1
+        for: 5m
+        labels:
+          severity: warning
+          team: infra
+        annotations:
+          summary: "Nginx p95 latency > 1s"
+          description: "Nginx p95 latency is {{ $value }}s."
+
+  - name: nod-prometheus
+    interval: 30s
+    rules:
+      - alert: PrometheusConfigReloadFailed
+        expr: prometheus_config_last_reload_successful == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: monitoring
+        annotations:
+          summary: "Prometheus config reload failed"
+          description: "Prometheus failed to reload configuration."
+
+      - alert: PrometheusTSDBCompactionsFailing
+        expr: rate(prometheus_tsdb_compactions_failed_total[1h]) > 0
+        for: 1m
+        labels:
+          severity: warning
+          team: monitoring
+        annotations:
+          summary: "Prometheus TSDB compactions failing"
+          description: "Prometheus has failing TSDB compactions."

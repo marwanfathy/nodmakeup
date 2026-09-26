@@ -1,0 +1,9 @@
+# control-center local state + secrets (never commit)
+node_modules/
+.env
+.runtime/
+*.log
+.next/
+out/
+next-env.d.ts
+tsconfig.tsbuildinfo*

@@ -1,0 +1,6 @@
+# Vercel environment variables for marwanfathy/nodmakeup (main-website).
+# Paste each line into Vercel: Settings -> Environment Variables.
+# Verified live <today>: quick tunnels rotate on restart — re-check logs/tunnel-quick-*.log.
+
+NEXT_PUBLIC_API_URL=https://accent-papers-barriers-depends.trycloudflare.com
+NEXT_PUBLIC_MEDIA_URL=https://archive-not-kick-immunology.trycloudflare.com

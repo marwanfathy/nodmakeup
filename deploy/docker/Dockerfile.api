@@ -1,0 +1,48 @@
+# syntax=docker/dockerfile:1
+# =====================================================================
+#  NOD Makeup — API container
+#  Build context MUST be the repo root: backend/ depends on shared/ via
+#  the file:../shared dependency, so both folders must be present.
+# =====================================================================
+
+# ---- Stage 1: build the shared contract package (@nod/shared) ----
+FROM node:20-alpine AS shared
+WORKDIR /wd/shared
+COPY shared/package.json shared/package-lock.json ./
+RUN npm ci
+COPY shared/ ./
+RUN npm run build
+
+# ---- Stage 2: install + compile the backend ----
+FROM node:20-alpine AS builder
+RUN apk add --no-cache openssl
+WORKDIR /wd
+COPY shared ./shared
+COPY backend ./backend
+# Build shared first so backend's `file:../shared` dependency resolves at install time.
+RUN cd shared && npm ci && npm run build \
+ && cd /wd/backend && npm ci \
+ && npx prisma generate && npm run build
+
+# ---- Stage 3: slim runner ----
+FROM node:20-alpine AS runner
+RUN apk add --no-cache tini openssl \
+ && addgroup -S app && adduser -S -G app app
+WORKDIR /wd
+ENV NODE_ENV=production
+ENV NODE_OPTIONS="--max-old-space-size=1024"
+# Backend + its node_modules. The file:../shared install is a symlink that
+# resolves to /wd/shared — copy it (with its own node_modules for zod/axios).
+COPY --from=builder /wd/backend/package.json     /wd/backend/package-lock.json ./backend/
+COPY --from=builder /wd/backend/node_modules     ./backend/node_modules
+COPY --from=builder /wd/backend/dist             ./backend/dist
+COPY --from=builder /wd/backend/prisma           ./backend/prisma
+COPY --from=builder /wd/shared                   ./shared
+RUN chown -R app:app /wd
+USER app
+WORKDIR /wd/backend
+EXPOSE 5001
+HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=5 \
+  CMD ["node","-e","fetch('http://127.0.0.1:5001/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+ENTRYPOINT ["/sbin/tini","--"]
+CMD ["node","dist/server.js"]

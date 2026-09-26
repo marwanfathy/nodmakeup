@@ -1,0 +1,536 @@
+/* --- Variables for Consistency --- */
+:root {
+  --lux-black: #111111;
+  --lux-grey: #666666;
+  --lux-light-grey: #f4f4f4;
+  --lux-border: #e0e0e0;
+  --lux-font-heading: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --lux-font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* --- Layout Structure --- */
+.product-page-wrapper {
+  background-color: #fff;
+  width: 100%;
+  min-height: 100vh;
+  /* --nav-h is measured from the live fixed navbar (see ProductViewPage.tsx);
+     80px is the pre-measure fallback so the first paint is never tucked under
+     the bar. Without it the gallery's top edge sat behind the navbar. */
+  padding: calc(var(--nav-h, 80px) + var(--space-6)) var(--space-5) var(--space-10);
+}
+
+.product-grid-container {
+  max-width: 1300px; /* Luxury width */
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr; /* Image takes more space */
+  gap: 60px; /* Huge negative space */
+}
+
+/* --- Error --- */
+/* .loader-center used to share this rule. Nothing has rendered it since the
+   full-screen typewriter loader was removed — waiting is now always a skeleton
+   that mirrors the real layout — so only the error state is styled. */
+.error-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60vh;
+  font-family: var(--lux-font-body);
+  color: var(--lux-grey);
+}
+
+/* --- Left Column: Gallery --- */
+.product-gallery-section {
+  width: 100%;
+}
+
+/* --- Right Column: Sticky Info --- */
+.product-info-section {
+  position: relative;
+}
+
+.sticky-wrapper {
+  position: sticky;
+  /* Clears the fixed navbar by its measured height, plus a little air. The old
+     40px was a guess that let the panel slide under the bar on wide screens. */
+  top: calc(var(--nav-h, 80px) + var(--space-4));
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* --- Breadcrumbs --- */
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: var(--lux-grey);
+  margin-bottom: -10px; /* pull back into the wrapper's gap */
+}
+
+.breadcrumbs a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.breadcrumbs a:hover {
+  color: var(--lux-black);
+  text-decoration: underline;
+}
+
+.breadcrumbs-sep {
+  color: #c4c4c4;
+}
+
+.breadcrumbs-current {
+  color: var(--lux-black);
+  /* A long product name must not stretch the crumb row across the panel. */
+  max-width: 22ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- Typography & Header --- */
+.product-brand {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--lux-grey);
+  font-weight: 600;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.product-title {
+  font-family: var(--lux-font-heading);
+  font-size: 2.5rem;
+  font-weight: 400; /* Elegant thin weight */
+  line-height: 1.1;
+  color: var(--lux-black);
+  margin: 0 0 20px 0;
+}
+
+/* --- One-line pitch, straight under the price --- */
+.product-subtitle {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #555;
+  /* The full description now sits below the buy button, so this is the only
+     copy above the fold. It gets room to breathe but never competes with the
+     price or the CTA. */
+  margin: -8px 0 16px;
+  max-width: 46ch;
+}
+
+/* --- Price --- */
+.price-block {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.price-current {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--lux-black);
+}
+
+.price-current.sale {
+  color: #c0392b; /* Subtle red for sale */
+}
+
+.price-original {
+  font-size: 1rem;
+  text-decoration: line-through;
+  color: #999;
+}
+
+.price-discount-tag {
+  border-radius: var(--r-chip);
+  background-color: var(--lux-black);
+  color: #fff;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* --- Quantity Selector --- */
+.quantity-wrapper {
+  margin-top: 25px;
+}
+
+.quantity-wrapper .label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  color: var(--lux-black);
+}
+
+.qty-control {
+  border-radius: var(--r-control);
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--lux-border);
+  height: 45px;
+  width: 140px;
+}
+
+.qty-control button {
+  border-radius: var(--r-circle);
+  width: 40px;
+  height: 100%;
+  border: none;
+  background: transparent;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: var(--lux-black);
+  transition: background 0.2s;
+}
+
+.qty-control button:hover:not(:disabled) {
+  background-color: var(--lux-light-grey);
+}
+
+.qty-control button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.qty-control span {
+  flex: 1;
+  text-align: center;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+/* --- Action Buttons --- */
+.product-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.btn-main, .btn-outline {
+  border-radius: var(--r-control);
+  width: 100%;
+  height: 52px;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid var(--lux-black);
+}
+
+.btn-main {
+  background-color: var(--lux-black);
+  color: #fff;
+}
+
+.btn-main:hover {
+  background-color: #333;
+  border-color: #333;
+}
+
+.btn-main.disabled {
+  background-color: #ccc;
+  border-color: #ccc;
+  cursor: not-allowed;
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--lux-black);
+}
+
+.btn-outline:hover {
+  background-color: var(--lux-black);
+  color: #fff;
+}
+
+/* --- Stock signal --- */
+/* Kept as a real element (rather than a margin on .price-block) so the row
+   survives being empty on an out-of-stock variant without collapsing oddly. */
+.stock-line {
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+  min-height: 1.2em;
+}
+
+.stock-warning {
+  color: #e67e22;
+  font-weight: 500;
+}
+
+.stock-ok {
+  color: #2e7d32;
+}
+
+/* --- Description --- */
+.product-description-container {
+  color: var(--lux-black);
+}
+
+.desc-heading {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 1px solid var(--lux-black);
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+  display: inline-block;
+}
+
+.desc-content {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: #444;
+}
+
+/* Fix generic HTML from API */
+.desc-content p { margin-bottom: 15px; }
+.desc-content ul { padding-left: 20px; margin-bottom: 15px; }
+.desc-content li { margin-bottom: 5px; }
+
+/* --- RESPONSIVE MOBILE --- */
+@media (max-width: 900px) {
+  .product-grid-container {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .product-info-section {
+    padding: 0 10px;
+  }
+
+  /* Disable sticky on mobile so user can scroll naturally */
+  .sticky-wrapper {
+    position: static; 
+  }
+
+  .product-title {
+    font-size: 2rem;
+  }
+
+  /* In-page CTA returns to normal flow; the floating bar covers the gap while
+     it is off-screen, and yields to this block once it is reached. */
+  .product-actions {
+    position: static;
+    width: auto;
+    margin-top: 10px;
+    padding: 0;
+    background: none;
+    border: none;
+    box-shadow: none;
+    z-index: auto;
+  }
+}
+
+/* --- Floating Mobile CTA --------------------------------------------------
+   Free-floats at the bottom of the viewport while the in-page actions are
+   scrolled out of view, then gets out of the way when the user reaches them.
+   `visibility` (not just opacity/transform) keeps the hidden button out of the
+   tab order and the a11y tree. */
+.pdp-floating-cta {
+  display: none; /* desktop: the in-page CTA is always on screen */
+}
+
+@media (max-width: 900px) {
+  .pdp-floating-cta {
+    position: fixed;
+    /* Floated clear of the screen edges so the curve is actually visible,
+       rather than a square bar welded to the bottom of the viewport. */
+    left: var(--space-3);
+    right: var(--space-3);
+    bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
+    z-index: 90; /* under the nav drawer / cart sidebar (z-index 2000) */
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.97);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--lux-border);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+    /* The bar wraps a 50px pill at 12px of padding: 25 + 12 = 37. */
+    border-radius: var(--r-floating-bar);
+    transform: translateY(calc(100% + var(--space-6)));
+    visibility: hidden;
+    transition: transform 0.28s ease, visibility 0.28s;
+  }
+
+  .pdp-floating-cta.is-visible {
+    transform: translateY(0);
+    visibility: visible;
+  }
+
+  .pdp-floating-cta__price {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex-shrink: 0;
+    line-height: 1.2;
+  }
+
+  .pdp-floating-cta__price-now {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--lux-black);
+    white-space: nowrap;
+  }
+
+  .pdp-floating-cta__price-was {
+    font-size: 0.75rem;
+    color: #999;
+    text-decoration: line-through;
+    white-space: nowrap;
+  }
+
+  .pdp-floating-cta__btn {
+    border-radius: var(--r-control);
+    flex: 1;
+    min-width: 0;
+    min-height: 50px;
+    padding: 0 16px;
+    background: var(--lux-black);
+    color: #fff;
+    border: 1px solid var(--lux-black);
+    font-family: var(--lux-font-body);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .pdp-floating-cta__btn:hover:not(:disabled) {
+    background: #333;
+    border-color: #333;
+  }
+
+  .pdp-floating-cta__btn:disabled {
+    background: #ccc;
+    border-color: #ccc;
+    cursor: not-allowed;
+  }
+
+  /* Stop the bar from covering the end of the page while it is on screen. */
+  .product-page-wrapper.has-floating-cta {
+    padding-bottom: calc(84px + env(safe-area-inset-bottom));
+  }
+}
+
+/* =====================================================================
+   Reassurance row
+   Three short promises that sit directly under the buy buttons, where a
+   shopper actually hesitates. A list, not a row of divs, so the count is
+   announced and the items are individually selectable.
+   ===================================================================== */
+.trust-signals {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;          /* a 4th item, or a long translation, wraps
+                               instead of pushing the page wide */
+  gap: 8px 18px;
+}
+
+.trust-signals li {
+  position: relative;
+  padding-left: 20px;       /* room for the dot */
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--lux-muted, #6b6b6b);
+}
+
+/* A small filled dot rather than a check glyph: it needs no icon font, it
+   scales with the font, and it inherits the muted ink. */
+.trust-signals li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.55em;              /* optically centred on the first line */
+  width: 7px;
+  height: 7px;
+  border-radius: var(--r-circle);
+  background: currentColor;
+  opacity: 0.55;
+}
+
+/* --- Related products ------------------------------------------------- */
+.related-products-section {
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid #eee;
+}
+
+/* =====================================================================
+   Loading skeleton
+   Same classes as the real page, so every breakpoint that resizes the real
+   layout resizes this one identically — the skeleton is a phone layout on a
+   phone. Nothing here carries a fixed pixel width: an earlier version used a
+   200px + 150px button row inside a column that is only 355px wide on a
+   375px screen, which forced a sideways scroll while loading.
+   ===================================================================== */
+@keyframes pdp-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.pdp-skeleton {
+  background: linear-gradient(90deg, #f1f1f1 25%, #e6e6e6 50%, #f1f1f1 75%);
+  background-size: 200% 100%;
+  animation: pdp-shimmer 1.4s infinite linear;
+}
+
+.pdp-skeleton--line { border-radius: var(--r-track); }
+.pdp-skeleton--media { border-radius: var(--r-card); }
+.pdp-skeleton--thumb { border-radius: var(--r-thumb); }
+.pdp-skeleton--btn { border-radius: var(--r-control); }
+.pdp-skeleton--dot { border-radius: var(--r-circle); }
+
+/* The real main image is `width: 100%; height: auto` capped at 70vh, so its
+   height comes from the photo. The placeholder takes the same ceiling and
+   shrinks with the viewport rather than claiming a fixed 500px. */
+.pdp-skeleton--media {
+  width: 100%;
+  height: min(70vh, 520px);
+}
+
+.pdp-skeleton--thumb {
+  /* matches .thumbnail-button: 56px, dropping to 50px at <=768px */
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .pdp-skeleton--thumb { width: 50px; height: 50px; }
+}
+
+.pdp-skeleton--btn {
+  /* matches .btn-main / .btn-outline: full width, 52px tall, pill */
+  width: 100%;
+  height: 52px;
+}
+
+.pdp-skeleton--dot {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}

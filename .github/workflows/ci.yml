@@ -1,0 +1,108 @@
+# NOD Makeup v5 — CI pipeline
+#
+# lint → type → test → build → security. Targets the 4 services + shared.
+# Run manually in GitHub Actions once the repo has a remote; mirrors the
+# local gates from `scripts/` and start.sh.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  quality:
+    name: lint + type + test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        pkg:
+          - backend
+          - shared
+          - main-website
+          - admin-panel
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: ${{ matrix.pkg }}/package-lock.json
+
+      - name: Install (${{ matrix.pkg }})
+        working-directory: ${{ matrix.pkg }}
+        run: npm ci
+
+      - name: Typecheck
+        working-directory: ${{ matrix.pkg }}
+        run: npx tsc --noEmit
+
+      - name: Unit tests (backend)
+        if: matrix.pkg == 'backend'
+        working-directory: backend
+        run: npx vitest run
+
+      - name: Lint (main-website)
+        if: matrix.pkg == 'main-website'
+        working-directory: main-website
+        run: npx eslint .
+
+      - name: Lint (admin-panel)
+        if: matrix.pkg == 'admin-panel'
+        working-directory: admin-panel
+        run: npx eslint src --ext .js,.jsx
+
+  build:
+    name: production builds
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        pkg: [backend, shared, main-website, admin-panel]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: ${{ matrix.pkg }}/package-lock.json
+      - name: Install (${{ matrix.pkg }})
+        working-directory: ${{ matrix.pkg }}
+        run: npm ci
+      - name: Build (${{ matrix.pkg }})
+        working-directory: ${{ matrix.pkg }}
+        run: npm run build
+
+  security:
+    name: secret scan + audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: gitleaks secret scan
+        run: |
+          curl -sSfL https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_$(uname -s)_x64.tar.gz | tar -xz
+          ./gitleaks detect --source . --no-banner --exit-code 1
+      - name: npm audit (workspace)
+        run: |
+          for pkg in backend shared main-website admin-panel; do
+            (cd "$pkg" && npm audit --audit-level=high) || exit 1
+          done
+
+  smoke:
+    name: route smoke sweep (started stack)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Starting stack
+        run: |
+          ./start.sh --skip-media-build 2>/dev/null || true
+      - name: Route sweep
+        run: bash scripts/smoke-routes.sh

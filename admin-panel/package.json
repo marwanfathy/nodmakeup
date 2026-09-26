@@ -1,0 +1,46 @@
+{
+  "name": "nod-admin-studio",
+  "version": "2.0.0",
+  "private": true,
+  "description": "NOD Makeup — Editorial Beauty-House Admin Studio",
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^5.16.14",
+    "axios": "^1.7.9",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0",
+    "react-toastify": "^10.0.5",
+    "web-vitals": "^2.1.4"
+  },
+  "devDependencies": {
+    "react-scripts": "5.0.1"
+  },
+  "scripts": {
+    "prestart": "node ../scripts/materialize-shared.mjs .",
+    "start": "react-scripts start",
+    "prebuild": "node ../scripts/materialize-shared.mjs .",
+    "build": "react-scripts build",
+    "postinstall": "node ../scripts/materialize-shared.mjs .",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

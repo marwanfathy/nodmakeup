@@ -1,0 +1,52 @@
+/* Only the two families this site actually renders with are declared here.
+ *
+ * A @font-face rule on its own downloads nothing — a webfont is only fetched
+ * once some rendered text resolves to that family. Eight faces used to be
+ * declared (Montserrat, Alex Brush, Bodoni Moda, Ravensara, Blair ITC,
+ * Valentine, "the signature", a handwriting face) and not one of them was ever
+ * named by a font-family declaration anywhere in app/ or components/. They
+ * cost nothing at runtime, but they were ~1.7 MB of dead files in the tree and
+ * a trap for whoever assumed they were live.
+ *
+ * The two that ARE live:
+ *   rubic — nav links and labels      (navbar/NavBar.css)
+ *   cairo — headings/labels in Arabic (i18n/rtl.css)
+ *
+ * Both are subset to the characters this site can actually display (the Latin
+ * ranges plus every codepoint appearing in the source, and the Arabic block for
+ * Cairo) and re-encoded as WOFF2: Rubik 348 KB -> 52 KB, Cairo 345 KB -> 128 KB.
+ * Both remain variable fonts, so the real weight axis is preserved instead of
+ * being synthesised by the browser.
+ *
+ * They live in public/fonts/ rather than beside this file, under a
+ * content-hashed name, for two reasons. app/layout.tsx can then preload them
+ * by a URL it knows at build time instead of one buried in a stylesheet.
+ * And because the hash changes whenever the bytes do, next.config.ts can serve
+ * them `max-age=31536000, immutable` — the default for public/ is max-age=0,
+ * which makes the browser revalidate the font on every single page view. A
+ * stable filename could not safely be cached that hard: the old copy would
+ * stick for a year after a font fix.
+ *
+ * font-display: swap is the important part. Without it the browser holds back
+ * the first paint of any text using the family until the font arrives — on a
+ * slow connection that is up to a second of invisible text. With swap, text
+ * paints immediately in the fallback and swaps when the font lands.
+ *
+ * No `font-weight` range is declared, and that is deliberate. These files keep
+ * the axis their source had, and the existing CSS asks for specific weights
+ * (NavBar.css asks rubic for 400 while Rubik's default instance is 300).
+ * Declaring a range would change which real outlines get used — a visual
+ * change that belongs in its own review, not inside a performance pass.
+ */
+
+@font-face {
+    font-family: 'rubic';
+    src: url('/fonts/rubic.79f7a421.woff2') format('woff2');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'cairo';
+    src: url('/fonts/cairo.30840268.woff2') format('woff2');
+    font-display: swap;
+}

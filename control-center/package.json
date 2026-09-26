@@ -1,0 +1,26 @@
+{
+  "name": "control-center",
+  "version": "2.0.0",
+  "description": "NOD Makeup — Next.js operations control plane: metrics, process control, tracing (TypeScript)",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p ${CC_PORT:-4000} -H 127.0.0.1",
+    "build": "next build",
+    "start": "next start -p ${CC_PORT:-4000} -H 127.0.0.1",
+    "test": "node --test test/",
+    "sidecar:test": "python3 py/system_metrics.py --root ."
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "next": "^16.1.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "^5"
+  }
+}

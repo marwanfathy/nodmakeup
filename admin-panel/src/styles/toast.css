@@ -1,0 +1,21 @@
+/* =====================================================================
+   Toastify dark overrides — flat surface, hairline border, no glow
+   ===================================================================== */
+.Toastify__toast-container { --toastify-color-light: #fff; }
+.Toastify__toast {
+    background: var(--paper-raised-2) !important; border: 1px solid var(--hairline-strong);
+    border-radius: var(--r-md) !important; box-shadow: var(--shadow-2) !important;
+    color: var(--ink) !important; font-family: var(--font-sans); font-size: var(--step-sm);
+    padding: 14px 18px;
+}
+.Toastify__toast-theme--dark { background: var(--paper-raised-2) !important; }
+.Toastify__toast-body { align-items: flex-start; gap: 10px; }
+.Toastify__toast-icon { width: 22px; }
+.Toastify__progress-bar {
+    background: var(--accent) !important;
+}
+.Toastify__toast--success .Toastify__toast-icon { color: var(--moss); }
+.Toastify__toast--error .Toastify__toast-icon { color: var(--clay); }
+.Toastify__toast--warning .Toastify__toast-icon { color: var(--amber); }
+.Toastify__close-button { color: var(--ink-faint) !important; opacity: 1; }
+.Toastify__close-button:hover { color: var(--ink) !important; }

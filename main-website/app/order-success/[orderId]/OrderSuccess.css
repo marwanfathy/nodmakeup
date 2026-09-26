@@ -1,0 +1,172 @@
+.order-success-page {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f9f9f9;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* --- Card Style --- */
+.success-card, .error-card {
+    background: white;
+    max-width: 500px;
+    width: 100%;
+    /* 40px of padding, so the corner must be the inner box's radius plus that
+       padding: 20 + 40 = 60. A tighter 32px corner here would pinch the
+       details box sitting 40px in. */
+    padding: var(--space-10);
+    border-radius: var(--r-panel-lg);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    text-align: center;
+    animation: slideUp 0.5s ease-out;
+}
+
+/* --- Icon Animation --- */
+.success-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    background-color: #e8f5e9; /* Light Green */
+    border-radius: var(--r-circle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.success-icon {
+    width: 40px;
+    height: 40px;
+    color: #2e7d32; /* Dark Green */
+    animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s both;
+}
+
+/* --- Typography --- */
+.success-title {
+    font-size: 2rem;
+    color: #1a1a1a;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.success-subtitle {
+    color: #666;
+    font-size: 1rem;
+    margin-bottom: 30px;
+}
+
+/* --- Details Box --- */
+.order-details-box {
+    background-color: #fafafa;
+    border: 1px solid #eee;
+    border-radius: var(--r-card);
+    padding: 20px;
+    margin-bottom: 30px;
+    text-align: left;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 0.95rem;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-row span {
+    color: #666;
+}
+
+.detail-row strong {
+    color: #000;
+    font-weight: 600;
+}
+
+/* --- Buttons --- */
+.success-actions {
+    margin-bottom: 20px;
+}
+
+.btn-continue, .btn-home {
+    display: inline-block;
+    background-color: #000;
+    color: white;
+    text-decoration: none;
+    padding: 14px 30px;
+    border-radius: var(--r-control);
+    font-weight: 600;
+    transition: background 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.btn-continue:hover, .btn-home:hover {
+    background-color: #333;
+}
+
+.email-note {
+    font-size: 0.85rem;
+    color: #6E6E73; /* ink-tertiary — was #888 (3.5:1) */
+    margin-top: 20px;
+}
+
+/* --- Animations --- */
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0); }
+    to { transform: scale(1); }
+}
+
+/* --- Mobile Responsive --- */
+@media (max-width: 480px) {
+    .success-card {
+        /* The ratio holds here too: the 20px side is the one the corner curve
+           is measured against, so the radius steps down with it: 20 + 20 = 40. */
+        padding: 30px var(--space-5);
+        border-radius: var(--r-panel);
+    }
+    .success-title {
+        font-size: 1.5rem;
+    }
+}
+/* =====================================================================
+   Loading skeleton — the success card's own shapes (icon circle, title,
+   details box) so the wait looks like the page that is coming. No spinner
+   and no loading text: a slow network should not blank the page.
+   ===================================================================== */
+@keyframes os-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.os-skeleton {
+  background: linear-gradient(90deg, #f1f1f1 25%, #e7e7e7 50%, #f1f1f1 75%);
+  background-size: 200% 100%;
+  animation: os-shimmer 1.4s infinite linear;
+}
+
+.os-skeleton--icon {
+  width: 80px; /* matches .success-icon-wrapper */
+  height: 80px;
+  margin: 0 auto 20px;
+  border-radius: var(--r-circle);
+}
+
+.os-skeleton--bar {
+  margin: 0 auto;
+  border-radius: var(--r-track);
+}
+
+.os-skeleton--box {
+  height: 120px;
+  border-radius: var(--r-card);
+}

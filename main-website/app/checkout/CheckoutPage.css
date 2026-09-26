@@ -1,0 +1,863 @@
+/* src/components/pages/public/CheckoutPage/CheckoutPage.css */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modern-checkout-page {
+  background-color: #ffffff;
+  color: #121212;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.checkout-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  min-height: 100vh;
+}
+
+@media (min-width: 992px) {
+  .checkout-container {
+    grid-template-columns: 55fr 45fr;
+  }
+}
+
+.checkout-form-column {
+  padding: 2.5rem 2rem;
+  order: 1;
+  border-right: 1px solid #e1e3e5;
+}
+
+@media (min-width: 992px) {
+  .checkout-form-column {
+    padding: 3rem 5%;
+    order: 0;
+  }
+}
+
+.order-summary-column {
+  background-color: #fafafa;
+  padding: 2.5rem 2rem;
+  order: 0;
+}
+
+@media (min-width: 992px) {
+  .order-summary-column {
+    padding: 3rem 5%;
+    order: 1;
+  }
+}
+
+.checkout-header {
+  margin-bottom: 2.5rem;
+}
+
+.checkout-logo-link {
+  display: inline-block;
+  line-height: 0;
+  margin-bottom: 0.75rem;
+}
+.checkout-logo {
+  width: 110px;
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.checkout-header p {
+  color: #5F5F5F; /* ink-secondary — was #737373 (4.7:1 borderline) */
+  margin: 0;
+}
+
+
+.form-section {
+  margin-bottom: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  /* Gap between form elements */
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  /* Reduced margin as gap is now on .form-section */
+}
+
+/* Style for the SVG icons used in the JS */
+.section-header svg {
+  width: 24px;
+  height: 24px;
+  color: #545454;
+}
+
+/* CORRECTED: The JSX uses h3, not h2 */
+.section-header h3 {
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* CORRECTED: Removed .form-group dependency to style inputs directly */
+.form-section input,
+.form-section select,
+.form-section textarea {
+  width: 100%;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid #d3d3d3;
+  border-radius: var(--r-field);
+  background-color: #fff;
+  font-size: 0.95rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.form-section input:focus,
+.form-section select:focus,
+.form-section textarea:focus {
+  outline: none;
+  border-color: #262626;
+  box-shadow: 0 0 0 1px #262626;
+}
+
+.form-section textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+/* --- Field wrapper: label + control + its own message ------------------
+   A field is the unit of validation, so the label, control and error travel
+   together and nothing is announced out of context. */
+.checkout-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.checkout-field > label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #555;
+}
+
+.checkout-field .field-hint {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.checkout-field .field-error {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  color: #c62828;
+}
+
+/* --- "Use my current location" -------------------------------------------
+   Deliberately quieter than the input above it: a phone with no GPS, or a
+   customer who declines the permission prompt, can still type an address. */
+.geo-btn {
+  align-self: flex-start; /* .checkout-field is a column flex container */
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 40px; /* comfortable touch target */
+  margin-top: 0.15rem;
+  padding: 0 0.9rem;
+  border: 1px solid #d3d3d3;
+  border-radius: var(--r-control);
+  background-color: #fff;
+  color: #333;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s, color 0.2s;
+}
+.geo-btn:hover:not(:disabled) {
+  border-color: #262626;
+  background-color: #fafafa;
+}
+.geo-btn:disabled {
+  opacity: 0.65;
+  cursor: progress;
+}
+.geo-btn svg {
+  width: 15px;
+  height: 15px;
+  flex: none; /* never let the icon squash on a long Arabic label */
+}
+
+/* Outcome of the lookup. Distinct from .field-error: the address itself may be
+   perfectly valid, so this must not read as a validation failure. */
+.geo-note {
+  font-size: 0.75rem;
+  color: #666;
+}
+.geo-note--ok {
+  color: #1b7a3d;
+}
+.geo-note--warn {
+  color: #a15c00;
+}
+
+/* Error state: red border plus a matching focus ring, so it is not
+   colour-only — the message text carries the meaning too. */
+.checkout-field.has-error input,
+.checkout-field.has-error select,
+.checkout-field.has-error textarea {
+  border-color: #c62828;
+  background-color: #fff8f8;
+}
+
+.checkout-field.has-error input:focus,
+.checkout-field.has-error select:focus,
+.checkout-field.has-error textarea:focus {
+  border-color: #c62828;
+  box-shadow: 0 0 0 1px #c62828;
+}
+
+/* --- Phone: fixed +20 country prefix ----------------------------------- */
+/* The row is pinned to LTR so the prefix stays on the LEFT in both locales. A
+   flex row follows the writing direction, so without this the Arabic page
+   mirrored it and moved +20 to the far side of the field — even though a phone
+   number is an LTR run and belongs next to its country code, exactly as it is
+   on the English page. */
+.phone-input {
+  direction: ltr;
+  display: flex;
+  align-items: stretch;
+  border: 1px solid #d3d3d3;
+  border-radius: var(--r-field);
+  background-color: #fff;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.phone-input:focus-within {
+  border-color: #262626;
+  box-shadow: 0 0 0 1px #262626;
+}
+
+.checkout-field--phone.has-error .phone-input {
+  border-color: #c62828;
+  background-color: #fff8f8;
+}
+
+.checkout-field--phone.has-error .phone-input:focus-within {
+  border-color: #c62828;
+  box-shadow: 0 0 0 1px #c62828;
+}
+
+/* The prefix is chrome, not an input: muted, non-selectable, and it keeps the
+   text field's own border off so the control reads as one row. `direction: ltr`
+   keeps the flag before +20, and `border-inline-end` puts the divider on the
+   side facing the number — which, now that the row is LTR, is always the right
+   edge of the prefix. */
+.phone-prefix {
+  direction: ltr;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0 0.7rem;
+  background-color: #f6f6f6;
+  border-inline-end: 1px solid #e4e4e4;
+  color: #333;
+  font-size: 0.95rem;
+  font-weight: 600;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.phone-prefix__flag {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--r-circle);
+  object-fit: cover;
+}
+
+.phone-input input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  border-radius: 0;
+  background-color: transparent;
+  /* National digits only — the +20 is already on screen. Digits are read
+     left-to-right whatever the page direction, so the field is pinned to LTR
+     and the caret/placeholder never jump around. */
+  direction: ltr;
+  text-align: left;
+  letter-spacing: 0.5px;
+}
+
+/* No RTL override here on purpose. The prefix is now always on the left, so the
+   number stays left-aligned in both locales and grows away from it — flag, +20,
+   then the digits, the same way in Arabic as in English. */
+
+/* Hint on one side, the live "+20…" echo on the other. */
+.phone-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.phone-preview {
+  direction: ltr; /* a phone number is an LTR run in any locale */
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--r-chip);
+  background-color: #f0f0f0;
+  color: #333;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.phone-input input:focus {
+  box-shadow: none;
+  border: none;
+  outline: none;
+}
+
+.payment-option {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid #d3d3d3;
+  border-radius: var(--r-card);
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.payment-option input[type="radio"]:checked+span {
+  font-weight: 600;
+}
+
+.payment-option:has(input[type="radio"]:checked) {
+  border-color: #262626;
+  box-shadow: 0 0 0 1px #262626;
+  background-color: #f8f8f8;
+}
+
+.payment-option input[type="radio"] {
+  margin-right: 1rem;
+  width: auto;
+  /* Override default width */
+}
+
+.no-payment-methods {
+  color: #8a6d3b;
+  background-color: #fcf8e3;
+  padding: 1rem;
+  border-radius: var(--r-field); /* was 6px */
+  font-size: 0.9rem;
+}
+
+.checkout-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.return-to-cart-link {
+  font-size: 0.9rem;
+  color: #545454;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.return-to-cart-link:hover {
+  color: #121212;
+}
+
+.place-order-button {
+  background-color: #1a1a1a;
+  color: white;
+  border: none;
+  padding: 1rem 2.5rem;
+  border-radius: var(--r-control);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+  /* Allow button to grow on small screens */
+}
+
+@media (min-width: 480px) {
+  .place-order-button {
+    flex-grow: 0;
+    /* Revert on larger screens */
+  }
+}
+
+.place-order-button:hover:not(:disabled) {
+  background-color: #333;
+}
+
+.place-order-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+/* Order Summary Column — floating white panel card */
+.order-summary-box {
+  background-color: #ffffff;
+  border: 1px solid #ececee;
+  border-radius: var(--r-card);
+  padding: 1.75rem 1.5rem;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.06);
+  animation: fadeIn 0.5s 0.1s ease-out backwards;
+}
+
+@media (min-width: 992px) {
+  .order-summary-column {
+    align-self: start; /* let the panel float instead of stretching */
+  }
+  .order-summary-box {
+    position: sticky;
+    top: 24px; /* summary stays in view while the form scrolls */
+  }
+}
+
+.summary-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid #eef0f2;
+}
+
+.summary-item:last-of-type {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.summary-item-image {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.summary-item-image img {
+  width: 72px;
+  height: auto; /* portrait like the store photos */
+  border-radius: var(--r-thumb);
+  object-fit: cover;
+  border: 1px solid #e1e3e5;
+  background-color: #f5f5f5;
+}
+
+.summary-item-quantity {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: #141414; /* ink */
+  color: #fff;
+  border-radius: var(--r-circle);
+  width: 24px;
+  height: 24px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ffffff;
+}
+
+/* Name → variant → price → controls */
+.summary-item-details {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.summary-item-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.summary-item-details h4 {
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.summary-item-details .summary-item-text p {
+  font-size: 0.8rem;
+  color: #5F5F5F; /* ink-secondary */
+  margin: 0;
+}
+
+.summary-item-price {
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: left;
+}
+
+.discount-section {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1.25rem 0;
+  margin: 1.25rem 0;
+  border-top: 1px solid #e1e3e5;
+}
+
+.discount-section input {
+  flex-grow: 1;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid #d3d3d3;
+  border-radius: var(--r-field);
+  font-size: 0.95rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.discount-section input:focus {
+  outline: none;
+  border-color: #262626;
+  box-shadow: 0 0 0 1px #262626;
+}
+
+.discount-section button {
+  background-color: #efefef;
+  color: #545454;
+  border: 1px solid #d3d3d3;
+  padding: 0 1.5rem;
+  border-radius: var(--r-control);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 80px;
+  height: 45px;
+}
+
+.discount-section button:hover:not(:disabled) {
+  background-color: #e5e5e5;
+}
+
+.discount-section button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  background-color: #efefef !important;
+  /* Keep bg color when coupon is applied */
+}
+
+.discount-section input:disabled {
+  background-color: #f5f5f5;
+}
+
+
+.cost-summary {
+  padding-top: 1.25rem;
+  border-top: 1px solid #e1e3e5;
+}
+
+.cost-line {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.cost-line span:first-child {
+  color: #545454;
+}
+
+.cost-line.total {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e1e3e5;
+}
+
+.total .total-price {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #121212;
+}
+
+.cost-line.discount span:first-child {
+  color: #16a34a;
+  /* A nice green color for discounts */
+}
+
+.cost-line.discount span:last-child {
+  font-weight: 500;
+  color: #16a34a;
+}
+
+/* Add these styles to your CheckoutPage.css file if you haven't already */
+.summary-item-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 4px;
+}
+
+/* Quantity stepper — soft pill with round buttons (matches the cart) */
+.quantity-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #f2f2f4;
+  border: 1px solid #e4e4e6;
+  border-radius: var(--r-control);
+  padding: 3px;
+}
+
+.quantity-control button {
+  background: #ffffff;
+  border: none;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r-circle);
+  font-size: 1.1rem;
+  line-height: 1;
+  color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: background-color 0.2s, transform 0.15s;
+}
+
+.quantity-control button:hover:not(:disabled) {
+  background-color: #ececee;
+}
+
+.quantity-control button:active {
+  transform: scale(0.92);
+}
+
+.quantity-control span {
+  font-size: 0.95rem;
+  font-weight: 600;
+  min-width: 28px;
+  text-align: center;
+  color: #1a1a1a;
+}
+
+.remove-item-btn {
+  background: 0 0;
+  border: none;
+  color: #ef4444;
+  font-size: .8rem;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.remove-item-btn:hover {
+  color: #dc2626
+}
+/* Add this to your src/components/pages/public/CheckoutPage/CheckoutPage.css file */
+
+.free-shipping-display {
+  color: #16a34a; /* Green color for positive message */
+  font-weight: 500;
+}
+
+.free-shipping-display del {
+  color: #9ca3af; /* Light grey for the strikethrough text */
+  margin-right: 0.5rem;
+  font-weight: 400;
+}
+
+.cost-line.discount {
+color: #16a34a; 
+}
+
+/* =========================================
+   ADD TO BOTTOM OF CSS FILE
+   (Only affects screens smaller than 992px)
+   ========================================= */
+
+/* --- TABLET & MOBILE (Max 991px) --- */
+@media (max-width: 991px) {
+  /* 1. Switch Grid to Flex Column to stack Summary on top of Form */
+  .checkout-container {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* 2. Summary goes on Top */
+  .order-summary-column {
+    order: 0;
+    /* Add a thick divider to separate summary from the form below */
+    border-bottom: 8px solid #f4f4f4; 
+    /* Remove any side borders */
+    border-right: none;
+    border-left: none;
+  }
+
+  /* 3. Form goes on Bottom */
+  .checkout-form-column {
+    order: 1;
+    border-right: none;
+  }
+}
+
+/* --- SMALL MOBILE SCREENS (Max 480px) --- */
+@media (max-width: 480px) {
+  
+  /* 1. ADD PADDING: Ensures content doesn't touch the edges */
+  .checkout-form-column,
+  .order-summary-column {
+    padding: 1.5rem 1.25rem !important; /* 20px - 24px padding */
+  }
+
+  /* 2. Center the logo on mobile */
+  .checkout-logo-link {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .checkout-header p {
+    text-align: center;
+  }
+
+  /* 3. Make Inputs Mobile Friendly (Prevents iOS Zoom) */
+  .form-section input,
+  .form-section select,
+  .discount-section input {
+    font-size: 16px !important; /* Critical: prevents auto-zoom on iPhone */
+    padding: 12px; /* Larger touch target */
+  }
+
+  /* Keep the +20 prefix the same optical size as the number next to it */
+  .phone-prefix {
+    font-size: 16px;
+    padding: 0 0.85rem;
+  }
+
+  /* 4. Action Buttons: Full Width and Stacked */
+  .checkout-actions {
+    flex-direction: column-reverse; /* Button on top, Link below */
+    gap: 1rem;
+    width: 100%;
+    margin-top: 1.5rem;
+  }
+
+  .place-order-button {
+    width: 100%; /* Full width */
+    height: 55px; /* Taller for easier tapping */
+    font-size: 1.1rem;
+    margin: 0;
+  }
+
+  .return-to-cart-link {
+    width: 100%;
+    text-align: center;
+    padding: 10px;
+    display: block;
+  }
+
+  /* 5. Stack Discount Field for space */
+  .discount-section {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .discount-section button {
+    width: 100%;
+    height: 48px;
+  }
+}
+/* =====================================================================
+   Loading skeleton
+   The cart and the shipping zones both arrive over the network, so on a weak
+   connection this page waits. It waits as a skeleton of its own real layout —
+   header, field stack, summary card — rather than a spinner or a "Loading…"
+   label, so the page is never a blank screen and never jumps when the data
+   lands. Every radius below comes from the shared curve ladder, so the
+   placeholders are the same shape as the controls they stand in for.
+   ===================================================================== */
+@keyframes co-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.co-skeleton {
+  background: linear-gradient(90deg, #f1f1f3 25%, #e6e6ea 50%, #f1f1f3 75%);
+  background-size: 200% 100%;
+  animation: co-shimmer 1.4s infinite linear;
+}
+
+.co-skeleton--logo {
+  width: 100px;
+  height: 34px;
+  margin-bottom: 12px;
+  border-radius: var(--r-thumb);
+}
+
+.co-skeleton--bar {
+  border-radius: var(--r-track);
+}
+
+.co-skeleton--icon {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--r-circle);
+}
+
+.co-skeleton--field {
+  height: 46px;
+  border-radius: var(--r-field);
+}
+
+.co-skeleton--pill {
+  height: 52px;
+  border-radius: var(--r-control);
+}
+
+.co-skeleton--thumb {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  border-radius: var(--r-thumb);
+}
+
+.co-summary-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+}
+
+.co-summary-lines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

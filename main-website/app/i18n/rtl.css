@@ -1,0 +1,69 @@
+/* ---------------------------------------------------------------------------
+   RTL mirrors for physical CSS + Arabic font application.
+   Flex/grid layouts auto-mirror via the `dir` attribute; this file fixes the
+   remaining physical properties (transforms, absolute left/right, borders,
+   text-align) so the Arabic experience looks intentional, not broken.
+   --------------------------------------------------------------------------- */
+
+/* Arabic font stack for every UI element. Cairo is already bundled locally
+   (app/Fonts/CairRubik/Cairo) and covers Arabic + Latin. */
+html[dir='rtl'] body,
+html[dir='rtl'] button,
+html[dir='rtl'] input,
+html[dir='rtl'] select,
+html[dir='rtl'] textarea,
+html[dir='rtl'] a,
+html[dir='rtl'] p,
+html[dir='rtl'] li,
+html[dir='rtl'] span,
+html[dir='rtl'] label,
+html[dir='rtl'] h1,
+html[dir='rtl'] h2,
+html[dir='rtl'] h3,
+html[dir='rtl'] h4,
+html[dir='rtl'] h5 {
+  font-family: 'cairo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', sans-serif;
+}
+
+/* --- Cart drawer: hide toward the LEFT in RTL (`.open` rule wins when open) --- */
+html[dir='rtl'] .cart-sidebar {
+  transform: translateX(calc(-100% - 32px));
+}
+
+/* --- Cart remove button + checkout qty badge flip to the other side --- */
+html[dir='rtl'] .cart-item-remove-btn {
+  right: auto;
+  left: 0;
+}
+html[dir='rtl'] .summary-item-quantity {
+  right: auto;
+  left: -8px;
+}
+
+/* --- Checkout form column divider flips --- */
+html[dir='rtl'] .checkout-form-column {
+  border-right: none;
+  border-left: 1px solid #e1e3e5;
+}
+
+/* --- Mobile menu slides in from the RIGHT in RTL --- */
+html[dir='rtl'] .mobile-menu-sidebar {
+  left: auto;
+  right: 0;
+  transform: translateX(100%);
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+}
+
+/* --- Right-aligned price/label text in RTL --- */
+html[dir='rtl'] .summary-item-price,
+html[dir='rtl'] .price-block,
+html[dir='rtl'] .cost-line .total-price {
+  text-align: right;
+}
+
+/* --- Stories tray is inset with a physical left padding inline; flip it --- */
+html[dir='rtl'] .stories-tray-container {
+  padding-left: 0;
+  padding-right: 16px;
+}

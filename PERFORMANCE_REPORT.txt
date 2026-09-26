@@ -1,0 +1,628 @@
+================================================================================
+  PERFORMANCE ANALYSIS — NOD Makeup Platform
+  Frontend (main-website) + Backend (API)
+================================================================================
+
+  Report generated : 2026-09-26
+  Code state       : uncommitted working tree, main-website HEAD 3d7ff09
+  Measured on      : this machine, production build (next start :3005)
+                     and dev server (:3001) for the image optimiser
+  Services under test:
+      backend API   127.0.0.1:5001   (Express + Prisma + MariaDB 10.11.14)
+      storefront    127.0.0.1:3001   (Next.js 16.2.2 dev)
+                     127.0.0.1:3005   (Next.js 16.2.2 production)
+      media         127.0.0.1:5002
+      admin panel   0.0.0.0:3000
+
+  Every number in this report was measured, not estimated. Where a figure
+  could not be measured it is marked as such rather than guessed.
+
+================================================================================
+  CONTENTS
+================================================================================
+
+  1. Executive summary
+  2. The dominant defect: the site shipped an empty HTML body
+  3. Frontend — what was measured
+  4. Frontend — optimisations applied
+  5. Backend — what was measured
+  6. Backend — optimisations applied
+  7. Open defects and risks
+  8. Recommended next steps, in priority order
+  Appendix A — measurement commands
+  Appendix B — environment
+
+================================================================================
+  1. EXECUTIVE SUMMARY
+================================================================================
+
+  The single most important finding is not a missing optimisation. It is a
+  one-line bug in the root layout's cart provider that made the entire
+  storefront render an EMPTY <body> on the server.
+
+      // main-website/app/contexts/CartContext.tsx:74
+      if (!isHydrated) return null;
+
+  `isHydrated` was initialised to false and only ever set inside a
+  useEffect. Effects do not run on the server, so the provider returned
+  null during every server render. Because it wraps <Nav />,
+  <main>{children}</main> and <Footer /> in the root layout, the whole body
+  of every route was empty.
+
+  Consequence: the storefront was a client-rendered application wearing a
+  server-rendered costume. The HTML contained no content, so first paint
+  always waited for JS download -> parse -> hydrate -> API round trip.
+  No amount of image optimisation, font tuning or server-side caching could
+  improve that, because there was no markup to improve.
+
+  Headline before/after, measured on the production build:
+
+      Route                     HTML bytes   Visible body text
+      ---------------------------------------------------------------
+      /en  (home)               15,550  ->  36,679      0  ->  499 chars
+      /en/product/<slug>        25,848  ->  31,076      0  ->  691 chars
+      /en/AboutUs               (empty)  ->  22,264      0  -> 1,024 chars
+      /en/privacy-policy        (empty)  ->  24,581      0  -> 1,267 chars
+      /en/shop                  (empty)  ->  26,768      0  ->  361 chars
+      /en/bestsellers           (empty)  ->  21,008      0  ->  308 chars
+
+  The "after" byte counts are exact and stable: three consecutive requests per
+  route returned byte-identical responses, confirming the Data Cache is serving
+  a fixed page rather than re-rendering per request.
+
+  Two further real defects surfaced while isolating the above, both of which
+  had been hidden by it:
+
+      - useSearchParams() in the two analytics trackers marked every route
+        BAILOUT_TO_CLIENT_SIDE_RENDERING.
+      - /checkout could not be built at all; the build error was being
+        masked by the blanket bailout.
+
+  Everything in sections 3-6 was measured after those fixes.
+
+================================================================================
+  2. THE DOMINANT DEFECT — FULL DETAIL
+================================================================================
+
+  2.1 How it was found
+  -------------------
+  The initial audit recorded "homepage SSR HTML is <div hidden>" and treated
+  it as an accepted property of a client-rendered storefront. That reading was
+  wrong. The symptom was isolated by bisection on a production build, one
+  variable per build:
+
+      Experiment                                    Result
+      ------------------------------------------------------------------
+      Remove PageTracker + BehaviorTracker          still empty
+      Remove await cookies() from root layout       still empty
+      Remove Nav + Footer                           still empty
+      Reduce body to bare <main>{children}</main>   RENDERED (404 page)
+      Stub out useSearchParams()                    bailout marker gone,
+                                                       DOM still empty
+
+  The bisect showed the cause was in the two context providers wrapping the
+  body, and reading CartContext.tsx located it on line 74.
+
+  2.2 Why the guard existed, and why it was not needed
+  --------------------------------------------------
+  The guard is the standard "don't render until mounted" guard, normally used
+  to avoid a hydration mismatch. Here it was protecting nothing:
+
+      - the cart state starts as null and stays null until its own effect
+        resolves it, so `itemCount` computes to 0 on the server AND on the
+        first client render. The markup matches; hydration is clean.
+      - nothing reads localStorage during render. `sessionHeaders()` in
+        lib/api.ts guards on `typeof window === 'undefined'`, and
+        `syncSessionId` is only called from effects and event handlers.
+      - `isHydrated` was consumed by nothing else in the codebase. It was
+        write-only state whose only effect was to blank the site.
+
+  The guard was removed along with the now-dead state and its setter. The
+  reasoning is recorded in a comment at the point of change so it is not
+  reintroduced.
+
+  2.3 Verification
+  ----------------
+      - Next.js reports zero errors, warnings or hydration mismatches in the
+        production server log.
+      - All 11 measured routes return HTTP 200 with real markup.
+      - Arabic (/ar) renders 454 characters of real Arabic text, dir="rtl",
+        with the Cairo webfont preloaded.
+      - The product detail page returns the correct <title> and the product
+        name appears in real markup rather than only in the RSC payload.
+      - tsc --noEmit clean; npm run build exit 0.
+
+================================================================================
+  3. FRONTEND — WHAT WAS MEASURED
+================================================================================
+
+  3.1 Payload per route (production build, gzip as transferred)
+  -----------------------------------------------------------
+  Measured by extracting the <script src> and <link href> tags the server
+  actually returns for each route and gzipping the referenced files.
+
+      Route                       HTML      JS raw   JS gz   CSS raw  CSS gz
+      ---------------------------------------------------------------------
+      /en                       36,679 B   903 KB   273 KB    70 KB    17 KB
+      /en/product/<slug>        31,076 B   890 KB   268 KB    66 KB    16 KB
+      /en/bestsellers           21,008 B   892 KB   270 KB    60 KB    14 KB
+      /en/checkout              22,966 B   796 KB   241 KB    51 KB    12 KB
+      /en/shop                  26,768 B   784 KB   238 KB    47 KB    12 KB
+      /en/AboutUs               22,264 B   778 KB   236 KB    41 KB    10 KB
+
+  3.2 JavaScript chunk breakdown (homepage)
+  ----------------------------------------
+      222.0 KB raw    69.3 KB gz    largest chunk
+      146.0 KB raw    39.3 KB gz
+      110.0 KB raw    38.5 KB gz
+      104.7 KB raw    35.0 KB gz
+       95.2 KB raw    28.2 KB gz
+       53.4 KB raw    12.6 KB gz
+       46.6 KB raw    14.8 KB gz
+       43.4 KB raw     9.0 KB gz
+       30.3 KB raw     9.5 KB gz
+       23.4 KB raw     7.3 KB gz
+       18.2 KB raw     5.7 KB gz
+       10.3 KB raw     4.1 KB gz    turbopack runtime
+      ---------------- ----------
+      903.4 KB raw   273.3 KB gz    12 files
+
+  273 KB gzipped of JavaScript is the dominant remaining frontend cost. It is
+  now the top frontend priority — see section 8.
+
+  3.3 Images
+  ----------
+  Measured through the dev server, which is the only configuration where the
+  optimiser is permitted to fetch from loopback. Widths are taken from the
+  srcset the page actually declares, not chosen arbitrarily: the optimiser
+  rejects any width absent from images.deviceSizes / images.imageSizes, so a
+  hand-picked width returns HTTP 400 and looks like a broken image when it is
+  actually a rejected request.
+
+      Asset                 Original      Served     Saving   Width
+      ------------------------------------------------------------------
+      nav logo (l_dark)     215.2 KB      0.95 KB     99.6%   128w
+      cart icon              6.5 KB      0.74 KB     88.7%    64w
+      hero product           49.1 KB     12.5 KB      74.6%   640w
+      homepage banner       356.3 KB      9.7 KB     97.3%   828w
+      ------------------------------------------------------------------
+      combined              627.1 KB     23.9 KB     96.2%
+
+  3.4 Fonts
+  ---------
+  Only two of the ten declared families were ever fetched. An @font-face rule
+  on its own downloads nothing; a webfont is fetched only when rendered text
+  resolves to that family. Eight declared families (Montserrat, Alex Brush,
+  Bodoni Moda x2, Ravensara Antiqua, Blair ITC, Valentine Coolday, "the
+  signature") were named by no font-family declaration anywhere in app/ or
+  components/, and appeared in no database content. They cost nothing at
+  runtime but were ~1.4 MB of dead files in the tree.
+
+      Font                Before      After      Saving   Glyphs
+      ------------------------------------------------------------------
+      Rubik  (rubic)      348 KB      52 KB       85%      510
+      Cairo  (cairo)      345 KB     128 KB       63%      779
+
+  Both remain variable fonts with their axes intact (Rubik wght 300-900;
+  Cairo wght 200-1000 and slnt -11..11), so no weight is synthesised.
+
+  3.5 Server response time (production build, warm)
+  -------------------------------------------------
+      /en  TTFB 54 ms cold, settling to 28-33 ms warm
+      6 consecutive requests: 0 backend catalog calls (see section 4.4)
+
+================================================================================
+  4. FRONTEND — OPTIMISATIONS APPLIED
+================================================================================
+
+  4.1 Removed the SSR null guard (CartContext.tsx)
+  -----------------------------------------------
+  The fix described in section 2. This is the change that matters.
+
+  4.2 Server-side catalogue fetching with caching
+  ------------------------------------------------
+  New file: main-website/lib/server-api.ts
+
+  Every storefront read went through lib/api.ts, an axios facade over
+  @nod/shared. Next.js only caches its Data Cache for the NATIVE fetch; an
+  axios request is an opaque outgoing HTTP call the framework knows nothing
+  about, so it is never cached, never deduplicated and never revalidated.
+
+  lib/server-api.ts uses native fetch with an explicit revalidate window and
+  cache tags. Wired into:
+
+      homepage      Stories, Hero products, Collections
+      PDP           product detail (also removes a confirmed double fetch)
+
+  Design constraints honoured:
+      - never throws. Every function resolves to null on failure, so a dead
+        API degrades to the existing skeleton rather than a 500.
+      - only public, visitor-independent data is cached. Nothing derived from
+        a cookie, cart or session passes through it.
+      - every consumer keeps its own client fetch as a fallback, so first
+        load is server-rendered while client-side navigation still shows the
+        skeletons.
+
+  Measured: 6 consecutive homepage requests produced 0 backend calls to
+  /catalog/products/hero. TTFB fell from 54 ms to 28 ms as the cache warmed.
+
+  Revalidation is 60s for catalogue, 120s for content. This is a real
+  trade-off, not a free win: an admin product edit can take up to 60s to
+  appear. The correct long-term fix is an on-demand revalidateTag call from
+  the admin panel on save, not a shorter window.
+
+  4.3 Eliminated the client-render bailout
+  -----------------------------------------
+  New file: main-website/app/useQueryString.ts
+
+  PageTracker.js and BehaviorTracker.js called useSearchParams() to read the
+  query string. That hook reads request-time state, so Next.js marks the
+  entire route BAILOUT_TO_CLIENT_SIDE_RENDERING and ships an empty body with
+  the data in a script payload for the client to render.
+
+  Both components render null and use the value strictly inside effects, so
+  the value is only ever needed in the browser, where window.location already
+  holds it. They now use a new hook that:
+      - reads window.location.search (initial value '' to avoid a hydration
+        mismatch, since the server has no window);
+      - stays reactive by patching history.pushState / replaceState to
+        dispatch an event, because pushState deliberately fires none, and
+        listening for popstate for back/forward;
+      - installs the patch once per module and reference-counts it, so
+        multiple consumers do not stack wrappers.
+
+  app/shop/page.tsx legitimately needs its ?category= filter to seed state, so
+  it received the documented Suspense boundary. That is also what made the
+  masked /checkout build error visible.
+
+  4.4 Web fonts
+  -------------
+      - Subset to the characters the site can actually display. The set was
+        built from the Latin Unicode ranges plus every codepoint appearing in
+        the source, and validated against live database content (product
+        names, descriptions, stories): the database contributed ZERO codepoints
+        the safe set did not already contain. Cairo additionally carries the
+        Arabic block and presentation forms.
+      - Re-encoded as WOFF2. 348 KB -> 52 KB, 345 KB -> 128 KB.
+      - font-display: swap added to both faces. This was the actual defect:
+        without it the browser holds back the first paint of any text using
+        the family until the font arrives, which on a slow connection is up to
+        a second of invisible text.
+      - Content-hashed filenames. public/ is served with
+        Cache-Control: public, max-age=0 by default, so the font was being
+        revalidated on every single page view. Because the hash changes when
+        the bytes do, a headers() rule in next.config.ts can safely serve them
+        max-age=31536000, immutable. A stable filename could not be cached
+        that hard without stranding a font fix for a year.
+      - Preload: Rubic always (NavBar.css uses it on every page); Cairo only
+        when dir is rtl, because on an English page preloading it would spend
+        128 KB on a font that renders no glyph. crossOrigin="anonymous" is
+        set, without which the browser fetches the font twice.
+      - The 8 dead faces and their files were removed (1,387 KB).
+
+  4.5 Images
+  ----------
+      - next/image with formats ['image/avif','image/webp'].
+      - 13 of 17 <img> elements converted. The 4 that remain are deliberate:
+        SVG flags (the optimiser blocks SVG by default) and explicit
+        width/height where fill would collapse a container that has no
+        intrinsic height.
+      - remotePatterns derived from the environment rather than hardcoded, so
+        the LAN dev address keeps working when it changes.
+      - dangerouslyAllowLocalIP gated on NODE_ENV !== 'production'. Next 16
+        blocks loopback and private ranges as SSRF hardening. That is correct
+        in production, where media is on the public media host, and wrong in
+        development, where media is the same machine.
+
+  4.6 Dead dependencies
+  ---------------------
+  9 packages removed, 91 transitive packages eliminated. Each was verified to
+  have zero imports repo-wide, including inside the vendored @nod/shared
+  design system:
+
+      @emotion/react, @emotion/styled, @mui/material, class-variance-authority,
+      framer-motion, gl-matrix, lucide-react, mathjs, react-fast-marquee
+
+  main-website now declares 9 direct dependencies:
+      axios, clsx, next, react, react-confetti, react-dom, react-toastify,
+      swiper, tailwind-merge
+
+  4.7 Middleware renamed to proxy, and a locale bug fixed
+  -------------------------------------------------------
+  middleware.ts -> proxy.ts, exporting proxy(), per Next 16.2.2. This removed
+  a deprecation warning and the asset matcher was extended to avif/mp4/webm.
+
+  A real bug was fixed while doing it: the middleware WROTE the NEXT_LOCALE
+  cookie but never READ it. An Arabic user following any unprefixed link was
+  therefore redirected to /en. It now reads the cookie, seeds it on first
+  visit, and validates it against LOCALES.includes() so a tampered value
+  cannot inject an arbitrary locale.
+
+================================================================================
+  5. BACKEND — WHAT WAS MEASURED
+================================================================================
+
+  5.1 Per-endpoint latency (10 sequential warm requests each)
+  ---------------------------------------------------------
+      Endpoint                                     min      avg      max
+      ------------------------------------------------------------------
+      /catalog/products/search?limit=12            6.6ms    8.9ms   12.6ms
+      /catalog/products/hero                       4.5ms    6.0ms    8.4ms
+      /catalog/products/<slug>                     5.3ms    7.9ms   10.7ms
+      /catalog/collections?public=true             5.0ms   10.2ms   36.4ms
+      /content/stories?public=true                 3.7ms    6.0ms   11.5ms
+
+  A later 5-request spot check of /catalog/products/hero returned 7.7 ms
+  average. The spread between 6.0 and 7.7 ms on an endpoint whose minimum is
+  4.5 ms is ordinary variance, not a trend; the 10-request run above is the
+  figure quoted throughout this report.
+      /catalog/categories?public=true              3.1ms    5.6ms   14.7ms
+
+  Single-request latency is healthy. /catalog/collections shows a 36.4ms
+  outlier against a 5.0ms minimum, which is worth watching but is within
+  normal variance for an uncached aggregate query.
+
+  5.2 Concurrency
+  ---------------
+  30 parallel catalog reads, 3 rounds:
+
+      Round 1: wall 363ms   p50 275ms   p95 288ms   max 312ms   all 200
+      Round 2: wall 242ms   p50 221ms   p95 234ms   max 236ms   all 200
+      Round 3: wall 240ms   p50 225ms   p95 232ms   max 233ms   all 200
+
+  No pool exhaustion, no errors, no 5xx.
+
+  5.3 Write path
+  --------------
+      POST /api/v1/orders/cart/items   200   32.0 ms
+      GET  /api/v1/orders/cart         200    7.9 ms
+
+  5.4 Database
+  -----------
+      Engine                MariaDB 10.11.14
+      max_connections       151
+      thread_cache_size     151
+      innodb_buffer_pool    134,217,728 (128 MB)
+      slow_query_log        OFF
+      long_query_time       10.0 s
+
+  slow_query_log being OFF means the database cannot currently tell us which
+  queries are slow. That is a gap in observability, not a defect in the app.
+
+  5.5 Rate limits (from shared/src/config/env.ts)
+  -----------------------------------------------
+      General API        1000 per window
+      Catalog             600 per window
+      Checkout             60 per window
+      Auth                 10 per window
+
+  All four are backed by a Redis store, not in-process memory, so the counters
+  survive a restart and are shared across instances. Limiter keys mask IPv6 to
+  the /64 prefix; without that, a single IPv6 visitor was measured generating
+  35 separate counters of 1 each and the limit was never reached.
+
+  The checkout budget was deliberately NOT raised to accommodate the flash-sale
+  load test. That test fires 100 simultaneous checkouts from one address, which
+  no real customer does; the limiter correctly refuses it.
+
+================================================================================
+  6. BACKEND — OPTIMISATIONS APPLIED
+================================================================================
+
+  6.1 Prisma connection pool raised to 40
+  ---------------------------------------
+  DATABASE_URL in the root .env now carries ?connection_limit=40.
+
+  Prisma's default pool is num_cpus * 2 + 1, which is 9 on this 4-core box.
+  Under a burst that serialises work behind 9 connections. Measured on a
+  30-way burst of 0.4s queries:
+
+      pool  9   1701 ms
+      pool 40    449 ms          3.8x faster
+
+  40 was chosen against max_connections=151, leaving ample headroom for the
+  control plane, the outbox worker and administrative sessions. The rationale
+  is recorded in backend/config/prismaClient.ts.
+
+  Note: .env cannot carry comments. scripts/sync-env.mjs rewrites the entire
+  file from parsed key/value pairs whenever SAFE_ORIGINS changes, and its
+  parser discards comment lines. The rationale therefore lives in the source
+  file, not the .env.
+
+  6.2 Single long-lived Prisma client
+  ------------------------------------
+  backend/config/prismaClient.ts keeps one client on globalThis. Without it,
+  dev-mode module reloads leak connection pools until the server hits
+  max_connections and refuses all traffic.
+
+  6.3 Rate limiting hardened
+  --------------------------
+  Four tiers, Redis-backed, IPv6-aware. See 5.5.
+
+  6.4 Transactional outbox
+  -------------------------
+  backend/services/outbox.ts with workers/outboxWorker.ts and
+  workers/outboxHandlers.ts implements a claim-lease, dead-letter and sweep
+  state machine, so a side effect is never lost because a process died between
+  committing the business transaction and publishing the event.
+
+  6.5 Order creation and stock
+  -----------------------------
+  backend/services/orderService.ts performs order creation with retry, and
+  exposes getPublicOrderDetails. Stock is decremented at placement and
+  restored only on an admin transition to Cancelled or Refunded. Payment is
+  Cash on Delivery.
+
+  6.6 Regression suite
+  --------------------
+      npx vitest run --root backend
+        3 files, 21 tests, all passing (1.11s)
+
+      npm run check:radius
+        5/5 nestings satisfy outer = inner + padding
+
+================================================================================
+  7. OPEN DEFECTS AND RISKS
+================================================================================
+
+  These are real and currently unfixed. They are listed rather than quietly
+  omitted.
+
+  7.1 273 KB gzipped of JavaScript is now the top frontend cost
+  ------------------------------------------------------------
+  Section 3.2. With the HTML finally carrying content, JS no longer blocks the
+  first paint the way it did, but it still dominates total transfer and
+  hydration time. The largest single chunk is 69 KB gzipped. This needs a
+  deliberate pass to find what is in it; it was not attempted here.
+
+  7.2 Direct-to-media URLs are baked with the loopback host
+  --------------------------------------------------------
+  Now that pages are server-rendered, media URLs are computed on the server
+  and baked into the HTML. In this LAN configuration that host is
+  localhost:5002, so images that bypass the optimiser — the Egypt flag SVG —
+  will be requested from the visitor's own localhost and fail until hydration
+  re-derives the address.
+
+  Optimised images are unaffected: they are requested through /_next/image,
+  which the SERVER resolves, so the browser never contacts the media host
+  directly.
+
+  Production is not affected. media.nodmakeup.com is not a loopback host, so
+  deriveClientBaseUrl returns it verbatim on both the server and the client.
+
+  Verification on a phone should specifically check the flag icon.
+
+  7.3 Every route is dynamic; there is no static or ISR rendering
+  -------------------------------------------------------------
+  The root layout awaits cookies() to read the locale, which forces all 11
+  routes to ƒ (Dynamic). Pages are server-rendered, so this is far better than
+  before, but nothing is prerendered and no page is served from a static shell.
+
+  The correct fix is a [locale] route segment with generateStaticParams, which
+  makes the locale part of the route rather than a cookie read. That is a
+  routing change touching the proxy and the redirect logic that has already
+  been verified, so it is proposed rather than done.
+
+  7.4 /catalog/categories requires ?public=true
+  ----------------------------------------------
+  Without the query parameter the endpoint returns 401. The storefront calls it
+  correctly with the parameter and receives 200, so there is no live bug. This
+  corrects an earlier claim in this engagement that the storefront's category
+  list was silently empty; it is not.
+
+  7.5 scripts/sync-env.mjs silently deletes comments in .env
+  ----------------------------------------------------------
+  Any time SAFE_ORIGINS changes, the file is rewritten from parsed key/value
+  pairs and every comment line is lost. There is no warning.
+
+  7.6 121 pre-existing orders are unowned
+  ----------------------------------------
+  They are no longer retrievable through the public endpoint.
+
+  7.7 main-website never imports the vendored @nod/design-system
+  --------------------------------------------------------------
+  It has its own app/design-system/, so `materialize-shared . --design-system`
+  is dead weight on every install.
+
+  7.8 Observability gaps
+  ----------------------
+      slow_query_log is OFF, so slow queries cannot be identified from the
+      database side. Redis queue depth could not be sampled during this
+      analysis (the probe timed out) and remains unmeasured.
+
+================================================================================
+  8. RECOMMENDED NEXT STEPS, IN PRIORITY ORDER
+================================================================================
+
+   1. Reduce the 273 KB gzipped JS bundle.
+      Now the largest remaining frontend cost. Start by identifying what is in
+      the 69 KB gzipped chunk. Route-level dynamic import for the PDP, cart
+      drawer and checkout would cut the homepage's share.
+
+   2. Visual confirmation on localhost:3001, then on a phone.
+      Specifically: content appears immediately with no blank flash; no layout
+      shift; no broken images; flag icon renders; no sideways scroll;
+      skeletons still appear on client-side navigation; Arabic renders with
+      Cairo and correct RTL; add-to-cart, checkout and the variant selector
+      all work.
+
+   3. Mirror, commit and push to nodmakeuop-platform, then deploy to Vercel.
+      Requires Root Directory = main-website plus the environment variables
+      listed in vercel-env.txt. Note the risk: if NEXT_PUBLIC_MEDIA_URL is
+      absent on Vercel, deriveClientBaseUrl falls back to window.location and
+      images will not be optimised at all.
+
+   4. Enable slow_query_log before making further database changes, so the
+      next round of optimisation is measured rather than guessed.
+
+   5. Consider on-demand revalidation (revalidateTag from the admin panel on
+      product save) to replace the 60-second staleness window.
+
+   6. Consider the [locale] route segment to make routes statically
+      generated. Larger change; do it on its own, with its own review.
+
+   7. Optional, previously deferred:
+      - a releases_stock boolean on order_status
+      - CI has no deploy or migration job
+      - start.sh --stop <service> is a no-op against a stale PID file
+      - trim node_modules from the vendored @nod/shared
+
+================================================================================
+  APPENDIX A — MEASUREMENT COMMANDS
+================================================================================
+
+  Frontend production build and server
+      npm run build
+      setsid nohup npx next start -p 3005 > /tmp/p.log 2>&1 < /dev/null &
+
+  Build the log to a file and read it; piping to sed/tail has intermittently
+  produced empty captured output.
+      (npm run build > /tmp/b.log 2>&1; echo "EXIT=$?" >> /tmp/b.log)
+
+  Confirm a build is current before trusting any measurement. Two rounds of
+  testing were once wasted on a stale build.
+      stat -c '%y %n' next.config.ts .next/BUILD_ID
+
+  Server-rendered body text (the primary regression signal)
+      curl -s http://127.0.0.1:3005/en | python3 -c "
+      import re,sys
+      s=sys.stdin.read()
+      d=re.sub(r'<script.*?</script>','',s,flags=re.S)
+      print(len(' '.join(re.sub(r'<[^>]+>',' ',d).split())))"
+
+  Concurrency burst
+      node burst.mjs   (30 parallel fetches, reports p50/p95/max and codes)
+
+  Type gate — Next dev and build do not typecheck on their own
+      npx tsc --noEmit
+
+  Regression suites
+      npx vitest run --root backend
+      npm run check:radius
+
+================================================================================
+  APPENDIX B — ENVIRONMENT
+================================================================================
+
+  Next.js            16.2.2 (Turbopack)
+  React              19.x
+  Node               (see package.json engines)
+  Express            4.x
+  Prisma             (see backend/package.json)
+  Database           MariaDB 10.11.14, max_connections 151
+  Redis              rate-limit store + BullMQ queues
+  Payment            Cash on Delivery
+
+  Prisma column names differ from field names and will bite anyone writing
+  raw SQL: OutboxEvent.eventType, stockQuantity -> stock_quantity,
+  variant_id, sku, ProductImage.imageUrl -> image_url. ProductVariant has no
+  image_url column; product images live in product_images.
+
+  Verifying database state requires exporting DATABASE_URL from the repo-root
+  .env into the environment. dotenv/config does not work because there is no
+  backend/.env. BigInt values need a JSON.stringify replacer. The mysql CLI is
+  not installed.
+
+================================================================================
+  END OF REPORT
+================================================================================
