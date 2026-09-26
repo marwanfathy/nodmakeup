@@ -33,10 +33,10 @@ exports.createOrderSchema = zod_1.z.object({
 });
 exports.addCartItemSchema = zod_1.z.object({
     variantId: zod_1.z.string().uuid('Invalid variant ID.'),
-    quantity: zod_1.z.coerce.number({ invalid_type_error: 'Quantity must be a number.' }).int().min(1, 'Quantity must be at least 1.').max(99, 'Maximum 99 units per line.'),
+    quantity: zod_1.z.coerce.number().int({ message: 'Quantity must be a number.' }).int().min(1, 'Quantity must be at least 1.').max(99, 'Maximum 99 units per line.'),
 });
 exports.updateCartItemSchema = zod_1.z.object({
-    quantity: zod_1.z.coerce.number({ invalid_type_error: 'Quantity must be a number.' }).int().max(99, 'Maximum 99 units per line.'),
+    quantity: zod_1.z.coerce.number().int({ message: 'Quantity must be a number.' }).int().max(99, 'Maximum 99 units per line.'),
 });
 exports.validateCouponSchema = zod_1.z.object({
     couponCode: zod_1.z.string().trim().min(1, 'Coupon code is required.').max(50),

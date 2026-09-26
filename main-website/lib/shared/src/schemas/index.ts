@@ -36,11 +36,11 @@ export const createOrderSchema = z.object({
 
 export const addCartItemSchema = z.object({
     variantId: z.string().uuid('Invalid variant ID.'),
-    quantity: z.coerce.number({ invalid_type_error: 'Quantity must be a number.' }).int().min(1, 'Quantity must be at least 1.').max(99, 'Maximum 99 units per line.'),
+    quantity: z.coerce.number().int({ message: 'Quantity must be a number.' }).int().min(1, 'Quantity must be at least 1.').max(99, 'Maximum 99 units per line.'),
 });
 
 export const updateCartItemSchema = z.object({
-    quantity: z.coerce.number({ invalid_type_error: 'Quantity must be a number.' }).int().max(99, 'Maximum 99 units per line.'),
+    quantity: z.coerce.number().int({ message: 'Quantity must be a number.' }).int().max(99, 'Maximum 99 units per line.'),
 });
 
 export const validateCouponSchema = z.object({
