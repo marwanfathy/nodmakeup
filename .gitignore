@@ -6,6 +6,7 @@ dist/
 build/
 .next/
 out/
+!main-website/lib/shared/dist/
 
 # environment — never commit real credentials
 .env

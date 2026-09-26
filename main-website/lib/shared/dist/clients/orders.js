@@ -1,0 +1,51 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ordersAdminApi = exports.ordersApi = exports.cartApi = void 0;
+const endpoints_1 = require("../api/endpoints");
+const client_1 = require("./client");
+/** Cart domain client (session resource under orders). */
+const cartApi = (baseURL, options = {}) => {
+    const client = (0, client_1.createApiClient)({ baseURL, ...options });
+    return {
+        client,
+        getCart: async () => (0, client_1.unwrap)(client.get(endpoints_1.API_V1.orders.cart.root)),
+        addItem: async (variantId, quantity) => (0, client_1.unwrap)(client.post(endpoints_1.API_V1.orders.cart.items, { variantId, quantity })),
+        updateItemQuantity: async (cartItemId, quantity) => (0, client_1.unwrap)(client.put(endpoints_1.API_V1.orders.cart.itemsById(cartItemId), { quantity })),
+        removeItem: async (cartItemId) => (0, client_1.unwrap)(client.delete(endpoints_1.API_V1.orders.cart.itemsById(cartItemId))),
+    };
+};
+exports.cartApi = cartApi;
+/** Orders + discounts + shipping zones. */
+const ordersApi = (baseURL, options = {}) => {
+    const client = (0, client_1.createApiClient)({ baseURL, ...options });
+    return {
+        client,
+        createOrder: async (data) => (0, client_1.unwrap)(client.post(endpoints_1.API_V1.orders.orders.root, data)),
+        getOrderDetails: async (orderId) => (0, client_1.unwrap)(client.get(endpoints_1.API_V1.orders.orders.byId(orderId))),
+        getShippingZones: async () => (0, client_1.unwrap)(client.get(endpoints_1.API_V1.orders.shippingZones.root)),
+        validateCoupon: async (couponCode, customerPhone) => (0, client_1.unwrap)(client.post(endpoints_1.API_V1.orders.discounts.validate, { couponCode, customerPhone })),
+    };
+};
+exports.ordersApi = ordersApi;
+/** Orders admin client. */
+const ordersAdminApi = (baseURL, options = {}) => {
+    const client = (0, client_1.createApiClient)({ baseURL, ...options });
+    return {
+        client,
+        getAll: (params = {}) => client.get(endpoints_1.API_V1.orders.orders.root, { params }),
+        getById: (id) => client.get(endpoints_1.API_V1.orders.orders.byId(id)),
+        getStatuses: () => client.get(endpoints_1.API_V1.orders.orders.statuses),
+        updateStatus: (orderId, statusId) => client.put(endpoints_1.API_V1.orders.orders.status(orderId), { statusId }),
+        updateTransactionStatus: (orderId, status) => client.put(endpoints_1.API_V1.orders.orders.transactionStatus(orderId), { status }),
+        sendReward: (orderId, discountType, discountValue) => client.post(endpoints_1.API_V1.orders.orders.sendReward(orderId), { discountType, discountValue }),
+        discounts: {
+            client,
+            getAll: (params = {}) => client.get(endpoints_1.API_V1.orders.discounts.root, { params }),
+            getById: (id) => client.get(endpoints_1.API_V1.orders.discounts.byId(id)),
+            create: (data) => client.post(endpoints_1.API_V1.orders.discounts.root, data),
+            update: (id, data) => client.put(endpoints_1.API_V1.orders.discounts.byId(id), data),
+            remove: (id) => client.delete(endpoints_1.API_V1.orders.discounts.byId(id)),
+        },
+    };
+};
+exports.ordersAdminApi = ordersAdminApi;
