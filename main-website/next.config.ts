@@ -176,6 +176,8 @@ const nextConfig: NextConfig = {
     // Product shots are 971x1619 on disk. Capping the source means the
     // optimiser never upscales a small image just because a 1920w slot asked.
     minimumCacheTTL: 60 * 60 * 24 * 30,
+    // Use maximum quality (100) for all images. Default is [75].
+    qualities: [100],
   },
 };
 
