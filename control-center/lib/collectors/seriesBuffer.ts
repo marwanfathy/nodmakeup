@@ -52,3 +52,26 @@ export function readSeries(name: string): SeriesData {
 export function allSeries(): string[] {
   return Array.from(series.keys());
 }
+
+/** Newest point of a series, or null when it has never been written.
+ *  The live stream sends this instead of the whole history on every tick, so a
+ *  5s heartbeat costs one point per series rather than `cap` points. */
+export function lastPoint(name: string): { t: number; v: number } | null {
+  const s = series.get(name);
+  if (!s || !s.points.length) return null;
+  return s.points[s.points.length - 1];
+}
+
+/** Full history for several series in one pass. */
+export function readAllSeries(names: string[]): Record<string, SeriesData> {
+  const out: Record<string, SeriesData> = {};
+  for (const name of names) out[name] = readSeries(name);
+  return out;
+}
+
+/** Newest point of several series in one pass; absent series map to null. */
+export function lastPoints(names: string[]): Record<string, { t: number; v: number } | null> {
+  const out: Record<string, { t: number; v: number } | null> = {};
+  for (const name of names) out[name] = lastPoint(name);
+  return out;
+}

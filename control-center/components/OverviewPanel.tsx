@@ -1,11 +1,10 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { api } from './api-client';
 import { fmtPct, fmtTime } from './api-client';
 import ServiceCards from './ServiceCards';
 import Sparkline from './Sparkline';
-import type { OverviewPayload, SeriesData } from '@/lib/types';
+import { useLiveMetrics } from './useLiveMetrics';
+import type { OverviewPayload } from '@/lib/types';
 
 const GRAPH_COLORS = ['#2997ff', '#ff9f0a', '#32d74b', '#64d2ff', '#c4b5fd', '#f472b6'];
 
@@ -29,74 +28,27 @@ const fmtValue = (v: number, unit: string): string => {
 };
 
 export default function OverviewPanel({ initial }: { initial: OverviewPayload }) {
-  const [data, setData] = useState<OverviewPayload>(initial);
-  const [series, setSeries] = useState<Record<string, SeriesData>>({});
-  const pausedRef = useRef(false);
-  const autoRef = useRef(true);
-
-  // Read operator flags once (autoRefresh / pauseOnTabHidden drive polling).
-  useEffect(() => {
-    api<{ flags: { key: string; value: boolean }[] }>('/api/flags')
-      .then((r) => {
-        const map = Object.fromEntries(r.flags.map((f) => [f.key, f.value]));
-        autoRef.current = map.autoRefresh !== false;
-      })
-      .catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    const onVis = (): void => {
-      pausedRef.current = document.hidden;
-    };
-    document.addEventListener('visibilitychange', onVis);
-    return () => document.removeEventListener('visibilitychange', onVis);
-  }, []);
-
-  // Overview heartbeat (5s) — only while this page is mounted.
-  useEffect(() => {
-    let alive = true;
-    let timer: ReturnType<typeof setTimeout> | null = null;
-    const refresh = async (): Promise<void> => {
-      try {
-        const next = await api<OverviewPayload>('/api/dashboard/overview');
-        if (alive) setData(next);
-      } catch {
-        /* transient */
-      } finally {
-        if (alive && autoRef.current && !pausedRef.current) timer = setTimeout(() => void refresh(), 5000);
-      }
-    };
-    void refresh();
-    return () => {
-      alive = false;
-      if (timer) clearTimeout(timer);
-    };
-  }, []);
-
-  // Load a chart series (independent of the overview poll).
-  const loadSeries = async (name: string): Promise<void> => {
-    try {
-      const s = await api<SeriesData>(`/api/dashboard/series?name=${encodeURIComponent(name)}`);
-      setSeries((prev) => ({ ...prev, [name]: s }));
-    } catch {
-      /* next tick */
-    }
-  };
-  useEffect(() => {
-    const names = [...MAIN_CHARTS.map((c) => c.series), ...SVCS.flatMap((n) => [`${n}.cpu`, `${n}.mem`])];
-    void Promise.all(names.map((n) => loadSeries(n)));
-    const timer = setInterval(() => {
-      void Promise.all(names.map((n) => loadSeries(n)));
-    }, 5000);
-    return () => clearInterval(timer);
-  }, []);
+  const { data, series, mode, lastFrameAt, refresh } = useLiveMetrics(initial);
 
   const sys = data.system.system ?? {};
+  const live = mode === 'live';
 
   return (
     <div className="content">
       <h2 className="pane-title">Overview</h2>
-      <ServiceCards services={data.services} system={data.system} onChanged={() => void loadAll()} />
+      <div className="meta" style={{ marginBottom: 8 }}>
+        {live ? (
+          <>
+            <span className="ok">● live</span> — pushed on every sample
+            {lastFrameAt ? ` · last frame ${new Date(lastFrameAt).toLocaleTimeString('en-GB', { hour12: false })}` : ''}
+          </>
+        ) : mode === 'polling' ? (
+          <span className="bad">● polling</span>
+        ) : (
+          <span className="meta">● connecting…</span>
+        )}
+      </div>
+      <ServiceCards services={data.services} system={data.system} onChanged={() => void refresh()} />
 
       <div className="grid sys" style={{ marginTop: 12 }}>
         <div className="card">
@@ -169,13 +121,4 @@ export default function OverviewPanel({ initial }: { initial: OverviewPayload })
       </div>
     </div>
   );
-
-  async function loadAll(): Promise<void> {
-    try {
-      const next = await api<OverviewPayload>('/api/dashboard/overview');
-      setData(next);
-    } catch {
-      /* next poll */
-    }
-  }
 }

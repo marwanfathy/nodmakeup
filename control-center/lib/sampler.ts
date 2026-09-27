@@ -21,7 +21,27 @@ const state = globalState('sampler', () => ({
   windowOffset: 0,
   lastTick: Date.now(),
   promLastRefresh: 0,
+  tick: 0,
+  listeners: new Set<(tick: number) => void>(),
 }));
+
+/**
+ * Subscribe to sampler ticks. Used by the live dashboard stream so pushes are
+ * driven by real samples instead of a second interval that would drift out of
+ * phase with the data it reports. Returns an unsubscribe function.
+ */
+export function onSamplerTick(cb: (tick: number) => void): () => void {
+  state.listeners.add(cb);
+  return () => {
+    state.listeners.delete(cb);
+  };
+}
+
+/** Monotonic count of completed ticks. Lets a client discard a duplicated or
+ *  out-of-order frame after a reconnect instead of double-appending points. */
+export function samplerTickCount(): number {
+  return state.tick;
+}
 
 async function tick(): Promise<void> {
   try {
@@ -68,6 +88,17 @@ async function tick(): Promise<void> {
     }
   } catch (err) {
     console.error('[control-center] sampler tick failed:', (err as Error).message);
+  } finally {
+    // Notify in `finally` so a partial tick still reaches subscribers: a client
+    // showing slightly stale numbers beats one frozen on the last good frame.
+    state.tick += 1;
+    for (const cb of state.listeners) {
+      try {
+        cb(state.tick);
+      } catch {
+        /* a broken listener must not stop the heartbeat */
+      }
+    }
   }
 }
 
