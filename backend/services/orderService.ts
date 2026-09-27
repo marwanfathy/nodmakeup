@@ -56,7 +56,11 @@ export interface PublicOrderDetails {
     }>;
 }
 
-/** Domain failure carrying the HTTP status the controller must respond with. */
+/** Domain failure carrying the HTTP status the controller must respond with.
+ *  Defaults to 500 because most uses really are server-side misconfiguration.
+ *  Anything driven by customer input MUST pass an explicit 4xx: a 5xx here both
+ *  masks the real message in production (the error handler blanks 5xx messages)
+ *  and raises a Sentry alert for what is only a bad request. */
 class CheckoutFailure extends Error {
     constructor(
         message: string,
@@ -131,7 +135,9 @@ const calculateOrderTotals = async (
         (await tx.shippingZone.findFirst({ where: { governorate: shippingGovernorate } })) ??
         (await tx.shippingZone.findFirst({ where: { governorate: 'Default' } }));
 
-    if (!shippingZone) throw new CheckoutFailure('Invalid shipping governorate provided.');
+    // Customer-supplied value, not a fault of ours: 400, so the checkout page can
+    // tell the shopper to pick a delivery area instead of showing a server error.
+    if (!shippingZone) throw new CheckoutFailure('Invalid shipping governorate provided.', 400);
 
     let shippingCost = Number(shippingZone.shippingCost);
 
@@ -149,10 +155,10 @@ const calculateOrderTotals = async (
 
     if (couponCode) {
         const coupon = await tx.discount.findFirst({ where: { couponCode, isActive: true } });
-        if (!coupon) throw new CheckoutFailure(`Coupon "${couponCode}" is not valid or has expired.`);
+        if (!coupon) throw new CheckoutFailure(`Coupon "${couponCode}" is not valid or has expired.`, 400);
 
         if (coupon.maxUsages > 0 && coupon.currentUsages >= coupon.maxUsages) {
-            throw new CheckoutFailure(`This coupon code (${couponCode}) has already been used.`);
+            throw new CheckoutFailure(`This coupon code (${couponCode}) has already been used.`, 409);
         }
 
         appliedCouponId = coupon.id;
