@@ -50,7 +50,7 @@ export default async function RootLayout({
          * font-display:swap in fonts.css means neither blocks first paint. */}
         <link
           rel="preload"
-          href="/fonts/rubic.79f7a421.woff2"
+          href="/fonts/rubic.ce012169.woff2"
           as="font"
           type="font/woff2"
           crossOrigin="anonymous"
@@ -58,7 +58,7 @@ export default async function RootLayout({
         {dir === 'rtl' && (
           <link
             rel="preload"
-            href="/fonts/cairo.30840268.woff2"
+            href="/fonts/cairo.7eea4806.woff2"
             as="font"
             type="font/woff2"
             crossOrigin="anonymous"
