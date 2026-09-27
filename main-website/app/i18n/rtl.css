@@ -26,6 +26,78 @@ html[dir='rtl'] h5 {
     'Helvetica Neue', sans-serif;
 }
 
+/* --- No letter-spacing anywhere in Arabic -------------------------------
+ *
+ * The design language here is Latin: wide tracking on nav links, buttons and
+ * section titles is most of what makes the English side read as "premium".
+ * None of it transfers. Arabic is a cursive script — letters join along a
+ * baseline by substituting an initial, medial or final glyph for the isolated
+ * one. letter-spacing inserts a gap between every glyph, which pushes those
+ * joins apart and lands the reader in exactly the state the Cairo font bug
+ * produced: real words, correct order, letters standing apart instead of
+ * connected. Tracking is not a stylistic preference in Arabic, it is a
+ * legibility bug, so this is a flat reset rather than a reduced value.
+ *
+ * Keyed on BOTH attributes the layout emits (`<html lang={locale}
+ * dir={dir}>`, verified as lang="ar" dir="rtl"). Two attribute selectors on
+ * purpose: 43 declarations across the component stylesheets set tracking, and
+ * a single-attribute selector here would lose to the handful of two-class
+ * ones (e.g. `.cart-sidebar-footer .checkout-btn`) and silently leave Arabic
+ * headings tracked. This selector outranks all of them, so the guarantee holds
+ * without restating a single component class here.
+ *
+ * The logo (.navbar-logo .logo) also outranks nothing — it is an <img>, and
+ * letter-spacing does not apply to replaced elements at all.
+ */
+html[dir='rtl'][lang='ar'] :is(
+    body,
+    button,
+    input,
+    select,
+    textarea,
+    a,
+    p,
+    li,
+    span,
+    label,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    strong,
+    em,
+    b,
+    i,
+    small,
+    sub,
+    sup,
+    td,
+    th,
+    blockquote,
+    figcaption,
+    legend,
+    dt,
+    dd,
+    summary,
+    caption,
+    option
+  ) {
+  letter-spacing: normal;
+}
+
+/* The one place on the page holding Latin script in Arabic mode: the checkout
+ * phone field, which is direction:ltr on purpose so the dialling code and the
+ * national digits read left-to-right. Its tracking is digit legibility rather
+ * than typography, so it is kept — scoped to the phone field so an Arabic
+ * name or address typed beside it still gets the reset. Must stay in step
+ * with .phone-input input / .phone-preview in CheckoutPage.css. */
+html[dir='rtl'][lang='ar'] .checkout-field--phone .phone-input input,
+html[dir='rtl'][lang='ar'] .checkout-field--phone .phone-preview {
+  letter-spacing: 0.5px;
+}
+
 /* --- Cart drawer: hide toward the LEFT in RTL (`.open` rule wins when open) --- */
 html[dir='rtl'] .cart-sidebar {
   transform: translateX(calc(-100% - 32px));
