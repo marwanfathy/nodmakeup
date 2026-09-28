@@ -519,6 +519,91 @@
   text-align: left;
 }
 
+/* --- Governorate picker -------------------------------------------------
+   A text box plus a floating list, so the list can be typed into. The box
+   itself is already styled by .form-section input above; these rules add the
+   positioning and the list. The chevron stands in for the native select's
+   arrow, which a text box does not have. */
+.gov-select {
+  position: relative;
+}
+
+.gov-select__input {
+  /* Room for the chevron, on the trailing edge in either direction. */
+  padding-inline-end: 2.4rem !important;
+  text-align: start;
+}
+
+/* Drawn with borders rather than an icon font or an extra image request, so it
+   inherits colour and never 404s. */
+.gov-select__input::after {
+  content: '';
+  position: absolute;
+  inset-inline-end: 1.1rem;
+  top: 50%;
+  width: 0.45rem;
+  height: 0.45rem;
+  margin-top: -0.35rem;
+  border-right: 1.5px solid #6e6e73;
+  border-bottom: 1.5px solid #6e6e73;
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+.gov-select__list {
+  position: absolute;
+  z-index: 20;
+  inset-inline: 0;
+  top: calc(100% + 4px);
+  margin: 0;
+  padding: 0.25rem;
+  list-style: none;
+  max-height: 15rem;
+  overflow-y: auto;
+  /* Never wider than the field, so a long Arabic name cannot push the page
+     sideways on a phone. */
+  box-sizing: border-box;
+  background-color: #fff;
+  border: 1px solid #d3d3d3;
+  border-radius: var(--r-field);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.gov-select__option {
+  padding: 0.6rem 0.7rem;
+  border-radius: calc(var(--r-field) - 4px);
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.gov-select__option.is-active {
+  background-color: #f2f2f2;
+}
+
+/* The chosen one stays marked while the list is open, so the shopper can see
+   what is already selected rather than inferring it from the closed box. */
+.gov-select__option.is-selected {
+  font-weight: 600;
+}
+
+.gov-select__option.is-selected::after {
+  content: '✓';
+  float: inline-end;
+  color: #1b7a3d;
+}
+
+.gov-select__empty {
+  padding: 0.6rem 0.7rem;
+  font-size: 0.9rem;
+  color: #6e6e73;
+}
+
+@media (max-width: 768px) {
+  .gov-select__list {
+    max-height: 12rem;
+  }
+}
+
 /* --- Discount code ------------------------------------------------------
    The code input is a field like any other, so a refusal sits under it with the
    same styling as every other message on the page. It carries its own id and

@@ -22,7 +22,9 @@ import { useI18n } from '../../lib/i18n/client';
 import { localePath } from '../../lib/i18n/paths';
 import { formatPrice } from '../../lib/format';
 import { normalizeEgyptianPhone, isValidEgyptianPhone, toInternationalEgyptianPhone, formatPhoneForLocale, EG_PHONE_PREFIX } from '../../lib/phone';
-import { getCurrentPosition, describePosition, mergeAddress, GeoError, ADDRESS_MAX } from '../../lib/geolocation';
+import { getCurrentPosition, locateFix, mergeAddress, matchesPlace, GeoError, ADDRESS_MAX } from '../../lib/geolocation';
+import { governorateLabel } from '../../lib/i18n/governorates';
+import GovernorateSelect from './GovernorateSelect';
 import './CheckoutPage.css';
 
 interface FormData {
@@ -300,9 +302,16 @@ export default function CheckoutPage() {
     };
 
     /**
-     * Fill the address from the device's GPS position. The permission prompt is
+     * Fill the address from the device's GPS position, and pick the delivery
+     * governorate when the fix lands in one we serve. The permission prompt is
      * the slow part, so the button reports progress, and a failure explains
      * itself instead of leaving an empty field behind.
+     *
+     * The governorate is chosen only when the geocoder names a place we
+     * recognise. Guessing would be worse than asking: the shipping price and
+     * whether we deliver at all both hang off this field, so a wrong silent
+     * choice is a refund and an angry message later. An unrecognised place
+     * leaves the picker untouched and says so.
      */
     const handleUseCurrentLocation = async () => {
         if (isLocating) return;
@@ -313,11 +322,25 @@ export default function CheckoutPage() {
             const coords = await getCurrentPosition();
             // Coordinates alone are not an address a driver can read, so a street
             // address is resolved too — with the pin kept either way.
-            const detected = await describePosition(coords, locale);
-            const next = { ...formData, customer_address: mergeAddress(formData.customer_address, detected) } as FormData;
+            const fix = await locateFix(coords, locale);
+            const matched = shippingZones.find((zone) =>
+                fix.places.some((place) => matchesPlace(place, [zone.governorate, governorateLabel(zone.governorate, locale)])),
+            );
+
+            const next = { ...formData, customer_address: mergeAddress(formData.customer_address, fix.address) } as FormData;
+            if (matched) next.shipping_governorate = matched.governorate;
             setFormData(next);
             revalidate('customer_address', next);
-            setGeoNote({ tone: 'ok', text: t('checkout.geoFound') });
+            if (matched) {
+                setTouched((prev) => ({ ...prev, shipping_governorate: true }));
+                revalidate('shipping_governorate', next);
+                setGeoNote({ tone: 'ok', text: t('checkout.geoFoundWithGov', { governorate: governorateLabel(matched.governorate, locale) }) });
+            } else {
+                // The address is still filled — only the governorate is left to
+                // the shopper, and the message has to say that rather than
+                // claiming everything was filled in.
+                setGeoNote({ tone: 'warn', text: t('checkout.geoGovUnmatched') });
+            }
         } catch (error) {
             const reason = error instanceof GeoError ? error.reason : 'unavailable';
             setGeoNote({ tone: 'warn', text: t(`checkout.geo.${reason}`) });
@@ -638,20 +661,24 @@ export default function CheckoutPage() {
 
                             <div className={`checkout-field ${errors.shipping_governorate ? 'has-error' : ''}`}>
                                 <label htmlFor="shipping_governorate">{t('checkout.governorate')}</label>
-                                <select
+                                <GovernorateSelect
                                     id="shipping_governorate"
-                                    name="shipping_governorate"
-                                    required
-                                    ref={(el) => { fieldRefs.current.shipping_governorate = el; }}
-                                    aria-invalid={Boolean(errors.shipping_governorate)}
-                                    aria-describedby={errors.shipping_governorate ? 'err-shipping_governorate' : undefined}
-                                    onChange={handleInputChange}
-                                    onBlur={() => handleBlur('shipping_governorate')}
                                     value={formData.shipping_governorate}
-                                >
-                                    <option value="">{t('checkout.governorate')}</option>
-                                    {shippingZones.map(zone => <option key={zone.id} value={zone.governorate}>{zone.governorate}</option>)}
-                                </select>
+                                    zones={shippingZones}
+                                    locale={locale}
+                                    placeholder={t('checkout.governorateSearch')}
+                                    noResults={t('checkout.governorateNoResults')}
+                                    invalid={Boolean(errors.shipping_governorate)}
+                                    describedBy={errors.shipping_governorate ? 'err-shipping_governorate' : undefined}
+                                    inputRef={(el) => { fieldRefs.current.shipping_governorate = el; }}
+                                    onSelect={(governorate) => {
+                                        const next = { ...formData, shipping_governorate: governorate };
+                                        setFormData(next);
+                                        setTouched((prev) => ({ ...prev, shipping_governorate: true }));
+                                        revalidate('shipping_governorate', next);
+                                    }}
+                                    onSettled={() => handleBlur('shipping_governorate')}
+                                />
                                 {errors.shipping_governorate && <span className="field-error" id="err-shipping_governorate">{errors.shipping_governorate}</span>}
                             </div>
 

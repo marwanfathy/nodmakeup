@@ -21,17 +21,28 @@ const run = async () => {
     console.log(`Admin created: ${adminEmail} / admin1234`);
   }
 
-  // 2. Shipping zones
+  // 2. Shipping zones — the areas the courier actually serves.
+  // These three are the whole delivery area. A zone removed here stops being
+  // offered at checkout, but orders that already name it keep it: the order
+  // stores the governorate as text rather than pointing at this row, so history
+  // survives a change to coverage.
   const zones = [
     { governorate: 'Cairo', shippingCost: 50, freeShippingThreshold: 1500 },
-    { governorate: 'Giza', shippingCost: 50, freeShippingThreshold: 1500 },
     { governorate: 'Alexandria', shippingCost: 70, freeShippingThreshold: 1500 },
-    { governorate: 'Mansoura', shippingCost: 70, freeShippingThreshold: 1500 },
-    { governorate: 'Aswan', shippingCost: 90, freeShippingThreshold: 2000 },
-    { governorate: 'Luxor', shippingCost: 90, freeShippingThreshold: 2000 },
+    { governorate: 'Port Said', shippingCost: 70, freeShippingThreshold: 1500 },
   ];
   for (const z of zones) {
     await prisma.shippingZone.upsert({ where: { governorate: z.governorate }, update: {}, create: z });
+  }
+  // Drop any zone not in the list above. Upsert alone would leave a retired
+  // governorate behind and still offering itself at checkout, so the seed would
+  // not actually be the source of truth for coverage. Only these rows go;
+  // orders are untouched because they store the name as text.
+  const removed = await prisma.shippingZone.deleteMany({
+    where: { governorate: { notIn: zones.map((z) => z.governorate) } },
+  });
+  if (removed.count > 0) {
+    console.log(`Retired ${removed.count} zone(s) no longer served.`);
   }
   console.log(`${zones.length} shipping zones ensured.`);
 

@@ -93,14 +93,36 @@ export function formatPin({ lat, lng }: Coordinates): string {
   return `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
 }
 
+/** A resolved position: what to show, and which places it sits inside. */
+export interface LocatedPlace {
+  /**
+   * A street address a driver can read, with the exact pin kept alongside it, or
+   * just the pin when no address could be resolved.
+   */
+  address: string;
+  /**
+   * Place names the fix falls inside, most authoritative first. Nominatim calls
+   * the governorate `state`, and for a delivery area that is the one that
+   * matters — but the city is kept too, because a shopper often thinks in terms
+   * of the city and the two do not always agree.
+   */
+  places: string[];
+}
+
 /**
- * The best available description of a position: a street address with the exact
- * pin kept alongside it, or just the pin when no address could be resolved.
+ * The best available description of a position, plus the places it belongs to.
+ *
+ * Both come from one request: asking twice would double the wait on a button
+ * whose slowest part is already the permission prompt, against a public service
+ * that rate-limits.
  */
-export async function describePosition(coords: Coordinates, locale: string): Promise<string> {
+export async function locateFix(coords: Coordinates, locale: string): Promise<LocatedPlace> {
   const pin = formatPin(coords);
-  const street = await reverseGeocode(coords, locale);
-  return street ? `${street} (${pin})` : pin;
+  const found = await reverseGeocode(coords, locale);
+  return {
+    address: found?.displayName ? `${found.displayName} (${pin})` : pin,
+    places: found?.places ?? [],
+  };
 }
 
 /**
@@ -122,13 +144,21 @@ export function mergeAddress(existing: string, detected: string): string {
   return `${base}, ${addition}`;
 }
 
+/** What the geocoder gives back that the checkout actually uses. */
+interface GeocodeResult {
+  /** Tidied, length-capped address for the address field. */
+  displayName: string | null;
+  /** Governorate, city, town… in the order Nominatim considers most specific first. */
+  places: string[];
+}
+
 /**
  * OpenStreetMap's reverse geocoder. Returns null for every failure mode —
  * blocked by an extension, offline, rate limited, slow — because the caller has
  * a perfectly good fallback and an error would only cost the customer the
  * feature.
  */
-async function reverseGeocode({ lat, lng }: Coordinates, locale: string): Promise<string | null> {
+async function reverseGeocode({ lat, lng }: Coordinates, locale: string): Promise<GeocodeResult | null> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), GEOCODER_TIMEOUT_MS);
 
@@ -148,13 +178,101 @@ async function reverseGeocode({ lat, lng }: Coordinates, locale: string): Promis
     });
     if (!response.ok) return null;
 
-    const payload = (await response.json()) as { display_name?: string };
-    return tidyDisplayName(payload?.display_name);
+    const payload = (await response.json()) as NominatimResponse;
+    return {
+      displayName: tidyDisplayName(payload?.display_name),
+      places: collectPlaces(payload?.address),
+    };
   } catch {
     return null;
   } finally {
     clearTimeout(timer);
   }
+}
+
+/** The subset of Nominatim's address object this feature reads. */
+interface NominatimResponse {
+  display_name?: string;
+  address?: Partial<Record<PlaceKey, string>>;
+}
+
+/** Ordered most to least authoritative: the governorate decides delivery. */
+type PlaceKey = 'state' | 'city' | 'town' | 'village' | 'county' | 'state_district';
+
+const PLACE_KEYS: readonly PlaceKey[] = ['state', 'city', 'town', 'village', 'county', 'state_district'];
+
+/**
+ * The place names a fix belongs to, most authoritative first and without
+ * duplicates, so a caller can take the first one it recognises.
+ */
+function collectPlaces(address?: Partial<Record<PlaceKey, string>>): string[] {
+  if (!address) return [];
+  const seen = new Set<string>();
+  const places: string[] = [];
+  for (const key of PLACE_KEYS) {
+    const value = address[key]?.trim();
+    if (!value) continue;
+    const normalized = normalizePlaceName(value);
+    if (!normalized || seen.has(normalized)) continue;
+    seen.add(normalized);
+    places.push(value);
+  }
+  return places;
+}
+
+/**
+ * Words that name a level of government rather than a place. The geocoder
+ * decorates them inconsistently — "Cairo" in one place, "Cairo Governorate" in
+ * another, "محافظة القاهرة" in Arabic — and the delivery zones are named after
+ * the bare place, so the decoration is dropped before comparing.
+ */
+const ADMINISTRATIVE_WORDS = ['governorate', 'gouvernorat', 'محافظة', 'إمارة'];
+
+/**
+ * Reduce a place name to something two spellings of the same place share:
+ * case, Arabic diacritics and tatweel, the alef/ya/ta-marbuta variants, and any
+ * administrative word wrapped around the name.
+ */
+export function normalizePlaceName(raw: string): string {
+  let value = raw
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '') // latin diacritics
+    .replace(/[\u064B-\u065F\u0670\u0640]/g, '') // arabic marks, tatweel
+    .replace(/[أإآٱ]/g, '\u0627') // alef variants
+    .replace(/\u0649/g, '\u064A') // alef maqsura
+    .replace(/\u0629/g, '\u0647') // ta marbuta
+    .toLowerCase()
+    .trim();
+
+  for (const word of ADMINISTRATIVE_WORDS) {
+    value = value
+      .replace(new RegExp(`(^|\\s)${word}(?=\\s|$)`, 'g'), ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  // The Arabic definite article. Nobody types or searches "القاهرة" when they
+  // mean "قاهره", and the geocoder may return either. Only stripped when
+  // something substantial remains, so a name that genuinely starts with those
+  // letters is not gutted.
+  value = value.replace(/^ال(?=.{3,})/, '');
+
+  return value;
+}
+
+/**
+ * Whether a place the geocoder reported is the same place as one of the names a
+ * delivery zone answers to.
+ *
+ * Deliberately exact after normalizing. A loose "contains" match would put a
+ * fix in the wrong delivery zone, and the shopper would find out from the
+ * shipping price rather than from us — so an unrecognized place is left
+ * unselected and the customer chooses, which is the honest outcome.
+ */
+export function matchesPlace(place: string, candidates: readonly string[]): boolean {
+  const target = normalizePlaceName(place);
+  if (!target) return false;
+  return candidates.some((candidate) => normalizePlaceName(candidate) === target);
 }
 
 /**
