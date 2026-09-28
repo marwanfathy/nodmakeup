@@ -9,6 +9,14 @@ import { PrismaClient } from '@prisma/client';
 dotenv.config();
 const prisma = new PrismaClient();
 
+/**
+ * The zone the checkout charges when it is given a governorate it does not
+ * recognise. Not a delivery area: it is never offered to shoppers, and
+ * orderService falls back to it so an unknown governorate is priced rather
+ * than rejected.
+ */
+const DEFAULT_FALLBACK_ZONE = 'Default';
+
 const run = async () => {
   // 1. Admin account (also satisfies resolveBotAdminId's "first admin")
   const adminEmail = 'admin@nodmakeup.com';
@@ -38,8 +46,16 @@ const run = async () => {
   // governorate behind and still offering itself at checkout, so the seed would
   // not actually be the source of truth for coverage. Only these rows go;
   // orders are untouched because they store the name as text.
+  //
+  // 'Default' is excluded from the delete on purpose: it is not a delivery area
+  // but the fallback the checkout charges when it is handed a governorate it
+  // does not recognise (orderService), so removing it would turn a priced
+  // fallback into a 400. It is also already hidden from the storefront, which
+  // filters it out of the public list.
   const removed = await prisma.shippingZone.deleteMany({
-    where: { governorate: { notIn: zones.map((z) => z.governorate) } },
+    where: {
+      governorate: { notIn: [...zones.map((z) => z.governorate), DEFAULT_FALLBACK_ZONE] },
+    },
   });
   if (removed.count > 0) {
     console.log(`Retired ${removed.count} zone(s) no longer served.`);
