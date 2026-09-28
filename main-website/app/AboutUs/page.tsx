@@ -1,6 +1,6 @@
 import React from 'react';
-import '../styles/Legal.css';
-import { getTranslator } from '../i18n/server';
+import '../../styles/Legal.css';
+import { getTranslator } from '../../lib/i18n/server';
 
 export const metadata = {
     title: 'The Story | nod',

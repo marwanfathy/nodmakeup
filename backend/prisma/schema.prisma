@@ -383,6 +383,63 @@ model HeroMediaItem {
   @@map("hero_media_items")
 }
 
+// The landing-page banner between Stories and the product hero. One row is the
+// live slot; the admin edits that single banner rather than managing a list,
+// so there is no ordering column and no "which active row wins" rule.
+//
+// Deliberately NOT a HeroSection: those are single-language multi-slide
+// carousels, and the banner needs an Arabic twin on every string or the Arabic
+// storefront loses the copy it has today.
+//
+// The Arabic columns are nullable so the admin is not forced to fill six
+// fields to publish an English-only edit. The storefront falls back to the
+// English value per string, the same way it does for Product.nameAr.
+model LandingBanner {
+  id         String   @id @default(uuid()) @map("landing_banner_id") @db.VarChar(36)
+  imageUrl   String   @map("image_url") @db.VarChar(255)
+  imageAlt   String?  @map("image_alt") @db.VarChar(255)
+  tagline    String   @db.VarChar(120)
+  taglineAr  String?  @map("tagline_ar") @db.VarChar(120)
+  title      String   @db.VarChar(120)
+  titleAr    String?  @map("title_ar") @db.VarChar(120)
+  ctaLabel   String   @map("cta_label") @db.VarChar(60)
+  ctaLabelAr String?  @map("cta_label_ar") @db.VarChar(60)
+  ctaUrl     String   @map("cta_url") @db.VarChar(255)
+  isActive   Boolean  @default(true) @map("is_active")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  @@map("landing_banners")
+}
+
+// One row per homepage section: its position and whether it is shown.
+//
+// The set of sections is NOT stored here — it is registered in code
+// (shared/src/landing/sections.ts) so a new section needs no migration and no
+// admin-panel change. This table only records what the operator decided about
+// sections the registry already knows about. That is why `key` is a unique
+// string rather than a foreign key: the registry is the source of truth for
+// which keys exist, and a row whose key has since been unregistered is reported
+// to the admin as unknown rather than silently deleted, so re-registering the
+// section restores its saved position.
+//
+// A section with no row at all is enabled, in registry order. That default lives
+// in code rather than as five seeded rows precisely so the common case — nobody
+// has touched the layout — needs no data to be correct.
+//
+// `config` holds per-section settings (today only the hero's mode and carousel
+// slug). Json rather than columns so a section gaining a setting is a registry
+// and schema change, not a migration.
+model LandingSection {
+  id           String   @id @default(uuid()) @map("landing_section_id") @db.VarChar(36)
+  key          String   @unique @db.VarChar(64)
+  displayOrder Int      @default(0) @map("display_order")
+  isEnabled    Boolean  @default(true) @map("is_enabled")
+  config       Json?    @map("config")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  @@map("landing_sections")
+}
+
 // -------------------------------------------
 // --- ENUMS ---
 // -------------------------------------------

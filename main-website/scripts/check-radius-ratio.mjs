@@ -34,7 +34,7 @@ function evalCalc(expr) {
 }
 
 function loadTokens() {
-  const src = readFileSync('app/design-system/variables.css', 'utf8');
+  const src = readFileSync('design-system/variables.css', 'utf8');
   const raw = {};
   for (const m of src.matchAll(/--([\w-]+)\s*:\s*([^;]+);/g)) raw[m[1]] = m[2].trim();
 
@@ -160,28 +160,28 @@ const NESTINGS = [
   },
   {
     what: 'gallery: thumbnail image inside the button padding + 1px border',
-    file: 'app/ProductImageGallery/ProductImageGallery.css',
+    file: 'components/product/ProductImageGallery/ProductImageGallery.css',
     outer: '.thumbnail-button',
     inner: '.thumbnail-button img',
     chain: ['.thumbnail-button'], // 2px padding + 1px border
   },
   {
     what: 'gallery: main image bleeds into the media panel',
-    file: 'app/ProductImageGallery/ProductImageGallery.css',
+    file: 'components/product/ProductImageGallery/ProductImageGallery.css',
     outer: '.main-image-container',
     inner: '.main-image',
     bleed: true,
   },
   {
     what: 'cart: drawer body bleeds into the drawer edge',
-    file: 'app/navbar/NavBar.css',
+    file: 'components/layout/Navbar/NavBar.css',
     outer: '.cart-sidebar',
     inner: '.cart-sidebar-body',
     bleed: true,
   },
   {
     what: 'cart: drawer footer shares the drawer edge',
-    file: 'app/navbar/NavBar.css',
+    file: 'components/layout/Navbar/NavBar.css',
     outer: '.cart-sidebar',
     inner: '.cart-sidebar-footer',
     bleed: true,

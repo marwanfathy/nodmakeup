@@ -2,16 +2,16 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import ProductCard from '../ProductCard/ProductCard'; // Adjust path if needed
-import { ProductCardSkeleton } from '../ProductCard/ProductCardSkeleton'; // Adjust path if needed
+import ProductCard from '../../components/product/ProductCard/ProductCard'; // Adjust path if needed
+import { ProductCardSkeleton } from '../../components/product/ProductCard/ProductCardSkeleton'; // Adjust path if needed
 import { 
     searchProducts, 
     getPublicCategories, 
     ProductSummary, 
     Category 
 } from '../../lib/api'; 
-import { useI18n } from '../i18n/client';
-import { localePath } from '../i18n/paths';
+import { useI18n } from '../../lib/i18n/client';
+import { localePath } from '../../lib/i18n/paths';
 import './ShopPage.css';
 
 export default function ShopPage() {

@@ -1,6 +1,6 @@
 import React from 'react';
-import '../../styles/Legal.css'; // Adjust path based on where you put the CSS
-import { getTranslator } from '../../i18n/server';
+import '../../../styles/Legal.css'; // Adjust path based on where you put the CSS
+import { getTranslator } from '../../../lib/i18n/server';
 
 export const metadata = {
     title: 'Privacy Policy | nod',

@@ -260,6 +260,10 @@
     border-radius: 50%; background: #000; border: 1px solid var(--hairline-strong); color: var(--ink);
     cursor: pointer; display: flex; align-items: center; justify-content: center;
     font-size: 12px; z-index: 2; }
+/* Wide variant for landscape art (the landing banner). The default tile is a
+   92px square, which crops a wide photo to an unreadable centre square when
+   object-fit: cover does its job. */
+.nd-upload-tile.is-wide { width: 100%; min-width: 240px; height: 150px; }
 
 /* ---------- Misc ---------- */
 .nd-progress { height: 6px; border-radius: var(--r-full); background: rgba(255, 255, 255, 0.08); overflow: hidden; }
@@ -282,3 +286,50 @@
 .nd-ev-main { flex: 1; min-width: 0; }
 .nd-ev-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .nd-ev-meta { color: var(--ink-faint); font-size: var(--step-micro); font-family: var(--font-mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ---------- Homepage layout: reorderable section list ----------
+   A section's position only means something relative to the others, so the list
+   carries the order directly: rows are dragged and swap in place, and the whole
+   list is saved at once. `touch-action: none` on the handle is load-bearing — the
+   pointer gesture is captured there, and without it a touch drag scrolls the page
+   instead of moving the row. */
+.nd-sortable { list-style: none; margin: 0; padding: 0; }
+.nd-sortable-row {
+    display: flex; align-items: flex-start; gap: var(--sp-3);
+    background: var(--paper-raised-2);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    padding: var(--sp-3) var(--sp-4);
+    margin-bottom: var(--sp-2);
+    transition: border-color 0.14s ease, box-shadow 0.14s ease, opacity 0.14s ease;
+}
+.nd-sortable-row:last-child { margin-bottom: 0; }
+/* Lifted while held: the one piece of motion, so the row under the pointer is
+   unambiguous. The rest of the feedback is the rows swapping around it. */
+.nd-sortable-row.is-dragging { border-color: var(--accent); box-shadow: var(--shadow-2); }
+/* Hidden sections stay listed and stay draggable — you may be reordering the page
+   while one part of it is off — but recede so the ones that render read first. */
+.nd-sortable-row.is-off { opacity: 0.55; }
+.nd-sortable-row.is-off .nd-sortable-title { text-decoration: line-through; }
+
+.nd-sortable-handle {
+    flex: none; display: inline-flex; align-items: center; justify-content: center;
+    /* Circular hit target, and the row is only draggable from here — so the
+       controls beside it never swallow a drag. */
+    width: 34px; height: 34px; padding: 0; margin-top: 1px;
+    border: 1px solid var(--hairline); border-radius: var(--r-full);
+    background: transparent; color: var(--ink-faint);
+    cursor: grab; touch-action: none;
+}
+.nd-sortable-handle:hover { color: var(--ink); border-color: var(--hairline-strong); }
+.nd-sortable-handle:active { cursor: grabbing; }
+
+.nd-sortable-main { flex: 1; min-width: 0; }
+.nd-sortable-title { display: flex; align-items: baseline; gap: var(--sp-2); font-weight: 600; font-size: var(--step-body); }
+/* The Arabic name is shown beside the English one so the operator can match a
+   section to the storefront without switching the whole panel to Arabic. */
+.nd-sortable-alt { color: var(--ink-faint); font-size: var(--step-sm); font-weight: 400; }
+.nd-sortable-hint { color: var(--ink-faint); font-size: var(--step-caption); margin-top: 2px; }
+
+.nd-sortable-modes { flex: none; width: 260px; }
+.nd-sortable-toggle { flex: none; width: 108px; }

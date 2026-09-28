@@ -1,5 +1,5 @@
 import '../globals.css';
-import CollectionsSection from "../CollectionsSection/CollectionsSection";
+import CollectionsSection from "../../components/sections/CollectionsSection/CollectionsSection";
 
 export const metadata = {
     title: 'Bestsellers | NOD Makeup',

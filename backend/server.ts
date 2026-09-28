@@ -43,6 +43,8 @@ import publicDiscountRoutes from './routes/public/discountRoutes';
 import publicOrderRoutes from './routes/public/orderRoutes';
 import publicAnalyticsRoutes from './routes/public/analyticsRoutes';
 import publicHeroSectionRoutes from './routes/public/heroSectionRoutes';
+import publicLandingBannerRoutes from './routes/public/landingBannerRoutes';
+import publicLandingLayoutRoutes from './routes/public/landingLayoutRoutes';
 
 import adminAuthRoutes from './routes/admin/authRoutes';
 import adminDashboardRoutes from './routes/admin/dashboardRoutes';
@@ -57,6 +59,8 @@ import adminStoryRoutes from './routes/admin/storyRoutes';
 import adminUserRoutes from './routes/admin/adminRoutes';
 import adminAnalyticsRoutes from './routes/admin/analyticsRoutes';
 import heroSectionRoutes from './routes/admin/heroSectionRoutes';
+import adminLandingBannerRoutes from './routes/admin/landingBannerRoutes';
+import adminLandingLayoutRoutes from './routes/admin/landingLayoutRoutes';
 import crmRoutes from './routes/admin/crmRoutes';
 
 const app: Application = express();
@@ -288,6 +292,13 @@ app.use('/api/v1/content/stories', csrfProtect, adminStoryRoutes);
 app.use('/api/v1/content/stories', publicStoryRoutes);
 app.use('/api/v1/content/hero-sections', csrfProtect, heroSectionRoutes);
 app.use('/api/v1/content/hero-sections', publicHeroSectionRoutes);
+// Singleton slot, so no :id guard — protectIfToken alone splits admin from public.
+app.use('/api/v1/content/landing-banner', csrfProtect, adminLandingBannerRoutes);
+app.use('/api/v1/content/landing-banner', publicLandingBannerRoutes);
+// The homepage section order, same singleton shape as the banner. Which sections
+// exist is registered in code, so there is nothing to guard by id here either.
+app.use('/api/v1/content/landing-layout', csrfProtect, adminLandingLayoutRoutes);
+app.use('/api/v1/content/landing-layout', publicLandingLayoutRoutes);
 
 // Orders (cart, orders, shipping-zones, discounts)
 app.use('/api/v1/orders/cart', cartRoutes);

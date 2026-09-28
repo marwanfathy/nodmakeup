@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * One-off codemod: point every border-radius in the storefront at the design
- * system's curve ladder (app/design-system/variables.css).
+ * system's curve ladder (design-system/variables.css).
  *
  * Rules of the ladder:
  *   --r-control  buttons, pills, icon buttons      (circle cap)
@@ -133,7 +133,13 @@ function selectorsFor(source) {
   return out;
 }
 
-const files = execSync("find app -name '*.css' ! -path '*design-system*'", { encoding: 'utf8' })
+// app/ holds only routes now; the component stylesheets live under components/,
+// with the shared legal page stylesheet under styles/. design-system/ is a
+// generated token copy and fonts/ is a webfont stylesheet — neither is hand-edited.
+const files = execSync(
+  "find app components styles -name '*.css' ! -path '*design-system*' ! -path 'fonts/*'",
+  { encoding: 'utf8' }
+)
   .trim()
   .split('\n')
   .sort();

@@ -216,6 +216,53 @@ export interface HeroSection {
     isActive: boolean;
     slides: HeroSlide[];
 }
+/**
+ * The landing-page banner slot, as the public endpoint returns it.
+ *
+ * Each of the three strings has an Arabic twin. A null twin means "fall back to
+ * the English value for this one string", not "render nothing" — which is why
+ * they are nullable rather than required, and why the storefront resolves them
+ * per field instead of treating the row as one language or the other.
+ */
+export interface LandingBanner {
+    id: string;
+    imageUrl: string;
+    imageAlt?: string | null;
+    tagline: string;
+    taglineAr?: string | null;
+    title: string;
+    titleAr?: string | null;
+    ctaLabel: string;
+    ctaLabelAr?: string | null;
+    ctaUrl: string;
+}
+/**
+ * One homepage section as the storefront receives it.
+ *
+ * `key` is a plain `string`, not the `LandingSectionKey` union, because this is
+ * whatever came out of the database: a row can name a key that has since been
+ * unregistered from the registry, and the storefront's job is to notice and skip
+ * it rather than to be handed a type that says it cannot happen. The renderer
+ * narrows with `isLandingSectionKey` before looking up a component.
+ *
+ * The mode fields are `null` rather than optional on purpose — the row always
+ * has a value for them, it just may be no value.
+ */
+export interface LandingSectionSetting {
+    key: string;
+    isEnabled: boolean;
+    heroMode: string | null;
+    heroSlug: string | null;
+}
+/**
+ * The saved order and visibility of every homepage section.
+ *
+ * `sections` is already ordered — position in the array IS the display order, so
+ * clients never sort and cannot disagree with the database about it.
+ */
+export interface PublicLandingLayout {
+    sections: LandingSectionSetting[];
+}
 export interface PageViewEvent {
     path: string;
     /** First-party persistent visitor id (repeat visitors). */

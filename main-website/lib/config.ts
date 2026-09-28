@@ -9,7 +9,7 @@
 // lives in shared/runtime/config — the one source of truth, shared with
 // the admin panel.
 
-import { deriveClientBaseUrl } from '../lib/shared/dist/runtime/config.js';
+import { deriveClientBaseUrl } from './shared/dist/runtime/config.js';
 
 const browserLocation = () =>
   typeof window !== 'undefined'

@@ -244,8 +244,8 @@ export const Tabs = ({ tabs, active, onChange }) => (
 );
 
 /* ---------- Upload tile ---------- */
-export const UploadTile = ({ src, onRemove, onFile, label, busy }) => (
-    <span className={`nd-upload-tile ${busy ? 'busy' : ''}`} title={label || 'Upload'}>
+export const UploadTile = ({ src, onRemove, onFile, label, busy, className = '' }) => (
+    <span className={`nd-upload-tile ${className} ${busy ? 'busy' : ''}`} title={label || 'Upload'}>
         {src && <img src={mediaSrc(src)} alt={label || 'uploaded'} />}
         {busy && (
             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(4,6,8,0.72)', zIndex: 3 }}>

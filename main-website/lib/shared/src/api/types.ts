@@ -247,6 +247,27 @@ export interface HeroSection {
   slides: HeroSlide[];
 }
 
+/**
+ * The landing-page banner slot, as the public endpoint returns it.
+ *
+ * Each of the three strings has an Arabic twin. A null twin means "fall back to
+ * the English value for this one string", not "render nothing" — which is why
+ * they are nullable rather than required, and why the storefront resolves them
+ * per field instead of treating the row as one language or the other.
+ */
+export interface LandingBanner {
+  id: string;
+  imageUrl: string;
+  imageAlt?: string | null;
+  tagline: string;
+  taglineAr?: string | null;
+  title: string;
+  titleAr?: string | null;
+  ctaLabel: string;
+  ctaLabelAr?: string | null;
+  ctaUrl: string;
+}
+
 // --- Analytics ---
 export interface PageViewEvent {
   path: string;

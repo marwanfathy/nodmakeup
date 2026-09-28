@@ -68,6 +68,24 @@ export const storyApi = {
 
 export const heroSectionApi = crud('/api/v1/content/hero-sections');
 
+// The landing banner is a singleton slot, so this is a get/save pair rather
+// than the create/update/delete of `crud`: saving always writes "the" banner,
+// whether or not a row exists yet (hence PUT on both the client and the route).
+// Both replies are { success, data }, so callers read `.data`.
+export const landingBannerApi = {
+    get: () => api('get', '/api/v1/content/landing-banner'),
+    save: (body) => api('put', '/api/v1/content/landing-banner', body),
+};
+
+// The homepage layout, same get/save shape: one ordered list, saved whole. The
+// order is the array order in the body — there is no displayOrder field to keep
+// in sync — and the reply is the saved list read back through the same
+// projection a reload would use.
+export const landingLayoutApi = {
+    get: () => api('get', '/api/v1/content/landing-layout'),
+    save: (sections) => api('put', '/api/v1/content/landing-layout', { sections }),
+};
+
 export const adminUserApi = {
     getAll: () => api('get', '/api/v1/users/admins'),
     create: (body) => api('post', '/api/v1/users/admins', body),
@@ -109,6 +127,7 @@ export const mediaApi = {
     uploadProductImage: (file) => uploadTo('/api/upload-product-image', file),
     uploadStory: (file) => uploadTo('/api/upload-story', file),
     uploadHeroMedia: (file) => uploadTo('/api/upload-hero-media', file),
+    uploadBannerImage: (file) => uploadTo('/api/upload-banner-image', file),
     uploadAudio: (file) => uploadTo('/api/upload-audio', file),
     delete: (path) => fetch(`${MEDIA_URL}/api/delete`, {
         method: 'POST',

@@ -10,3 +10,4 @@ export { analyticsApi, analyticsAdminApi } from './clients/analytics';
 export { usersApi, usersAdminApi } from './clients/users';
 export { crmAdminApi } from './clients/crm';
 export { mediaApi, MEDIA_ROUTES } from './clients/media';
+export * from './landing/sections';

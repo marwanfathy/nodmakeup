@@ -11,12 +11,12 @@ import {
     ProductVariantDetail, 
     ProductSummary 
 } from '../../../lib/api';
-import { useCart } from '../../contexts/CartContext';
-import ProductImageGallery from '../../ProductImageGallery/ProductImageGallery';
-import VariantSelector from '../../VariantSelector/VariantSelector';
-import RelatedProductsSlider from '../../RelatedProducts/RelatedProducts';
-import { useI18n } from '../../i18n/client';
-import { localePath } from '../../i18n/paths';
+import { useCart } from '../../../contexts/CartContext';
+import ProductImageGallery from '../../../components/product/ProductImageGallery/ProductImageGallery';
+import VariantSelector from '../../../components/product/VariantSelector/VariantSelector';
+import RelatedProductsSlider from '../../../components/product/RelatedProducts/RelatedProducts';
+import { useI18n } from '../../../lib/i18n/client';
+import { localePath } from '../../../lib/i18n/paths';
 import { formatPrice, pickLocale } from '../../../lib/format';
 import './ProductViewPage.css';
 

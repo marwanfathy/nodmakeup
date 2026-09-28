@@ -11,7 +11,7 @@ import { MIME } from '../utils/mime.js';
 const STAGING_DIR = path.join(import.meta.dirname, '../../public/temp');
 
 const MAX_BYTES = {
-  image: 10 * 1024 * 1024, // 10 MB — product shots
+  image: 10 * 1024 * 1024, // 10 MB — product shots, landing banner
   media: 100 * 1024 * 1024, // 100 MB — story/hero raw video
   audio: 10 * 1024 * 1024, // 10 MB
 };
@@ -63,6 +63,9 @@ function createUploader({ kind, filenamePrefix, maxBytes }) {
 
 // ── Kind configuration (the only place upload rules are defined) ──
 export const productImageUploader = createUploader({ kind: 'image', filenamePrefix: 'prod-raw-', maxBytes: MAX_BYTES.image });
+// The landing banner is a single still photo, so it takes the image-only filter
+// and the image size cap rather than the video-capable 'media' kind.
+export const bannerImageUploader = createUploader({ kind: 'image', filenamePrefix: 'banner-raw-', maxBytes: MAX_BYTES.image });
 export const storyUploader = createUploader({ kind: 'media', filenamePrefix: 'story-raw-', maxBytes: MAX_BYTES.media });
 export const heroMediaUploader = createUploader({ kind: 'media', filenamePrefix: 'hero-raw-', maxBytes: MAX_BYTES.media });
 export const audioUploader = createUploader({ kind: 'audio', filenamePrefix: 'audio-', maxBytes: MAX_BYTES.audio });

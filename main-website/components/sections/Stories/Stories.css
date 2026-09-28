@@ -1,0 +1,416 @@
+@import url("../../../fonts/fonts.css");
+
+/* ==========================================================================
+   1. Stories Tray (The horizontal avatar list)
+   ========================================================================== */
+
+.stories-tray-container {
+box-sizing: border-box;
+  background-color: #f8f8f8;
+  /* Fluid, not a percentage of a percentage: 97.5% + 20px of margin on each
+     side is wider than any phone or tablet, which pushed the whole page
+     sideways. Filling the space the margins leave is exact at every width and
+     needs no max-width/right-offset patch further down. */
+  width: auto;
+  padding: 2rem 0;
+  display: flex;
+  border-radius: var(--r-card);
+  margin: 20px;
+  z-index: 500;
+  /* Children default to min-width:auto, so a wide row (the Swiper, or the
+     skeleton's scroller) refuses to shrink and stretches the tray instead of
+     scrolling inside it. */
+  min-width: 0;
+}
+.title-story-section{
+    font-size: 2rem;
+    position: relative;
+    left: 6rem;
+    top: 5px;
+    text-transform: uppercase;
+    letter-spacing: 5px;
+}
+.title-story-section-separite{
+    text-transform: uppercase;
+    color: #3A3A3A; /* ink — was #26262667 (~2.1:1), now 11.4:1 on the tray */
+    font-size: 2.5rem;
+    position: relative;
+    left: 6.5rem;
+    bottom: 4px;
+    font-weight:lighter;
+}
+.story-swiper {
+    padding: 0 16px !important;
+    min-width: 0;
+}
+
+.story-avatar-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px; /* Tighter gap between ring and name */
+    cursor: pointer;
+    width: 76px; /* Adjusted width */
+    user-select: none;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.story-avatar-wrapper:active {
+    transform: scale(0.95);
+}
+
+/* --- THE INSTAGRAM RING --- */
+.story-avatar {
+border-radius: var(--r-circle);
+  justify-content: center;
+  align-items: center;
+  width: 66px;
+  height: 66px;
+  display: flex;
+  position: relative;
+}
+
+/* Optional: Class for "Seen" stories (Grey Ring) 
+   You would need to conditionally add this class in React */
+.story-avatar.seen {
+    background: #e1e1e1; /* Light grey for seen */
+}
+
+.story-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--r-circle);
+    object-fit: cover;
+    
+    /* This creates the whitespace gap between the ring and the image */
+    border: 2.5px solid #ffffff; 
+    background-color: #fff;
+    display: block;
+}
+
+.story-username {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 11px;
+    color: #262626;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    letter-spacing: 0.01em;
+}
+
+/* ==========================================================================
+   2. Story Viewer (The full-screen modal)
+   ========================================================================== */
+
+.story-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    /* Darker, blurred backdrop */
+    background-color: rgba(26, 26, 26, 0.95);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    animation: overlay-fade-in 0.2s ease-out;
+}
+
+@keyframes overlay-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.story-viewer {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    
+    /* Mobile-like sizing on desktop */
+    max-width: 400px; 
+    max-height: 85vh; /* Gives a bit of breathing room on desktop */
+    
+    background-color: #000;
+    border-radius: var(--r-surface);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    user-select: none;
+    animation: viewer-pop-in 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+    /* Enforce 9:16 Aspect Ratio */
+    aspect-ratio: 9 / 16;
+}
+
+@keyframes viewer-pop-in {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* --- Progress Bars --- */
+.progress-bar-container {
+    position: absolute;
+    top: 14px;
+    left: 10px;
+    right: 10px;
+    display: flex;
+    gap: 4px;
+    z-index: 20;
+    height: 2px; /* Thinner bars like IG */
+}
+
+.progress-segment-wrapper {
+    flex: 1;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.35);
+    border-radius: var(--r-track);
+    overflow: hidden;
+}
+
+.progress-segment-fill {
+    height: 100%;
+    background-color: #ffffff;
+    border-radius: var(--r-track);
+    transition: width 0.1s linear;
+    box-shadow: 0 0 2px rgba(0,0,0,0.3);
+}
+
+/* --- Story Header --- */
+.story-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 28px 16px 16px 16px; /* More padding top for bars */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 20;
+    
+    /* Subtle gradient to make text pop against any image */
+    background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 100%);
+    
+    color: white;
+}
+
+.story-header-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.story-avatar-placeholder {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--r-circle);
+    background-color: #fff;
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.story-admin-name {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.3px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.story-timestamp {
+    font-size: 13px;
+    opacity: 0.7;
+    margin-left: 4px;
+    font-weight: 400;
+}
+
+.close-story-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 28px; /* Slightly smaller */
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+    opacity: 0.9;
+    transition: transform 0.2s;
+}
+
+.close-story-btn:hover {
+    transform: scale(1.1);
+}
+
+/* --- Story Content Area --- */
+.story-content {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #1a1a1a;
+    width: 100%;
+    height: 100%;
+}
+
+.story-media {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Crops to fill screen */
+    display: block;
+}
+
+/* --- Navigation Overlays (Invisible Click Zones) --- */
+.story-nav-overlay {
+    position: absolute;
+    top: 70px; /* Below header */
+    bottom: 0;
+    width: 35%; /* Wider click areas */
+    z-index: 15;
+    cursor: pointer;
+    /* background: rgba(255,0,0,0.1); Debugging zone */ 
+}
+
+.story-nav-overlay.prev {
+    left: 0;
+}
+
+.story-nav-overlay.next {
+    right: 0;
+}
+
+/* --- Pause Indicator --- */
+.story-pause-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 30;
+    color: rgba(255,255,255,0.8);
+    font-size: 24px;
+    opacity: 0;
+    animation: fade-in 0.2s forwards;
+}
+
+@keyframes fade-in {
+    to { opacity: 1; }
+}
+
+/* Tablet & medium screens: pull the titles back inside the tray (the base
+   6rem/6.5rem offsets are tuned for desktop). */
+@media (max-width: 768px) {
+    .title-story-section {
+        font-size: 1.2rem;
+        left: 1rem;
+        top: 10px;
+    }
+    .title-story-section-separite {
+        font-size: 1.8rem;
+        left: 1.2rem;
+        bottom: 2px;
+    }
+}
+
+@media (max-width: 480px) {
+        .story-viewer {
+        max-width: 85%;
+        max-height: 85%;
+        border-radius: var(--r-surface);
+        position: relative;
+        bottom: 40px;
+    }
+    /* The tray's old `max-width: 95.5%; right: 10px` patch is gone. It only
+       existed to claw back the overflow from `width: 97.5%` + 20px margins;
+       the tray is now fluid, and the offset used to leave it visibly
+       off-centre against the page. */
+    .story-avatar {
+  width: 60px;
+  height: 60px;
+}
+.title-story-section{
+text-transform: uppercase;
+  letter-spacing: 5px;
+  font-size: 1rem;
+  margin-right: 20px;
+  position: relative;
+  left: 15px;
+  top: 20px;
+}
+.title-story-section-separite{
+    text-transform: uppercase;
+    color: #3A3A3A; /* ink — was #26262667 (~2.1:1) */
+    font-size: 2.5rem;
+    position: relative;
+    left: 0.2rem;
+    bottom: 4px;
+    font-weight:lighter;
+}
+}
+
+/* =====================================================================
+   Loading skeleton — circles for the avatars, a bar for the name under
+   each, matching .story-avatar / .story-avatar-wrapper so the tray does not
+   jump when the stories arrive. No loading text: on a weak connection that
+   label would sit there for seconds.
+   ===================================================================== */
+@keyframes story-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.stories-skeleton-scroll {
+  display: flex;
+  gap: 10px; /* matches the Swiper's spaceBetween */
+  padding: 0 16px; /* matches .story-swiper */
+  width: 100%;
+  min-width: 0;
+  /* The tray itself is a plain flex row with no overflow handling, so the
+     skeleton has to bring its own scroller. Without this, eight fixed-width
+     circles widen the whole page on a phone. */
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.stories-skeleton-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.story-skeleton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto; /* never shrink, so the row scrolls instead of squashing */
+}
+
+.story-skeleton-avatar,
+.story-skeleton-label {
+  background: linear-gradient(90deg, #ececec 25%, #e0e0e0 50%, #ececec 75%);
+  background-size: 200% 100%;
+  animation: story-shimmer 1.4s infinite linear;
+}
+
+.story-skeleton-avatar {
+  width: 66px; /* matches .story-avatar */
+  height: 66px;
+  border-radius: var(--r-circle);
+}
+
+.story-skeleton-label {
+  width: 52px;
+  height: 10px;
+  border-radius: var(--r-track);
+}

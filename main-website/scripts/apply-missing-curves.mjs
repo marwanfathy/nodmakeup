@@ -4,7 +4,7 @@
  * after the ladder landed. Keyed by "file::selector" so nothing is changed by
  * accident, and idempotent: a selector that already has a radius is skipped.
  *
- * Values come from the ladder in app/design-system/variables.css. Where a
+ * Values come from the ladder in design-system/variables.css. Where a
  * selector is a button, a field, a chip or a true circle, the matching role
  * token is used; anything that is not a real box (text links, full-bleed
  * bands, hover states) is deliberately absent from this map.
@@ -56,7 +56,13 @@ function selectorsFor(source) {
   return out;
 }
 
-const files = execSync("find app -name '*.css' ! -path '*design-system*'", { encoding: 'utf8' })
+// app/ holds only routes now; the component stylesheets live under components/,
+// with the shared legal page stylesheet under styles/. design-system/ is a
+// generated token copy and fonts/ is a webfont stylesheet — neither is hand-edited.
+const files = execSync(
+  "find app components styles -name '*.css' ! -path '*design-system*' ! -path 'fonts/*'",
+  { encoding: 'utf8' }
+)
   .trim()
   .split('\n')
   .sort();

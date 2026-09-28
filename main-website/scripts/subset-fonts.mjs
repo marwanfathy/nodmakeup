@@ -86,13 +86,13 @@ const REQUIRED_ARABIC_FEATURES = ['init', 'medi', 'fina'];
 const FONTS = [
   {
     family: 'rubic',
-    source: join(root, 'app', 'Fonts', 'rubic.woff2'),
+    source: join(root, 'fonts', 'rubic.woff2'),
     unicodes: UNICODES.filter((r) => !r.startsWith('U+06') && !r.startsWith('U+FE')),
     requireArabic: false,
   },
   {
     family: 'cairo',
-    source: join(root, 'app', 'Fonts', 'CairRubik', 'Cairo', 'Cairo-VariableFont_slnt,wght.ttf'),
+    source: join(root, 'fonts', 'CairRubik', 'Cairo', 'Cairo-VariableFont_slnt,wght.ttf'),
     unicodes: UNICODES,
     requireArabic: true,
   },
@@ -188,8 +188,8 @@ function subset({ family, source, unicodes, requireArabic }) {
       process.stdout.write(`  removed stale: ${existing}\n`);
     }
   }
-  // app/Fonts/<family>.woff2 is the working copy the next run subsets from.
-  copyFileSync(finalPath, join(root, 'app', 'Fonts', `${family}.woff2`));
+  // fonts/<family>.woff2 is the working copy the next run subsets from.
+  copyFileSync(finalPath, join(root, 'fonts', `${family}.woff2`));
 
   process.stdout.write(
     `  ${(bytes.length / 1024).toFixed(1)} KB  ->  ${finalName}\n` +
@@ -203,7 +203,7 @@ function subset({ family, source, unicodes, requireArabic }) {
 /** Point fonts.css and the layout preloads at the new content hashes. */
 function rewriteReferences(results) {
   const targets = [
-    join(root, 'app', 'Fonts', 'fonts.css'),
+    join(root, 'fonts', 'fonts.css'),
     join(root, 'app', 'layout.tsx'),
   ];
   for (const target of targets) {

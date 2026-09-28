@@ -7,6 +7,7 @@ import {
   productImageUploader,
   storyUploader,
   heroMediaUploader,
+  bannerImageUploader,
   audioUploader,
 } from '../middleware/uploader.js';
 import { sanitizeRelPath } from '../middleware/sanitize.js';
@@ -81,6 +82,8 @@ router.post('/api/upload-product-image', productImageUploader.single('media'), m
 router.post('/api/upload-story', storyUploader.single('media'), mediaUploadHandler(storyUploader, 'stories', { ok: 'Story uploaded!', fail: 'Processing failed.' }));
 
 router.post('/api/upload-hero-media', heroMediaUploader.single('media'), mediaUploadHandler(heroMediaUploader, 'hero', { ok: 'Hero uploaded!', fail: 'Hero upload failed.' }));
+
+router.post('/api/upload-banner-image', bannerImageUploader.single('media'), mediaUploadHandler(bannerImageUploader, 'banner', { ok: 'Banner uploaded!', fail: 'Banner upload failed.' }));
 
 router.post('/api/upload-audio', audioUploader.single('media'), handleAudioUpload);
 

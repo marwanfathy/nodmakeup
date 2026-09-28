@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useCart } from '../contexts/CartContext'; // Adjust path if needed
+import { useCart } from '../../contexts/CartContext'; // Adjust path if needed
 import { 
     createOrder, 
     getShippingZones, 
@@ -16,8 +16,8 @@ import {
 } from '@/lib/api';
 import { toast } from 'react-toastify'; 
 import Spinner from '../../components/ui/Spinner'; // shared loading spinner
-import { useI18n } from '../i18n/client';
-import { localePath } from '../i18n/paths';
+import { useI18n } from '../../lib/i18n/client';
+import { localePath } from '../../lib/i18n/paths';
 import { formatPrice } from '../../lib/format';
 import { normalizeEgyptianPhone, isValidEgyptianPhone, toInternationalEgyptianPhone, formatPhoneForLocale, EG_PHONE_PREFIX } from '../../lib/phone';
 import { getCurrentPosition, describePosition, mergeAddress, GeoError, ADDRESS_MAX } from '../../lib/geolocation';

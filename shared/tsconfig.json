@@ -11,5 +11,9 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  // Tests live beside the source but must not reach dist/: this package is
+  // bundled into the storefront, and a compiled `require("vitest")` in the
+  // published output is dead weight at best and a broken import at worst.
+  "exclude": ["node_modules", "dist", "src/**/*.test.ts"]
 }

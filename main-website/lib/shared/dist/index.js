@@ -54,3 +54,8 @@ Object.defineProperty(exports, "crmAdminApi", { enumerable: true, get: function 
 var media_1 = require("./clients/media");
 Object.defineProperty(exports, "mediaApi", { enumerable: true, get: function () { return media_1.mediaApi; } });
 Object.defineProperty(exports, "MEDIA_ROUTES", { enumerable: true, get: function () { return media_1.MEDIA_ROUTES; } });
+// The landing-page section registry. Browser-safe (no env, no client code) and
+// exported from the barrel so all three apps read the same section list: the
+// storefront maps keys to components, the admin builds its list from it, and the
+// backend validates against it. Adding a section here is what registers it.
+__exportStar(require("./landing/sections"), exports);

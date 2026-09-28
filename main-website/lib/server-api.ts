@@ -35,6 +35,14 @@
 //    as a prop, so it must survive JSON (no Date objects, no class instances).
 
 import { API_URL } from './config';
+import type {
+  ApiStoryGroup,
+  CollectionSummary,
+  HeroSectionPublic,
+  LandingBanner,
+  ProductSummary,
+  PublicLandingLayout,
+} from './api';
 
 // How long a catalogue response may be reused before the framework refetches it
 // in the background. Chosen to be short enough that an admin's product edit
@@ -50,6 +58,19 @@ import { API_URL } from './config';
 // an API load bug.
 const REVALIDATE_CATALOG = 60;
 const REVALIDATE_CONTENT = 120;
+
+// The landing banner is edited far more often than products and is a single-row
+// read, so it gets the tighter window. 60s is still at most one API call a
+// minute for the whole site, not one per visitor — the entry is shared by every
+// request in the window. Making an admin's save appear instantly would need an
+// on-demand revalidateTag hook, which is the correct fix but a separate piece of
+// cross-service plumbing; the toast after saving says "within a minute" to match.
+const REVALIDATE_BANNER = 60;
+
+// The homepage section order. Same 60s as the banner, and for the same reason:
+// one tiny row read, shared by every request in the window, and an operator's
+// drag-and-drop landing on the homepage within a minute is the expected feel.
+const REVALIDATE_LAYOUT = 60;
 
 type Revalidate = number;
 
@@ -98,21 +119,68 @@ async function cachedGet<T>(
 
 /** Products flagged for the homepage hero. */
 export const serverGetHeroProducts = () =>
-  cachedGet<unknown[]>('/api/v1/catalog/products/hero', REVALIDATE_CATALOG, ['catalog', 'hero']);
+  cachedGet<ProductSummary[]>('/api/v1/catalog/products/hero', REVALIDATE_CATALOG, ['catalog', 'hero']);
 
 /** Public collections (`?public=true` is what the admin/staff filter). */
 export const serverGetPublicCollections = () =>
-  cachedGet<unknown[]>('/api/v1/catalog/collections?public=true', REVALIDATE_CATALOG, [
+  cachedGet<CollectionSummary[]>('/api/v1/catalog/collections?public=true', REVALIDATE_CATALOG, [
     'catalog',
     'collections',
   ]);
 
 /** Active story bundles, newest first — the "bubbles" on the homepage. */
 export const serverGetPublicStories = () =>
-  cachedGet<unknown[]>('/api/v1/content/stories?public=true', REVALIDATE_CONTENT, [
+  cachedGet<ApiStoryGroup[]>('/api/v1/content/stories?public=true', REVALIDATE_CONTENT, [
     'content',
     'stories',
   ]);
+
+/**
+ * The active landing banner, or null.
+ *
+ * Null covers two cases that the storefront treats identically: no banner is
+ * live, and the fetch failed. Both render the built-in copy, so there is nothing
+ * to tell apart and nothing to retry on the client.
+ */
+export const serverGetLandingBanner = () =>
+  cachedGet<LandingBanner | null>('/api/v1/content/landing-banner', REVALIDATE_BANNER, [
+    'content',
+    'landing-banner',
+  ]);
+
+/**
+ * Which homepage sections to render, in what order, or null.
+ *
+ * Null is the same case as for the banner — the request failed — and the caller
+ * falls back to the registry's default order, which renders today's page. A
+ * layout that genuinely has no enabled sections is NOT null: the endpoint
+ * answers 200 with an empty array, so "the operator turned everything off" and
+ * "we could not reach the API" stay distinguishable. Collapsing them would mean
+ * an unreachable API silently un-hides sections the operator had switched off.
+ */
+export const serverGetLandingLayout = () =>
+  cachedGet<PublicLandingLayout | null>('/api/v1/content/landing-layout', REVALIDATE_LAYOUT, [
+    'content',
+    'landing-layout',
+  ]);
+
+/**
+ * One active hero section with its slides, for the hero's `slides` mode, or null.
+ *
+ * Only called when the layout selects that mode — the product hero needs no
+ * carousel, and fetching one per homepage render to discard it would be a request
+ * the layout itself decided against.
+ *
+ * The public hero route answers with the bare object rather than the usual
+ * envelope, and 404s when the slug is unknown or inactive; cachedGet handles
+ * both, so null here means "render the product hero instead".
+ */
+export const serverGetHeroSection = (slug: string) =>
+  cachedGet<HeroSectionPublic>(
+    `/api/v1/content/hero-sections/${encodeURIComponent(slug)}`,
+    REVALIDATE_CONTENT,
+    ['content', 'hero-sections', `hero-section:${slug}`],
+  );
 
 /** A single product by slug, for the product detail page's metadata + body. */
 export const serverGetProductBySlug = (slug: string) =>
@@ -121,7 +189,6 @@ export const serverGetProductBySlug = (slug: string) =>
     REVALIDATE_CATALOG,
     ['catalog', `product:${slug}`],
   );
-
 /** Paginated product search — the shop listing and the bestsellers strip. */
 export const serverSearchProducts = (query: string) =>
   cachedGet<unknown>(`/api/v1/catalog/products/search${query}`, REVALIDATE_CATALOG, [

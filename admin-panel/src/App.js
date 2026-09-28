@@ -17,6 +17,8 @@ import DiscountListPage from './Discounts/DiscountListPage';
 import StoryManagementPage from './Stories/StoryManagementPage';
 import HeroSectionListPage from './HeroSection/HeroSectionListPage';
 import HeroSectionForm from './HeroSection/HeroSectionForm';
+import LandingBannerPage from './LandingBanner/LandingBannerPage';
+import LandingLayoutPage from './LandingLayout/LandingLayoutPage';
 import UserListPage from './Users/UserListPage';
 import AnalyticsPage from './Analytics/AnalyticsPage';
 import CustomersPage from './Crm/CustomersPage';
@@ -43,6 +45,8 @@ const App = () => (
                         <Route path="hero-sections" element={<HeroSectionListPage />} />
                         <Route path="hero-sections/new" element={<HeroSectionForm />} />
                         <Route path="hero-sections/edit/:heroSectionId" element={<HeroSectionForm />} />
+                        <Route path="landing-banner" element={<LandingBannerPage />} />
+                        <Route path="landing-layout" element={<LandingLayoutPage />} />
                         <Route path="admins" element={<UserListPage />} />
                         <Route path="analytics" element={<AnalyticsPage />} />
                         <Route path="customers" element={<CustomersPage />} />

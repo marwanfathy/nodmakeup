@@ -13,7 +13,7 @@ import {
   ordersApi,
   analyticsApi,
   mediaApi,
-} from '../lib/shared/dist/index.js';
+} from './shared/dist/index.js';
 
 // Attach the cart session id (if any) to every request from this browser.
 const sessionHeaders = (): Record<string, string> => {
@@ -59,17 +59,20 @@ export type {
   HeroMediaItem,
   HeroSlide,
   HeroSection,
+  LandingBanner,
+  LandingSectionSetting,
+  PublicLandingLayout,
   MediaUploadResult,
-} from '../lib/shared/dist/api/types.js';
+} from './shared/dist/api/types.js';
 
 // Backward-compatible names (fields are camelCase now)
-export type CartItemPublic = import('../lib/shared/dist/api/types.js').CartItem;
-export type CartObject = import('../lib/shared/dist/api/types.js').Cart;
-export type ApiStory = import('../lib/shared/dist/api/types.js').StoryItem;
-export type ApiStoryGroup = import('../lib/shared/dist/api/types.js').StoryBundle;
-export type HeroSectionPublic = import('../lib/shared/dist/api/types.js').HeroSection;
-export type HeroMediaItemPublic = import('../lib/shared/dist/api/types.js').HeroMediaItem;
-export type HeroSlidePublic = import('../lib/shared/dist/api/types.js').HeroSlide;
+export type CartItemPublic = import('./shared/dist/api/types.js').CartItem;
+export type CartObject = import('./shared/dist/api/types.js').Cart;
+export type ApiStory = import('./shared/dist/api/types.js').StoryItem;
+export type ApiStoryGroup = import('./shared/dist/api/types.js').StoryBundle;
+export type HeroSectionPublic = import('./shared/dist/api/types.js').HeroSection;
+export type HeroMediaItemPublic = import('./shared/dist/api/types.js').HeroMediaItem;
+export type HeroSlidePublic = import('./shared/dist/api/types.js').HeroSlide;
 
 // ===============================================
 //           PRODUCTS & DISCOVERY API
@@ -120,7 +123,7 @@ export const removeItemFromCart = (cartItemId: string) => cart.removeItem(cartIt
 //           ORDERS & CHECKOUT API
 // ===============================================
 
-export const createOrder = (data: import('../lib/shared/dist/api/types.js').OrderCreationData) =>
+export const createOrder = (data: import('./shared/dist/api/types.js').OrderCreationData) =>
   orders.createOrder(data);
 
 export const getPublicOrderDetails = (orderId: string) =>

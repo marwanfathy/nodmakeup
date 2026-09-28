@@ -12,6 +12,8 @@ import ReceiptLongRoundedIcon from '@mui/icons-material/ReceiptLongRounded';
 import LocalOfferRoundedIcon from '@mui/icons-material/LocalOfferRounded';
 import PlayCircleOutlineRoundedIcon from '@mui/icons-material/PlayCircleOutlineRounded';
 import PanoramaRoundedIcon from '@mui/icons-material/PanoramaRounded';
+import CropLandscapeRoundedIcon from '@mui/icons-material/CropLandscapeRounded';
+import ViewAgendaRoundedIcon from '@mui/icons-material/ViewAgendaRounded';
 import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded';
 import AdminPanelSettingsRoundedIcon from '@mui/icons-material/AdminPanelSettingsRounded';
 import InsightsRoundedIcon from '@mui/icons-material/InsightsRounded';
@@ -40,6 +42,8 @@ const GROUPS = [
         items: [
             { to: '/admin/stories', label: 'Stories', icon: <PlayCircleOutlineRoundedIcon /> },
             { to: '/admin/hero-sections', label: 'Hero Sections', icon: <PanoramaRoundedIcon /> },
+            { to: '/admin/landing-banner', label: 'Landing Banner', icon: <CropLandscapeRoundedIcon /> },
+            { to: '/admin/landing-layout', label: 'Homepage Layout', icon: <ViewAgendaRoundedIcon /> },
         ],
     },
     {
