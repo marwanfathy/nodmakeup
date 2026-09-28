@@ -14,6 +14,16 @@ const notFound = (req: Request, res: Response, next: NextFunction) => {
 interface HttpError extends Error {
     statusCode?: number;
     errors?: unknown;
+    /**
+     * A machine-readable code for this refusal, sent alongside `message`.
+     *
+     * `message` is prose, and prose is English-only and untranslatable, so a
+     * client that only has it has nothing to localize and no way to tell what to
+     * do next. A thrower that knows more than "it failed" attaches the code here
+     * and the client picks its own wording. Untrusted: it is echoed to whoever
+     * called, so only codes a client is meant to branch on belong in it.
+     */
+    reason?: string;
 }
 
 const isPrismaError = (err: Error): err is Prisma.PrismaClientKnownRequestError =>
@@ -61,6 +71,9 @@ const errorHandler = (err: HttpError, req: Request, res: Response, next: NextFun
                 : err.message,
         stack: isProd ? undefined : err.stack,
         ...(err.errors ? { details: err.errors } : {}),
+        // Omitted rather than sent as undefined, so the field's presence means
+        // "the thrower classified this" and its absence means "it did not".
+        ...(err.reason ? { reason: err.reason } : {}),
     });
 };
 

@@ -110,10 +110,18 @@ const MediaItem: FC<{ item: HeroMediaItemPublic }> = ({ item }) => {
 // --- 3. MAIN COMPONENT ---
 const HeroSlider: FC<HeroSliderProps> = ({ slug, initialData = null }) => {
   const swiperRef = useRef<SwiperCore | null>(null);
-  // True when the server already resolved this data. An empty list counts as
-  // resolved, so a hero the admin deliberately emptied is not re-requested by
-  // every visitor's browser.
-  const resolvedOnServer = Array.isArray(initialData);
+  // True when the server already resolved this hero section.
+  //
+  // null is the ONLY unresolved value, and the test is `!== null` rather than
+  // `Array.isArray`: initialData is a single hero-section object, so a resolved
+  // hero is object-shaped and never an array. The array test was carried over
+  // from the sections that do receive arrays (stories, collections, hero
+  // products) and was never true here, which meant every visitor got the skeleton
+  // and then a redundant browser fetch that threw away the server's answer.
+  //
+  // A hero with no slides still counts as resolved, so one the operator
+  // deliberately emptied is not re-requested by every browser either.
+  const resolvedOnServer = initialData !== null;
 
   const [heroData, setHeroData] = useState<HeroSectionPublic | null>(initialData);
   const [loading, setLoading] = useState<boolean>(!resolvedOnServer);
@@ -126,12 +134,13 @@ const HeroSlider: FC<HeroSliderProps> = ({ slug, initialData = null }) => {
     const fetchHeroData = async () => {
       setLoading(true);
       try {
-        const data = await getPublicHeroSection(slug);
-        if (!data || !data.slides || data.slides.length === 0) {
-          throw new Error("Hero section is empty or not found.");
-        }
-        setHeroData(data);
+        // Resolves to null for a slug with no hero section, which is an ordinary
+        // state rather than a fault — the render path below handles it the same
+        // way it handles a hero section the operator left empty.
+        setHeroData(await getPublicHeroSection(slug));
       } catch (err) {
+        // Only a genuine 5xx or network failure gets here, so it is worth both an
+        // error state and a log.
         setError('Could not load hero section.');
         console.error(`Failed to fetch hero section with slug "${slug}":`, err);
       } finally {
@@ -155,17 +164,24 @@ const HeroSlider: FC<HeroSliderProps> = ({ slug, initialData = null }) => {
 
   // --- RENDER SKELETON IF LOADING ---
   if (loading) return <HeroSliderSkeleton />;
-  
+
   if (error) return <div className="hero-slider-placeholder error">{error}</div>;
-  if (!heroData) return null;
+
+  // No hero section for this slug. The layout can name one that was never created
+  // or that has been deactivated, and the public route answers 404 for both — an
+  // answer, not a failure, so it gets the same placeholder as an empty section
+  // rather than a silent blank. The registry normally falls back to the product
+  // hero before this is reached; this covers the slider on its own.
+  if (!heroData) {
+    return <div className="hero-slider-placeholder error">No hero section for this page.</div>;
+  }
 
   const { slides } = heroData;
 
-  // A resolved section with no slides is a real answer — the admin saved a hero
-  // with nothing in it — and it used to be treated as a failure by the fetch
-  // path above. Rendering it here would mount a carousel with zero slides, so it
-  // gets the same placeholder the fetch failure gets. Server-resolved data skips
-  // that fetch, which is why the check has to live at the render boundary too.
+  // A hero section that EXISTS but has no slides is a different case, and kept
+  // distinct on purpose: the operator made a hero section and left it empty, and
+  // quietly rendering something else would hide that. Rendering it here would
+  // mount a carousel with zero slides, so it gets a placeholder instead.
   if (slides.length === 0) {
     return <div className="hero-slider-placeholder error">No slides in this hero section.</div>;
   }

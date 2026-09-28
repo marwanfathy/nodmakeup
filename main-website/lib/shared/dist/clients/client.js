@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.unwrap = exports.createApiClient = void 0;
+exports.unwrap = exports.apiErrorBody = exports.isNotFound = exports.createApiClient = void 0;
 const axios_1 = __importStar(require("axios"));
 const createApiClient = (options) => {
     var _a, _b;
@@ -56,6 +56,36 @@ const createApiClient = (options) => {
     return client;
 };
 exports.createApiClient = createApiClient;
+/**
+ * Whether a rejected request failed because the resource is not there.
+ *
+ * Several public routes answer 404 for a perfectly ordinary state — a hero
+ * section slug nobody has created, a deactivated section. That is an answer,
+ * not a fault, so a caller that cares about absence can tell it apart from a
+ * genuine 5xx or a network failure without every call site re-deriving axios's
+ * error shape.
+ */
+const isNotFound = (error) => { var _a; return axios_1.default.isAxiosError(error) && ((_a = error.response) === null || _a === void 0 ? void 0 : _a.status) === 404; };
+exports.isNotFound = isNotFound;
+/**
+ * The JSON body of a refused request, or null.
+ *
+ * Exists so a caller can read a machine-readable field the API deliberately
+ * sent — a `reason`, say — instead of matching on the prose in `message`. The
+ * alternative is every consumer re-deriving axios's error shape, and one of them
+ * inevitably casting through `any` to do it.
+ *
+ * Null rather than a throw for the shapes that have no body, so a caller can ask
+ * the question and handle "no" without a try/catch.
+ */
+const apiErrorBody = (error) => {
+    var _a;
+    if (!axios_1.default.isAxiosError(error))
+        return null;
+    const data = (_a = error.response) === null || _a === void 0 ? void 0 : _a.data;
+    return typeof data === 'object' && data !== null ? data : null;
+};
+exports.apiErrorBody = apiErrorBody;
 /** Unwrap the `{ data }`/`{ success, data }` envelope. */
 const unwrap = async (request) => {
     const res = await request;

@@ -1,6 +1,6 @@
 import { API_V1, PUBLIC_LIST_QUERY } from '../api/endpoints';
 import type { HeroSection, StoryBundle } from '../api/types';
-import { createApiClient, type ApiClientOptionsPatch , unwrap, type AxiosInstance } from './client';
+import { createApiClient, type ApiClientOptionsPatch, isNotFound, unwrap, type AxiosInstance } from './client';
 
 /** Content domain client — stories + hero sections. */
 export const contentApi = (baseURL: string, options: ApiClientOptionsPatch = {}) => {
@@ -18,9 +18,25 @@ export const contentApi = (baseURL: string, options: ApiClientOptionsPatch = {})
     trackStoryClick: (storyId: string) =>
       client.post(API_V1.content.stories.clicks(storyId)),
 
-    getPublicHeroSection: async (slug: string): Promise<HeroSection> => {
-      const response = await client.get<HeroSection>(API_V1.content.heroSections.bySlug(slug));
-      return response.data;
+    /**
+     * The hero section for a public slug, or null when there is none.
+     *
+     * The route answers 404 for a slug that was never created and for one whose
+     * section has been deactivated — two ordinary states, not failures. Resolving
+     * them to null here means every consumer gets "no such hero section" instead
+     * of having to catch and classify the error itself, and it keeps the rule
+     * beside the call rather than spread across the components that make it.
+     *
+     * Genuine faults still throw: a 5xx or a network failure is worth surfacing.
+     */
+    getPublicHeroSection: async (slug: string): Promise<HeroSection | null> => {
+      try {
+        const response = await client.get<HeroSection>(API_V1.content.heroSections.bySlug(slug));
+        return response.data;
+      } catch (error) {
+        if (isNotFound(error)) return null;
+        throw error;
+      }
     },
   };
 };

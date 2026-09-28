@@ -25,10 +25,14 @@ export {
   type AxiosInstance,
   type AxiosRequestConfig,
 } from './clients/client';
-export { catalogApi, catalogAdminApi, type AdminCrudApi } from './clients/catalog';
-export { contentApi, contentAdminApi } from './clients/content';
-export { cartApi, ordersApi, ordersAdminApi } from './clients/orders';
+export { catalogApi, catalogAdminApi, type AdminCrudApi } from './clients/catalog';export { contentApi, contentAdminApi } from './clients/content';
+export { cartApi, ordersApi, ordersAdminApi, readCouponRejection } from './clients/orders';
 export { analyticsApi, analyticsAdminApi } from './clients/analytics';
 export { usersApi, usersAdminApi } from './clients/users';
 export { crmAdminApi } from './clients/crm';
 export { mediaApi, MEDIA_ROUTES } from './clients/media';
+// The landing-page section registry. Browser-safe (no env, no client code) and
+// exported from the barrel so all three apps read the same section list: the
+// storefront maps keys to components, the admin builds its list from it, and the
+// backend validates against it. Adding a section here is what registers it.
+export * from './landing/sections';

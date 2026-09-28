@@ -26,7 +26,7 @@ export {
   type AxiosRequestConfig,
 } from './clients/client';
 export { catalogApi, catalogAdminApi, type AdminCrudApi } from './clients/catalog';export { contentApi, contentAdminApi } from './clients/content';
-export { cartApi, ordersApi, ordersAdminApi } from './clients/orders';
+export { cartApi, ordersApi, ordersAdminApi, readCouponRejection } from './clients/orders';
 export { analyticsApi, analyticsAdminApi } from './clients/analytics';
 export { usersApi, usersAdminApi } from './clients/users';
 export { crmAdminApi } from './clients/crm';

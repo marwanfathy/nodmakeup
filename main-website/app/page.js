@@ -64,8 +64,8 @@ const HomePage = async () => {
   const wantsStories = hasSection(sections, 'stories');
   const wantsBanner = hasSection(sections, 'banner');
   const wantsCollections = hasSection(sections, 'collections');
-  // The product hero and the carousel are alternatives, so only one of the two
-  // reads is ever made.
+  // The product hero and the carousel are alternatives, so the first pass only
+  // reads the one the layout asked for.
   const wantsCarousel = heroWantsSlides(sections);
   const wantsHeroProducts = hasSection(sections, 'hero') && !wantsCarousel;
 
@@ -77,10 +77,19 @@ const HomePage = async () => {
     wantsCarousel ? serverGetHeroSection(heroSlugFor(sections)) : null,
   ]);
 
+  // The layout can ask for a hero section that does not exist — the slug may name
+  // one nobody created, or one that was deactivated, and the public route answers
+  // 404 for both. The registry falls back to the product hero in that case, so the
+  // products have to be here or the fallback would render an empty section.
+  //
+  // A second hop, but only on a miss: with a hero section present this is the
+  // same single round trip as before.
+  const heroProductsForRender = wantsCarousel && heroCarousel === null ? await serverGetHeroProducts() : heroProducts;
+
   const data = {
     stories: storyGroups,
     banner: landingBanner,
-    heroProducts,
+    heroProducts: heroProductsForRender,
     heroSection: heroCarousel,
     collections,
   };

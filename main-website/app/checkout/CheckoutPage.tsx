@@ -5,13 +5,15 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCart } from '../../contexts/CartContext'; // Adjust path if needed
-import { 
-    createOrder, 
-    getShippingZones, 
-    validateCoupon, 
-    ShippingZone, 
+import {
+    createOrder,
+    getShippingZones,
+    validateCoupon,
+    readCouponRejection,
+    ShippingZone,
     AppliedDiscount,
     CartItemPublic,
+    CouponRejectionReason,
     mediaUrl,
 } from '@/lib/api';
 import { toast } from 'react-toastify'; 
@@ -36,10 +38,45 @@ type FieldErrors = Partial<Record<FieldName, string>>;
 
 const NOTES_MAX = 500;
 
+/**
+ * How the form is ARRANGED, in the order a shopper actually needs to answer
+ * things — required delivery details first, then the things that are optional or
+ * can be settled afterwards, and the commit last.
+ *
+ * This is a reading order, not a wizard. A two-step funnel was tried and removed:
+ * the "continue" button and the "place order" button occupied the same slot in
+ * the same container, so a double-click placed the order while the shopper was
+ * still trying to move forward — and a gate like that adds a click to every
+ * order to solve a problem that ordering alone solves. Everything is on one page,
+ * in one pass, with one button that only ever means "place my order".
+ */
+
+/** The one place a refusal reason becomes wording, so it cannot drift per use. */
+const COUPON_REASON_KEYS: Record<CouponRejectionReason, string> = {
+    NOT_FOUND: 'checkout.coupon.notFound',
+    LIMIT_REACHED: 'checkout.coupon.limitReached',
+    PERSONALIZED_NEEDS_PHONE: 'checkout.coupon.personalizedNeedsPhone',
+    NOT_OWNED: 'checkout.coupon.notOwned',
+};
+
+/**
+ * Refusals the shopper can only clear by changing the phone number.
+ *
+ * These get a pointer at the field that would fix them, because the code itself
+ * is not what is wrong — the code is fine, the missing or incorrect number is.
+ * Asking them to retype the code would be sending them in the wrong direction.
+ */
+const COUPON_REASONS_NEEDING_PHONE: readonly CouponRejectionReason[] = [
+    'PERSONALIZED_NEEDS_PHONE',
+    'NOT_OWNED',
+];
+
 const ShippingIcon = () => (<svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>);
 const PaymentIcon = () => (<svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>);
 // Crosshair/target for "use my current location".
 const LocationIcon = () => (<svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="7"></circle><circle cx="12" cy="12" r="2.5"></circle><line x1="12" y1="1" x2="12" y2="4"></line><line x1="12" y1="20" x2="12" y2="23"></line><line x1="1" y1="12" x2="4" y2="12"></line><line x1="20" y1="12" x2="23" y2="12"></line></svg>);
+// Tag for the discount section header.
+const TagIcon = () => (<svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>);
 // Egypt flag for the phone prefix — same asset the navbar region link uses.
 const flagIconPath = mediaUrl('/uploads/assets/icons/flag-egypt.svg');
 
@@ -69,6 +106,13 @@ export default function CheckoutPage() {
     const [submitAttempted, setSubmitAttempted] = useState(false);
     const [errors, setErrors] = useState<FieldErrors>({});
     const fieldRefs = useRef<Partial<Record<FieldName, HTMLElement | null>>>({});
+    // The discount box's own error, held apart from the field errors above: it is
+    // a reason the code was refused rather than something the shopper typed
+    // wrong, and it is shown on the code input rather than on a field above it.
+    const [couponError, setCouponError] = useState<string | null>(null);
+    // A refusal the shopper can only clear by changing their number, so the code
+    // points at the phone field instead of asking them to retype the code.
+    const [couponErrorTargetsPhone, setCouponErrorTargetsPhone] = useState(false);
     // "Use my current location": the button's own state, kept apart from the
     // field's validation error because a geolocation problem is not a
     // validation problem — the address may already be fine.
@@ -230,6 +274,7 @@ export default function CheckoutPage() {
             const next = { ...formData, customer_phone: normalizeEgyptianPhone(raw) } as FormData;
             setFormData(next);
             revalidate(field, next);
+            clearCouponErrorIfPhoneRelated(field);
             return;
         }
 
@@ -238,6 +283,20 @@ export default function CheckoutPage() {
         revalidate(field, next);
         // A stale "location added" note would contradict what is now typed.
         if (field === 'customer_address') setGeoNote(null);
+    };
+
+    /**
+     * Clear a refusal as soon as the shopper starts fixing it.
+     *
+     * Only for the two reasons a new phone number resolves. Once the number is
+     * being retyped, a message describing the old one is noise; the code is
+     * re-checked when Apply is pressed again.
+     */
+    const clearCouponErrorIfPhoneRelated = (field: FieldName) => {
+        if (field === 'customer_phone' && couponErrorTargetsPhone) {
+            setCouponError(null);
+            setCouponErrorTargetsPhone(false);
+        }
     };
 
     /**
@@ -267,42 +326,81 @@ export default function CheckoutPage() {
         }
     };
 
-    // --- UPDATED FUNCTION ---
+    /**
+     * Apply a discount code, and explain any refusal on the code input itself.
+     *
+     * The previous behaviour here was the confusing part of checkout. It guessed
+     * from the code's `THANKS-` prefix that the code was personal and warned
+     * about the phone number — a guess, because nothing about the prefix makes a
+     * code personal, so a real personal code under any other name fell through to
+     * the API and came back as an English sentence in a toast. Both paths asked
+     * for something the shopper could not see, and neither said what to do.
+     *
+     * Now the API says which of four things went wrong, the wording comes from
+     * the shopper's own language, and a refusal that a phone number would fix
+     * points at the phone field. The code is still allowed to be typed before a
+     * number exists — that is a legitimate state, and the funnel already puts the
+     * number first — but the reply is now an explanation rather than a shrug.
+     */
     const handleApplyCoupon = async () => {
-        if (!couponCode) { 
-            toast.info(t('checkout.toast.couponEmpty')); 
-            return; 
-        }
-
-        // Check if phone is empty before validating personalized codes
-        // This prevents the error if the user types the code before their details
-        if (!formData.customer_phone && couponCode.toUpperCase().startsWith('THANKS-')) {
-            toast.warning(t('checkout.toast.couponPhone'));
+        const code = couponCode.trim();
+        if (!code) {
+            toast.info(t('checkout.toast.couponEmpty'));
             return;
         }
 
         setIsApplyingCoupon(true);
+        setCouponError(null);
+        setCouponErrorTargetsPhone(false);
+
         try {
-            // Send the same E.164 form the order is stored with, so a
-            // personalized coupon matches the customer's number.
+            // Sent in the same E.164 form the order is stored with, so a
+            // personalized code matches the customer's number.
             const phoneForCoupon = normalizeEgyptianPhone(formData.customer_phone);
             const validatedCoupon = await validateCoupon(
-                couponCode,
+                code,
                 phoneForCoupon ? toInternationalEgyptianPhone(phoneForCoupon) : '',
             );
-            
+
             setAppliedDiscount(validatedCoupon);
             toast.success(t('checkout.toast.couponApplied', { name: validatedCoupon.name }));
         } catch (error: unknown) {
             setAppliedDiscount(null);
-            const message =
-                error && typeof error === 'object' && 'response' in error
-                    ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
-                    : undefined;
-            toast.error(message || t('checkout.toast.couponFailed'));
+            const reason = readCouponRejection(error);
+            if (reason) {
+                setCouponError(t(COUPON_REASON_KEYS[reason]));
+                setCouponErrorTargetsPhone(COUPON_REASONS_NEEDING_PHONE.includes(reason));
+                return;
+            }
+            // The API refused without saying why — a network drop or a fault. No
+            // reason is invented here, because telling a shopper their code is
+            // expired when the request never arrived would be a plain lie.
+            setCouponError(t('checkout.toast.couponFailed'));
+            toast.error(t('checkout.toast.couponFailed'));
         } finally {
             setIsApplyingCoupon(false);
         }
+    };
+
+    /** Drop a code and everything it did to the total. */
+    const handleRemoveCoupon = () => {
+        setAppliedDiscount(null);
+        setCouponCode('');
+        setCouponError(null);
+        setCouponErrorTargetsPhone(false);
+    };
+
+    /**
+     * Move a refusal that a phone number would fix to the field that fixes it.
+     *
+     * The whole form is on one page, so this is a scroll and a focus rather than
+     * a step change: the message is on the code, the thing that resolves it is
+     * above, and the shopper is taken straight to it.
+     */
+    const goFixPhone = () => {
+        const phone = fieldRefs.current.customer_phone;
+        phone?.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
+        phone?.focus?.();
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -373,7 +471,7 @@ export default function CheckoutPage() {
                             <div className="co-skeleton co-skeleton--bar" style={{ width: 180, height: 14 }} />
                         </header>
 
-                        {[{ fields: 3 }, { fields: 3 }, { fields: 1 }].map((section, si) => (
+                        {[{ fields: 3 }, { fields: 2 }, { fields: 1 }].map((section, si) => (
                             <div className="form-section" key={si}>
                                 <div className="section-header">
                                     <div className="co-skeleton co-skeleton--icon" />
@@ -430,7 +528,9 @@ export default function CheckoutPage() {
                         </Link>
                         <p>{t('checkout.header')}</p>
                     </header>
+
                     <form onSubmit={handleSubmit} noValidate>
+                        {/* --- Everything the order cannot go without, first --- */}
                         <div className="form-section">
                             <div className="section-header"><ShippingIcon /><h3>{t('checkout.shipping')}</h3></div>
 
@@ -573,6 +673,10 @@ export default function CheckoutPage() {
                             </div>
                         </div>
 
+                        {/* --- Then what can be settled afterwards: payment, then the code.
+                            Nothing here is a gate. The code sits below the phone number
+                            it is checked against, so the number is already there when a
+                            personal code is applied. --- */}
                         <div className="form-section">
                             <div className="section-header"><PaymentIcon /><h3>{t('checkout.payment')}</h3></div>
                             <div className="payment-option selected">
@@ -581,6 +685,66 @@ export default function CheckoutPage() {
                             </div>
                         </div>
 
+                        {/* The code box, last on the way down: everything a personal code
+                            is checked against is already above it. */}
+                        <div className="form-section">
+                            <div className="section-header"><TagIcon /><h3>{t('checkout.discountCode')}</h3></div>
+                            <div className={`checkout-field ${couponError ? 'has-error' : ''}`}>
+                                <label className="visually-hidden" htmlFor="discount_code">{t('checkout.discountCode')}</label>
+                                <div className="discount-input-row">
+                                    <input
+                                        id="discount_code"
+                                        name="discount_code"
+                                        type="text"
+                                        placeholder={t('checkout.discountCode')}
+                                        value={couponCode}
+                                        onChange={(e) => {
+                                            setCouponCode(e.target.value.toUpperCase());
+                                            // Editing the code invalidates whatever was said
+                                            // about the previous one.
+                                            if (couponError) { setCouponError(null); setCouponErrorTargetsPhone(false); }
+                                        }}
+                                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void handleApplyCoupon(); } }}
+                                        disabled={isApplyingCoupon}
+                                        autoComplete="off"
+                                        spellCheck={false}
+                                        aria-invalid={Boolean(couponError)}
+                                        aria-describedby={couponError ? 'err-discount_code' : undefined}
+                                    />
+                                    {appliedDiscount ? (
+                                        <button type="button" className="discount-remove-btn" onClick={handleRemoveCoupon}>
+                                            {t('checkout.coupon.remove')}
+                                        </button>
+                                    ) : (
+                                        <button type="button" onClick={handleApplyCoupon} disabled={isApplyingCoupon} aria-busy={isApplyingCoupon}>
+                                            {isApplyingCoupon ? <Spinner size="small" /> : t('checkout.apply')}
+                                        </button>
+                                    )}
+                                </div>
+                                {/* The refusal is shown here, on the code that caused it, in
+                                    the shopper's language, with the way out. */}
+                                {couponError && (
+                                    <span className="field-error" id="err-discount_code" role="alert">
+                                        {couponError}
+                                        {couponErrorTargetsPhone && (
+                                            <button type="button" className="field-error__action" onClick={goFixPhone}>
+                                                {t('checkout.coupon.fixPhone')}
+                                            </button>
+                                        )}
+                                    </span>
+                                )}
+                                {appliedDiscount && (
+                                    <span className="field-success" role="status">
+                                        {t('checkout.coupon.applied', { amount: formatPrice(discountAmount, locale) })}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* One button, and it only ever means one thing. An earlier
+                            version had a "continue" here that became "place order" in
+                            the same slot, so a double-click placed the order on the way
+                            forward; there is no second action to reach by accident. */}
                         <div className="checkout-actions">
                             <Link href={localePath('/', locale)} className="return-to-cart-link"> {t('checkout.continue')}</Link>
                             <button type="submit" className="place-order-button" data-track="place_order" disabled={isProcessing}>
@@ -622,13 +786,6 @@ export default function CheckoutPage() {
                            );
                         })}
 
-                        <div className="discount-section">
-                            <input type="text" placeholder={t('checkout.discountCode')} value={couponCode} onChange={(e) => setCouponCode(e.target.value.toUpperCase())} disabled={isApplyingCoupon || appliedDiscount !== null}/>
-                            <button type="button" onClick={handleApplyCoupon} disabled={isApplyingCoupon || appliedDiscount !== null}>
-                                {isApplyingCoupon ? <Spinner size="small" /> : t('checkout.apply')}
-                            </button>
-                        </div>
-                        
                         <div className="cost-summary">
                             <div className="cost-line"><span>{t('checkout.subtotal')}</span><span>{formatPrice(subtotal, locale)}</span></div>
                             

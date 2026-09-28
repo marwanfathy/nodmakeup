@@ -6,7 +6,18 @@ export declare const contentApi: (baseURL: string, options?: ApiClientOptionsPat
     getActiveStories: () => Promise<StoryBundle[]>;
     markStoryAsViewed: (storyId: string) => Promise<import("axios").AxiosResponse<any, any, {}, any>>;
     trackStoryClick: (storyId: string) => Promise<import("axios").AxiosResponse<any, any, {}, any>>;
-    getPublicHeroSection: (slug: string) => Promise<HeroSection>;
+    /**
+     * The hero section for a public slug, or null when there is none.
+     *
+     * The route answers 404 for a slug that was never created and for one whose
+     * section has been deactivated — two ordinary states, not failures. Resolving
+     * them to null here means every consumer gets "no such hero section" instead
+     * of having to catch and classify the error itself, and it keeps the rule
+     * beside the call rather than spread across the components that make it.
+     *
+     * Genuine faults still throw: a 5xx or a network failure is worth surfacing.
+     */
+    getPublicHeroSection: (slug: string) => Promise<HeroSection | null>;
 };
 /** Content admin CRUD clients. */
 export declare const contentAdminApi: (baseURL: string, options?: ApiClientOptionsPatch) => {

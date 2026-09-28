@@ -152,6 +152,36 @@ export interface AppliedDiscount {
   value: string | number;
 }
 
+/**
+ * Why a coupon was refused, as a code rather than a sentence.
+ *
+ * The API also sends a human-readable `message`, but prose is the wrong thing for
+ * a client to react to: it cannot be translated, and it cannot tell the UI what
+ * to do next. A shopper on the Arabic page was shown an English sentence, and a
+ * "reserved for another customer" reply gave them nothing to act on.
+ *
+ * The storefront maps each code to its own wording and to the recovery it
+ * implies — a code that needs a phone focuses the phone field rather than
+ * re-asking for the code. So the backend decides *what happened* and the client
+ * decides *what to say*, in the reader's language.
+ */
+export const COUPON_REJECTION_REASONS = [
+  /** No such code, or the code belongs to a discount that is no longer active. */
+  'NOT_FOUND',
+  /** Already used the number of times it allows. */
+  'LIMIT_REACHED',
+  /** Reserved for one number, and the shopper has not given a phone yet. */
+  'PERSONALIZED_NEEDS_PHONE',
+  /** Reserved for one number, and the phone given is a different one. */
+  'NOT_OWNED',
+] as const;
+
+export type CouponRejectionReason = (typeof COUPON_REJECTION_REASONS)[number];
+
+/** Narrows an untrusted value (a response body) to a known rejection reason. */
+export const isCouponRejectionReason = (value: unknown): value is CouponRejectionReason =>
+  typeof value === 'string' && (COUPON_REJECTION_REASONS as readonly string[]).includes(value);
+
 export interface OrderCreationData {
   customerName: string;
   customerPhone: string;
@@ -266,6 +296,37 @@ export interface LandingBanner {
   ctaLabel: string;
   ctaLabelAr?: string | null;
   ctaUrl: string;
+}
+
+// --- Landing layout ------------------------------------------------------
+
+/**
+ * One homepage section as the storefront receives it.
+ *
+ * `key` is a plain `string`, not the `LandingSectionKey` union, because this is
+ * whatever came out of the database: a row can name a key that has since been
+ * unregistered from the registry, and the storefront's job is to notice and skip
+ * it rather than to be handed a type that says it cannot happen. The renderer
+ * narrows with `isLandingSectionKey` before looking up a component.
+ *
+ * The mode fields are `null` rather than optional on purpose — the row always
+ * has a value for them, it just may be no value.
+ */
+export interface LandingSectionSetting {
+  key: string;
+  isEnabled: boolean;
+  heroMode: string | null;
+  heroSlug: string | null;
+}
+
+/**
+ * The saved order and visibility of every homepage section.
+ *
+ * `sections` is already ordered — position in the array IS the display order, so
+ * clients never sort and cannot disagree with the database about it.
+ */
+export interface PublicLandingLayout {
+  sections: LandingSectionSetting[];
 }
 
 // --- Analytics ---

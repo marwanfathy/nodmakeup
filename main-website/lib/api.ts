@@ -13,6 +13,7 @@ import {
   ordersApi,
   analyticsApi,
   mediaApi,
+  readCouponRejection as readCouponRejectionFromShared,
 } from './shared/dist/index.js';
 
 // Attach the cart session id (if any) to every request from this browser.
@@ -49,6 +50,7 @@ export type {
   PaymentMethodType,
   ShippingZone,
   AppliedDiscount,
+  CouponRejectionReason,
   OrderCreationData,
   OrderCreationResponse,
   OrderItemInfo,
@@ -133,6 +135,15 @@ export const getShippingZones = () => orders.getShippingZones();
 
 export const validateCoupon = (couponCode: string, customerPhone?: string) =>
   orders.validateCoupon(couponCode, customerPhone);
+
+/**
+ * Why the API refused a coupon, or null if it did not say.
+ *
+ * Re-exported so the checkout reads its reason from one place like every other
+ * API helper, rather than importing the orders client directly and bypassing
+ * this module's base-URL configuration.
+ */
+export const readCouponRejection = readCouponRejectionFromShared;
 
 // ===============================================
 //           ANALYTICS API

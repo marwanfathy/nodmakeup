@@ -1,5 +1,15 @@
-import type { AppliedDiscount, Cart, OrderCreationData, OrderCreationResponse, OrderDetails, ShippingZone } from '../api/types';
+import type { AppliedDiscount, Cart, CouponRejectionReason, OrderCreationData, OrderCreationResponse, OrderDetails, ShippingZone } from '../api/types';
 import { type ApiClientOptionsPatch } from './client';
+/**
+ * Why a coupon was refused, read off the error `validateCoupon` rejected with.
+ *
+ * Null means the refusal was not one the API explained — a network drop, a 5xx,
+ * a 400 from somewhere else in the stack — so the caller should fall back to a
+ * generic message rather than invent a reason. That distinction matters: telling
+ * a shopper their code is "expired" when the request never reached the server is
+ * worse than saying nothing useful happened.
+ */
+export declare const readCouponRejection: (error: unknown) => CouponRejectionReason | null;
 /** Cart domain client (session resource under orders). */
 export declare const cartApi: (baseURL: string, options?: ApiClientOptionsPatch) => {
     client: import("axios").AxiosInstance;

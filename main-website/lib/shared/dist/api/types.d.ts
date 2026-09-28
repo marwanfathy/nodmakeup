@@ -138,6 +138,23 @@ export interface AppliedDiscount {
     discountType: 'PERCENTAGE' | 'FIXED_AMOUNT' | 'FREE_SHIPPING';
     value: string | number;
 }
+/**
+ * Why a coupon was refused, as a code rather than a sentence.
+ *
+ * The API also sends a human-readable `message`, but prose is the wrong thing for
+ * a client to react to: it cannot be translated, and it cannot tell the UI what
+ * to do next. A shopper on the Arabic page was shown an English sentence, and a
+ * "reserved for another customer" reply gave them nothing to act on.
+ *
+ * The storefront maps each code to its own wording and to the recovery it
+ * implies — a code that needs a phone focuses the phone field rather than
+ * re-asking for the code. So the backend decides *what happened* and the client
+ * decides *what to say*, in the reader's language.
+ */
+export declare const COUPON_REJECTION_REASONS: readonly ["NOT_FOUND", "LIMIT_REACHED", "PERSONALIZED_NEEDS_PHONE", "NOT_OWNED"];
+export type CouponRejectionReason = (typeof COUPON_REJECTION_REASONS)[number];
+/** Narrows an untrusted value (a response body) to a known rejection reason. */
+export declare const isCouponRejectionReason: (value: unknown) => value is CouponRejectionReason;
 export interface OrderCreationData {
     customerName: string;
     customerPhone: string;

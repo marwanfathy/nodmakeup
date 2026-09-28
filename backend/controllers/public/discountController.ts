@@ -19,7 +19,10 @@ export const validateCoupon = asyncHandler(async (req: Request, res: Response) =
 
     if (!result.ok) {
         res.status(result.status);
-        throw new Error(result.message);
+        // The reason rides along so the storefront can explain the refusal in the
+        // shopper's own language and offer the right way out of it, instead of
+        // showing this English sentence verbatim.
+        throw Object.assign(new Error(result.message), { reason: result.reason });
     }
 
     res.status(200).json({ success: true, data: result.discount });

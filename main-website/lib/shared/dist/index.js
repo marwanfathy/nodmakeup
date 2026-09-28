@@ -14,7 +14,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MEDIA_ROUTES = exports.mediaApi = exports.crmAdminApi = exports.usersAdminApi = exports.usersApi = exports.analyticsAdminApi = exports.analyticsApi = exports.ordersAdminApi = exports.ordersApi = exports.cartApi = exports.contentAdminApi = exports.contentApi = exports.catalogAdminApi = exports.catalogApi = exports.unwrap = exports.createApiClient = exports.deriveClientBaseUrl = exports.allowOrigin = exports.originMatches = exports.parseOriginList = exports.defaultPortOf = exports.SERVICES = exports.ENV_CONTRACT = exports.PUBLIC_LIST_QUERY = exports.API_PREFIX = exports.API_V1 = void 0;
+exports.MEDIA_ROUTES = exports.mediaApi = exports.crmAdminApi = exports.usersAdminApi = exports.usersApi = exports.analyticsAdminApi = exports.analyticsApi = exports.readCouponRejection = exports.ordersAdminApi = exports.ordersApi = exports.cartApi = exports.contentAdminApi = exports.contentApi = exports.catalogAdminApi = exports.catalogApi = exports.unwrap = exports.createApiClient = exports.deriveClientBaseUrl = exports.allowOrigin = exports.originMatches = exports.parseOriginList = exports.defaultPortOf = exports.SERVICES = exports.ENV_CONTRACT = exports.PUBLIC_LIST_QUERY = exports.API_PREFIX = exports.API_V1 = void 0;
 var endpoints_1 = require("./api/endpoints");
 Object.defineProperty(exports, "API_V1", { enumerable: true, get: function () { return endpoints_1.API_V1; } });
 Object.defineProperty(exports, "API_PREFIX", { enumerable: true, get: function () { return endpoints_1.API_PREFIX; } });
@@ -43,6 +43,7 @@ var orders_1 = require("./clients/orders");
 Object.defineProperty(exports, "cartApi", { enumerable: true, get: function () { return orders_1.cartApi; } });
 Object.defineProperty(exports, "ordersApi", { enumerable: true, get: function () { return orders_1.ordersApi; } });
 Object.defineProperty(exports, "ordersAdminApi", { enumerable: true, get: function () { return orders_1.ordersAdminApi; } });
+Object.defineProperty(exports, "readCouponRejection", { enumerable: true, get: function () { return orders_1.readCouponRejection; } });
 var analytics_1 = require("./clients/analytics");
 Object.defineProperty(exports, "analyticsApi", { enumerable: true, get: function () { return analytics_1.analyticsApi; } });
 Object.defineProperty(exports, "analyticsAdminApi", { enumerable: true, get: function () { return analytics_1.analyticsAdminApi; } });

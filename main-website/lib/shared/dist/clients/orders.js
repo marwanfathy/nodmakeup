@@ -1,8 +1,24 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ordersAdminApi = exports.ordersApi = exports.cartApi = void 0;
+exports.ordersAdminApi = exports.ordersApi = exports.cartApi = exports.readCouponRejection = void 0;
 const endpoints_1 = require("../api/endpoints");
+const types_1 = require("../api/types");
 const client_1 = require("./client");
+/**
+ * Why a coupon was refused, read off the error `validateCoupon` rejected with.
+ *
+ * Null means the refusal was not one the API explained — a network drop, a 5xx,
+ * a 400 from somewhere else in the stack — so the caller should fall back to a
+ * generic message rather than invent a reason. That distinction matters: telling
+ * a shopper their code is "expired" when the request never reached the server is
+ * worse than saying nothing useful happened.
+ */
+const readCouponRejection = (error) => {
+    var _a;
+    const reason = (_a = (0, client_1.apiErrorBody)(error)) === null || _a === void 0 ? void 0 : _a.reason;
+    return (0, types_1.isCouponRejectionReason)(reason) ? reason : null;
+};
+exports.readCouponRejection = readCouponRejection;
 /** Cart domain client (session resource under orders). */
 const cartApi = (baseURL, options = {}) => {
     const client = (0, client_1.createApiClient)({ baseURL, ...options });

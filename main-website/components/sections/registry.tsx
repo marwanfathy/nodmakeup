@@ -99,9 +99,23 @@ const RENDERERS: Record<LandingSectionKey, SectionRenderer> = {
    * here rather than trusted. An unrecognised mode falls back to the product
    * hero, which is the pre-existing rendering: a layout row written by a newer
    * build must not be able to blank the hero.
+   *
+   * A mode of `slides` is a request for a hero section, not a guarantee one
+   * exists. The slug may name a section nobody has created, or one that was
+   * deactivated, and the public route answers 404 for both. So the resolved data
+   * gates the carousel as well as the mode: without a hero section to show, the
+   * product hero is the honest rendering. Mounting the slider on a null would
+   * hand it a request every browser makes to be told the same thing.
+   *
+   * This is a different case from a hero section that EXISTS but has no slides in
+   * it. That one renders the slider's own "no slides" placeholder, because the
+   * operator made a hero section and left it empty, and quietly substituting a
+   * different hero would hide that. Here there is nothing to substitute for.
    */
   hero: (data, setting) =>
-    setting.heroMode === HERO_SLIDES && isModeFor('hero', setting.heroMode) ? (
+    setting.heroMode === HERO_SLIDES &&
+    isModeFor('hero', setting.heroMode) &&
+    data.heroSection !== null ? (
       <HeroSlider slug={setting.heroSlug ?? DEFAULT_HERO_SLUG} initialData={data.heroSection} />
     ) : (
       <HeroProductSection initialProducts={data.heroProducts} />

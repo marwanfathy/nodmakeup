@@ -2,12 +2,28 @@ import { API_V1 } from '../api/endpoints';
 import type {
   AppliedDiscount,
   Cart,
+  CouponRejectionReason,
   OrderCreationData,
   OrderCreationResponse,
   OrderDetails,
   ShippingZone,
 } from '../api/types';
-import { createApiClient, type ApiClientOptionsPatch , unwrap } from './client';
+import { isCouponRejectionReason } from '../api/types';
+import { apiErrorBody, createApiClient, type ApiClientOptionsPatch, unwrap } from './client';
+
+/**
+ * Why a coupon was refused, read off the error `validateCoupon` rejected with.
+ *
+ * Null means the refusal was not one the API explained — a network drop, a 5xx,
+ * a 400 from somewhere else in the stack — so the caller should fall back to a
+ * generic message rather than invent a reason. That distinction matters: telling
+ * a shopper their code is "expired" when the request never reached the server is
+ * worse than saying nothing useful happened.
+ */
+export const readCouponRejection = (error: unknown): CouponRejectionReason | null => {
+  const reason: unknown = apiErrorBody(error)?.reason;
+  return isCouponRejectionReason(reason) ? reason : null;
+};
 
 /** Cart domain client (session resource under orders). */
 export const cartApi = (baseURL: string, options: ApiClientOptionsPatch = {}) => {

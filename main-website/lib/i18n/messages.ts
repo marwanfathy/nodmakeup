@@ -132,6 +132,7 @@ const en: Dict = {
   'checkout.apply': 'Apply',
   'checkout.subtotal': 'Subtotal',
   'checkout.discount': 'Discount ({name})',
+  'checkout.coupon.fixPhone': 'Add my number',
   'checkout.shippingCost': 'Shipping',
   'checkout.free': 'Free',
   'checkout.selectGov': 'Select governorate',
@@ -140,9 +141,8 @@ const en: Dict = {
   'checkout.toast.emptyCart': 'Your cart is empty. Redirecting...',
   'checkout.toast.fillFields': 'Please fill in all required fields.',
   'checkout.toast.couponEmpty': 'Please enter a coupon code.',
-  'checkout.toast.couponPhone': 'This looks like a personal code. Please enter your Phone Number first.',
   'checkout.toast.couponApplied': 'Coupon "{name}" applied!',
-  'checkout.toast.couponFailed': 'Failed to apply coupon.',
+  'checkout.toast.couponFailed': 'We could not check that code. Please try again.',
   'checkout.toast.checkoutFailed': 'Checkout failed.',
   'checkout.toast.shippingFailed': 'Could not fetch shipping information.',
   // --- Per-field validation ---
@@ -155,6 +155,22 @@ const en: Dict = {
   'checkout.err.govRequired': 'Please choose your governorate.',
   'checkout.err.notesLong': 'Notes are limited to 500 characters.',
   'checkout.err.summary': 'Please fix the highlighted fields.',
+
+  // --- Coupon refusals -----------------------------------------------------
+  // One key per reason the API can report, and each one names the next move
+  // rather than only the fault. A shopper told a code is "reserved for another
+  // customer" with no indication of what to do is simply stuck; these say what
+  // happened AND what to do about it, because each reason has a different way out.
+  'checkout.coupon.notFound':
+    'We do not recognise that code. Check it for typos, or continue without a discount.',
+  'checkout.coupon.limitReached':
+    'This code has already been used the maximum number of times. You can still place your order without it.',
+  'checkout.coupon.personalizedNeedsPhone':
+    'This code is personal to one customer, so it can only be checked against a phone number. Add your number above, then apply the code again.',
+  'checkout.coupon.notOwned':
+    'This code was issued to a different phone number. If that is your number, correct it above and try again; otherwise continue without it.',
+  'checkout.coupon.applied': 'Code applied — {amount} off.',
+  'checkout.coupon.remove': 'Remove code',
   'checkout.phoneHint': 'Egyptian mobile — the leading 0 is dropped for you.',
   'checkout.useLocation': 'Use my current location',
   'checkout.locating': 'Finding your location…',
@@ -420,6 +436,7 @@ const ar: Dict = {
   'checkout.apply': 'تطبيق',
   'checkout.subtotal': 'المجموع الفرعي',
   'checkout.discount': 'الخصم ({name})',
+  'checkout.coupon.fixPhone': 'أضيفي رقمي',
   'checkout.shippingCost': 'الشحن',
   'checkout.free': 'مجاني',
   'checkout.selectGov': 'اختر المحافظة',
@@ -428,9 +445,8 @@ const ar: Dict = {
   'checkout.toast.emptyCart': 'سلة التسوق فارغة. جارٍ إعادة التوجيه...',
   'checkout.toast.fillFields': 'يرجى ملء جميع الحقول المطلوبة.',
   'checkout.toast.couponEmpty': 'يرجى إدخال كود الخصم.',
-  'checkout.toast.couponPhone': 'يبدو أن هذا كود شخصي. يرجى إدخال رقم الهاتف أولاً.',
   'checkout.toast.couponApplied': 'تم تطبيق الكود "{name}"!',
-  'checkout.toast.couponFailed': 'فشل تطبيق الكود.',
+  'checkout.toast.couponFailed': 'تعذّر التحقق من الكود. من فضلك حاولي مرة أخرى.',
   'checkout.toast.checkoutFailed': 'فشلت عملية الدفع.',
   'checkout.toast.shippingFailed': 'تعذر جلب معلومات الشحن.',
   // --- أخطاء الحقول ---
@@ -443,6 +459,21 @@ const ar: Dict = {
   'checkout.err.govRequired': 'من فضلك اختاري المحافظة.',
   'checkout.err.notesLong': 'الملاحظات محدودة بـ 500 حرف.',
   'checkout.err.summary': 'من فضلك صحّحي الحقول المميّزة.',
+
+  // --- رفض كود الخصم ---
+  // كل سبب يقول ما حدث و ALSO ما يمكن فعله، لأن لكل سبب طريقة مختلفة للخروج
+  // منه. رسالة تفيد بأن الكود محجوز لعميل آخر دون توضيح الخطوة التالية تترك
+  // المتسوّق في حيرة.
+  'checkout.coupon.notFound':
+    'لا نعرف هذا الكود. تأكدي من كتابته بشكل صحيح، أو يمكنك إتمام الطلب بدون خصم.',
+  'checkout.coupon.limitReached':
+    'تم استخدام هذا الكود بالحد الأقصى المسموح. لا يزال بإمكانك إتمام الطلب بدونه.',
+  'checkout.coupon.personalizedNeedsPhone':
+    'هذا الكود شخصي لعميل واحد، لذلك لا يمكن التحقق منه بدون رقم هاتف. أضيفي رقمك في الأعلى ثم أعيدي تطبيق الكود.',
+  'checkout.coupon.notOwned':
+    'تم إصدار هذا الكود لرقم هاتف مختلف. إذا كان هذا رقمك، صحّحيه في الأعلى وحاولي مرة أخرى؛ وإلا يمكنك المتابعة بدونه.',
+  'checkout.coupon.applied': 'تم تطبيق الكود — خصم {amount}.',
+  'checkout.coupon.remove': 'إزالة الكود',
   'checkout.phoneHint': 'رقم موبايل مصري — سيتم تجاهل الصفر الأول تلقائياً.',
   'checkout.useLocation': 'استخدمي موقعي الحالي',
   'checkout.locating': 'جارٍ تحديد موقعك…',

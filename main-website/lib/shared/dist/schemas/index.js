@@ -41,7 +41,23 @@ exports.updateCartItemSchema = zod_1.z.object({
 });
 exports.validateCouponSchema = zod_1.z.object({
     couponCode: zod_1.z.string().trim().min(1, 'Coupon code is required.').max(50),
-    customerPhone: exports.phoneSchema.optional(),
+    /**
+     * Optional, and an EMPTY string is a legitimate value rather than a bad one.
+     *
+     * The shopper may reach the discount box with no number yet, and "no number"
+     * is a state the API has an opinion about: a personal code is refused with
+     * PERSONALIZED_NEEDS_PHONE, which the storefront can explain and offer a way
+     * out of. Validating `''` against the phone schema turned that answer into a
+     * generic "Validation failed." with two field complaints, so the one refusal
+     * that needed explaining most was the one that arrived unexplained.
+     */
+    customerPhone: zod_1.z
+        .string()
+        .trim()
+        .refine((v) => v === '' || exports.phoneSchema.safeParse(v).success, {
+        message: 'Enter a valid Egyptian mobile number (e.g. 01012345678).',
+    })
+        .optional(),
 });
 exports.loginSchema = zod_1.z.object({
     email: zod_1.z.string().trim().toLowerCase().email('Enter a valid email.'),

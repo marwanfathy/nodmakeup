@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { normalizeEgyptPhone } from '../utils/phone';
+import { hasModes, isLandingSectionKey, isModeFor, LANDING_SECTIONS, SECTION_SLUG_RE } from '../landing/sections';
 
 // Egyptian mobile: +(20) + 10/11/12/15 + 8 digits
 const egyptMobile = /^\+?20(10|11|12|15)[0-9]{8}$/;
@@ -45,7 +46,23 @@ export const updateCartItemSchema = z.object({
 
 export const validateCouponSchema = z.object({
     couponCode: z.string().trim().min(1, 'Coupon code is required.').max(50),
-    customerPhone: phoneSchema.optional(),
+    /**
+     * Optional, and an EMPTY string is a legitimate value rather than a bad one.
+     *
+     * The shopper may reach the discount box with no number yet, and "no number"
+     * is a state the API has an opinion about: a personal code is refused with
+     * PERSONALIZED_NEEDS_PHONE, which the storefront can explain and offer a way
+     * out of. Validating `''` against the phone schema turned that answer into a
+     * generic "Validation failed." with two field complaints, so the one refusal
+     * that needed explaining most was the one that arrived unexplained.
+     */
+    customerPhone: z
+        .string()
+        .trim()
+        .refine((v) => v === '' || phoneSchema.safeParse(v).success, {
+            message: 'Enter a valid Egyptian mobile number (e.g. 01012345678).',
+        })
+        .optional(),
 });
 
 export const loginSchema = z.object({
@@ -124,9 +141,87 @@ export const upsertLandingBannerSchema = z.object({
     isActive: z.boolean(),
 });
 
+// --- landing layout ------------------------------------------------------
+
+// The hero's carousel slug, validated against the registry's single definition
+// of the shape (SECTION_SLUG_RE) so the schema, the admin read and the public
+// read cannot disagree about what counts as a slug.
+const heroSlugSchema = z
+    .string()
+    .trim()
+    .min(1, 'Hero slug is required.')
+    .max(64)
+    .regex(SECTION_SLUG_RE, 'Hero slug may contain lower-case letters, digits and single dashes.');
+
+/**
+ * One section's entry in a layout write.
+ *
+ * A single object with cross-field rules rather than a discriminated union: the
+ * rules are "the key must be registered" and "hero settings belong to the hero
+ * section", which is a relationship between fields, not a shape difference. A
+ * union would repeat the whole object per section, and discriminatedUnion cannot
+ * key off a refined `z.string()` anyway.
+ */
+const landingSectionSchema = z
+    .object({
+        key: z.string().trim().min(1).max(64),
+        isEnabled: z.boolean(),
+        heroMode: z.string().trim().min(1).max(32).optional(),
+        heroSlug: heroSlugSchema.optional(),
+    })
+    .superRefine((section, ctx) => {
+        const problem = (path: 'key' | 'heroMode' | 'heroSlug', message: string) =>
+            ctx.addIssue({ code: z.ZodIssueCode.custom, path: [path], message });
+
+        if (!isLandingSectionKey(section.key)) {
+            problem('key', 'Unknown landing section.');
+            return;
+        }
+
+        // Hero settings on a section that declares no modes at all. Storing them
+        // would be invisible here and confusing everywhere else: a row carrying a
+        // slug or mode the storefront never reads. Checked against `hasModes`
+        // rather than the chosen mode, so a slug saved before its mode is picked
+        // is still accepted.
+        if (!hasModes(section.key)) {
+            if (section.heroMode !== undefined) problem('heroMode', 'This section has no modes to set.');
+            if (section.heroSlug !== undefined) problem('heroSlug', 'This section has no modes to set.');
+            return;
+        }
+
+        // The value has to be one of THAT section's modes — checked against the
+        // registry, so a section gaining modes later needs no edit here.
+        if (section.heroMode !== undefined && !isModeFor(section.key, section.heroMode)) {
+            problem('heroMode', `"${section.heroMode}" is not a mode this section supports.`);
+        }
+    });
+
+/**
+ * The whole homepage layout in one write: order, visibility and per-section
+ * settings.
+ *
+ * Order is the array order — there is no displayOrder field in the body,
+ * because a number the client also has to keep consistent with the array is one
+ * more thing that can disagree with itself. The service assigns the indices.
+ *
+ * Capped at the registry size + a little slack: the body is a fixed set of
+ * known sections, so an unbounded array is only ever a mistake or an attempt to
+ * make the service do unbounded work.
+ */
+export const upsertLandingLayoutSchema = z.object({
+    sections: z
+        .array(landingSectionSchema)
+        .max(LANDING_SECTIONS.length + 5, 'Too many sections in one layout.')
+        .refine(
+            (sections) => new Set(sections.map((s) => s.key)).size === sections.length,
+            { message: 'A section may appear only once in the layout.' },
+        ),
+});
+
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;
 export type AddCartItemInput = z.infer<typeof addCartItemSchema>;
 export type UpdateCartItemInput = z.infer<typeof updateCartItemSchema>;
 export type ValidateCouponInput = z.infer<typeof validateCouponSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type UpsertLandingBannerInput = z.infer<typeof upsertLandingBannerSchema>;
+export type UpsertLandingLayoutInput = z.infer<typeof upsertLandingLayoutSchema>;

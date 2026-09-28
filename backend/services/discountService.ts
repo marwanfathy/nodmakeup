@@ -1,6 +1,7 @@
 // Discount service — storefront coupon validation.
 import prisma from '../config/prismaClient';
 import { Prisma } from '@prisma/client';
+import type { CouponRejectionReason } from '@nod/shared';
 
 export interface ValidatedCoupon {
     discountId: string;
@@ -10,9 +11,24 @@ export interface ValidatedCoupon {
     isPersonalized: boolean;
 }
 
+/**
+ * A refusal, carrying a machine-readable `reason` beside the prose `message`.
+ *
+ * The reason is what the storefront acts on. `message` stays for logs and for any
+ * caller with no better option, but it is English-only: the storefront used to
+ * show it verbatim, so an Arabic shopper was told their personal coupon was
+ * refused in a language they had not chosen. The client now maps `reason` to its
+ * own wording, and every refusal says what to do next rather than only what went
+ * wrong — "reserved for another customer" on its own is a dead end.
+ */
 export type CouponValidationResult =
     | { ok: true; discount: ValidatedCoupon }
-    | { ok: false; status: 400 | 403 | 404; message: string };
+    | {
+          ok: false;
+          status: 400 | 403 | 404;
+          reason: CouponRejectionReason;
+          message: string;
+      };
 
 /**
  * Validates an active coupon: existence, usage cap and (for personalized
@@ -37,11 +53,21 @@ export async function validateCouponCode(
     });
 
     if (!discount) {
-        return { ok: false, status: 404, message: `Coupon "${couponCode}" is not valid or has expired.` };
+        return {
+            ok: false,
+            status: 404,
+            reason: 'NOT_FOUND',
+            message: `Coupon "${couponCode}" is not valid or has expired.`,
+        };
     }
 
     if (discount.maxUsages > 0 && discount.currentUsages >= discount.maxUsages) {
-        return { ok: false, status: 400, message: 'This coupon has reached its maximum usage limit.' };
+        return {
+            ok: false,
+            status: 400,
+            reason: 'LIMIT_REACHED',
+            message: 'This coupon has reached its maximum usage limit.',
+        };
     }
 
     if (discount.assignedPhone) {
@@ -50,6 +76,7 @@ export async function validateCouponCode(
             return {
                 ok: false,
                 status: 400,
+                reason: 'PERSONALIZED_NEEDS_PHONE',
                 message: 'This is a personalized coupon. Please provide your phone number to use it.',
             };
         }
@@ -60,7 +87,12 @@ export async function validateCouponCode(
         const isMatch = dbPhone.includes(inputPhone) || inputPhone.includes(dbPhone);
 
         if (!isMatch) {
-            return { ok: false, status: 403, message: 'This coupon is reserved for a specific customer.' };
+            return {
+                ok: false,
+                status: 403,
+                reason: 'NOT_OWNED',
+                message: 'This coupon is reserved for a specific customer.',
+            };
         }
     }
 

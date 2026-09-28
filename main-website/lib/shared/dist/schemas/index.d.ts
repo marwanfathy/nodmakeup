@@ -46,7 +46,17 @@ export declare const updateCartItemSchema: z.ZodObject<{
 }>;
 export declare const validateCouponSchema: z.ZodObject<{
     couponCode: z.ZodString;
-    customerPhone: z.ZodOptional<z.ZodString>;
+    /**
+     * Optional, and an EMPTY string is a legitimate value rather than a bad one.
+     *
+     * The shopper may reach the discount box with no number yet, and "no number"
+     * is a state the API has an opinion about: a personal code is refused with
+     * PERSONALIZED_NEEDS_PHONE, which the storefront can explain and offer a way
+     * out of. Validating `''` against the phone schema turned that answer into a
+     * generic "Validation failed." with two field complaints, so the one refusal
+     * that needed explaining most was the one that arrived unexplained.
+     */
+    customerPhone: z.ZodOptional<z.ZodEffects<z.ZodString, string, string>>;
 }, "strip", z.ZodTypeAny, {
     couponCode: string;
     customerPhone?: string | undefined;
