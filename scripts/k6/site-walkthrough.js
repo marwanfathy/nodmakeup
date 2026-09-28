@@ -27,8 +27,8 @@
 // https:// URL. For a local stack, scripts/k6/tls-proxy.mjs terminates TLS in
 // front of the dev services so handshakes are real:
 //   node scripts/k6/tls-proxy.mjs && ~/bin/k6 run scripts/k6/site-walkthrough.js \
-//     -e SITE_BASE=https://127.0.0.1:8443 -e API_BASE=https://127.0.0.1:8443 \
-//     -e MEDIA_BASE=https://127.0.0.1:8443
+//     -e SITE_BASE=https://localhost:8443 -e API_BASE=https://localhost:8443 \
+//     -e MEDIA_BASE=https://localhost:8443
 //
 // ── Internet speeds ──────────────────────────────────────────────────────────
 //   NETWORK=fiber|broadband|wifi|lte_4g|hspa_3g|slow_2g   (default fiber)
@@ -36,9 +36,9 @@
 // so you can compare 4G users vs broadband vs 2G against the same server load.
 //
 // ── Env knobs ────────────────────────────────────────────────────────────────
-//   SITE_BASE   storefront (default http://127.0.0.1:3001)
-//   API_BASE    API gateway (default http://127.0.0.1:5001)
-//   MEDIA_BASE  media server (default http://127.0.0.1:5002)
+//   SITE_BASE   storefront (default http://localhost:3001)
+//   API_BASE    API gateway (default http://localhost:5001)
+//   MEDIA_BASE  media server (default http://localhost:5002)
 //   ORIGIN      Origin header the backend CORS allows (default http://localhost:3001)
 //   VUS         walk/soak target virtual users (default 10)
 //   MAX_VUS     capacity ramp ceiling (default 200)
@@ -55,9 +55,9 @@ import { check, sleep } from 'k6';
 
 // ------------------------------ config --------------------------------------
 
-const SITE = __ENV.SITE_BASE || 'http://127.0.0.1:3001';
-const API = __ENV.API_BASE || 'http://127.0.0.1:5001';
-const MEDIA = __ENV.MEDIA_BASE || 'http://127.0.0.1:5002';
+const SITE = __ENV.SITE_BASE || 'http://localhost:3001';
+const API = __ENV.API_BASE || 'http://localhost:5001';
+const MEDIA = __ENV.MEDIA_BASE || 'http://localhost:5002';
 const ORIGIN = __ENV.ORIGIN || 'http://localhost:3001';
 
 const MODE = __ENV.MODE || 'walk';

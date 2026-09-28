@@ -62,7 +62,7 @@ RUN chown -R app:app /app
 USER app
 EXPOSE 5001
 HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=5 \
-  CMD ["node","-e","fetch('http://127.0.0.1:5001/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+  CMD ["node","-e","fetch('http://localhost:5001/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
 ENTRYPOINT ["/sbin/tini","--"]
 CMD ["node","dist/server.js"]
 ```
@@ -105,7 +105,7 @@ COPY --from=builder /app/prisma ./prisma
 RUN mkdir -p .wwebjs_auth .wwebjs_cache && chown -R app:app /app
 USER app
 HEALTHCHECK --interval=20s --timeout=5s --start-period=60s --retries=5 \
-  CMD ["node","-e","fetch('http://127.0.0.1:5001/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+  CMD ["node","-e","fetch('http://localhost:5001/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
 ENTRYPOINT ["/sbin/tini","--"]
 CMD ["node","dist/workers/whatsapp.worker.js"]
 ```
@@ -132,7 +132,7 @@ VOLUME ["/app/public"]
 USER app
 EXPOSE 5002
 HEALTHCHECK --interval=15s --timeout=5s --start-period=15s --retries=5 \
-  CMD ["node","-e","fetch('http://127.0.0.1:5002/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+  CMD ["node","-e","fetch('http://localhost:5002/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
 ENTRYPOINT ["/sbin/tini","--"]
 CMD ["node","server.js"]
 ```
@@ -192,7 +192,7 @@ services:
           cpus: "2.0"
           memory: 2g
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p$$MYSQL_ROOT_PASSWORD"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p$$MYSQL_ROOT_PASSWORD"]
       interval: 15s
       timeout: 5s
       retries: 10
@@ -230,7 +230,7 @@ services:
     mem_limit: 1g
     security_opt: [no-new-privileges:true]
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:5001/readyz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      test: ["CMD", "node", "-e", "fetch('http://localhost:5001/readyz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -277,7 +277,7 @@ services:
     mem_limit: 512m
     security_opt: [no-new-privileges:true]
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:5002/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      test: ["CMD", "node", "-e", "fetch('http://localhost:5002/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -926,7 +926,7 @@ dcp ps worker
 dcp logs --tail=200 worker
 
 # 2. Check queue depth — rewards piling up?
-redis-cli -h 127.0.0.1 -p 6379 llen bull:rewards:wait        # (or: dcpexec redis-cli llen bull:rewards:wait)
+redis-cli -h localhost -p 6379 llen bull:rewards:wait        # (or: dcpexec redis-cli llen bull:rewards:wait)
 
 # 3. Restart the worker to trigger the 5s auto-reconnect path
 dcp restart worker

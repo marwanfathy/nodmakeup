@@ -4,9 +4,9 @@
   "description": "NOD Makeup — Next.js operations control plane: metrics, process control, tracing (TypeScript)",
   "private": true,
   "scripts": {
-    "dev": "next dev -p ${CC_PORT:-4000} -H 127.0.0.1",
+    "dev": "next dev -p ${CC_PORT:-4000} -H localhost",
     "build": "next build",
-    "start": "next start -p ${CC_PORT:-4000} -H 127.0.0.1",
+    "start": "next start -p ${CC_PORT:-4000} -H localhost",
     "test": "node --test test/",
     "sidecar:test": "python3 py/system_metrics.py --root ."
   },

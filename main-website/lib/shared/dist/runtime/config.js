@@ -165,6 +165,10 @@ function safeParseUrl(raw) {
 function deriveClientBaseUrl({ kind, envUrl, browserLocation }) {
     const defaultPort = defaultPortOf(kind);
     const env = safeParseUrl(envUrl);
+    // All three spellings of the loopback interface. Missing one here is not
+    // cosmetic: a name that is absent is treated as a real deployed host, so the
+    // env URL is returned verbatim and the browser is pointed at the machine's own
+    // address instead of the one the page was opened on.
     const isLoopback = env ? ['localhost', '127.0.0.1', '::1'].includes(env.hostname) : false;
     const envPort = (env === null || env === void 0 ? void 0 : env.port) || '';
     // Production mode: the env URL names a real host (tunnel or domain). It wins

@@ -48,7 +48,7 @@ app.use('/api/v1/orders', publicOrderRoutes);
 
 **MySQL Update:**
 ```sql
-ALTER USER 'nod'@'127.0.0.1' IDENTIFIED BY '5f86c5ec868e609846f558e45eeee393';
+ALTER USER 'nod'@'localhost' IDENTIFIED BY '5f86c5ec868e609846f558e45eeee393';
 ALTER USER 'nod'@'localhost' IDENTIFIED BY '5f86c5ec868e609846f558e45eeee393';
 ```
 
@@ -250,18 +250,18 @@ Started via `./start.sh` conventions (PID files in `run/`, logs in `logs/`). Sta
 
 ```bash
 # API Health
-curl http://127.0.0.1:5001/readyz
-curl http://127.0.0.1:5001/metrics | head
+curl http://localhost:5001/readyz
+curl http://localhost:5001/metrics | head
 
 # Auth + CSRF
-BASE=http://127.0.0.1:5001/api/v1
+BASE=http://localhost:5001/api/v1
 curl -c f.txt -b f.txt -X POST $BASE/users/auth/login -H 'Content-Type: application/json' -d '{"email":"admin@nodmakeup.com","password":"admin1234"}'
 CSRF=$(awk '$6=="csrf"{print $7}' f.txt)
 curl -b f.txt -X POST $BASE/users/admins -H "X-CSRF-Token: $CSRF" -H 'Content-Type: application/json' -d '{}'
 
 # Frontends
-curl -o /dev/null -w '%{http_code}\n' http://127.0.0.1:3000/
-curl -o /dev/null -w '%{http_code}\n' http://127.0.0.1:3001/
+curl -o /dev/null -w '%{http_code}\n' http://localhost:3000/
+curl -o /dev/null -w '%{http_code}\n' http://localhost:3001/
 ```
 
 ---
@@ -619,7 +619,7 @@ Standalone `control-center/` on `:4000` per the owner-approved spec (commit `451
 ## 25. P7 — Control Center (done, this commit)
 - **Scaffold**: `control-center/` ESM Node/Express app: `py/system_metrics.py` (psutil sidecar + node fallback), `src/config` (root-env reader, service registry mirroring start.sh), services (auditLog JSONL, flags, signed-cookie sessions, env editor, process control, 5s sampler), collectors (status, systemMetrics, logCollector, traceCollector, prometheus bridge probe, series ring cap 180), middleware (setup gate, sessionParser, requireAdmin, CSRF guard, login limiter, async error wrappers), routes (auth/dashboard/logs/control/config/flags/tracing/audit), helmet CSP, static SPA.
 - **UI** (English): `public/index.html` + `styles.css` + `app.js` (tabs: Overview/Logs/Tracing/Config/Flags/Audit, 5s refresh, SSE log tail, fetch wrapper auto-sends `X-CSRF-Token`) + `charts.js` (DPR-aware canvas sparklines).
-- **Security**: first-run setup writes bcrypt `CC_PASSWORD_HASH` to `control-center/.env`; sessions are HMAC-signed cookies (`.runtime/secret`), derived per-session CSRF re-verified server-side; every mutation audit-logged; binds 127.0.0.1.
+- **Security**: first-run setup writes bcrypt `CC_PASSWORD_HASH` to `control-center/.env`; sessions are HMAC-signed cookies (`.runtime/secret`), derived per-session CSRF re-verified server-side; every mutation audit-logged; binds localhost.
 - **Tracing integration**: new `media-server/src/middleware/requestId.js` (honours/echoes `x-request-id`, mints otherwise) + morgan `ReqId:` token; backend pino-http `req.id` parsed from `backend.log`. Joined chains verified end-to-end (`backend → media` with a forwarded id). Deferred: storefront/admin access-log ids (no real web→backend call chain exists to join).
 - **Process control**: spawns `detached` with **direct-to-file stdio** (`openSync` append fds — log capture survives control-center restarts; a pipe sink silently broke pino logging when the manager died, fixed); stop = SIGTERM → SIGKILL → `/proc` sweep (media's cluster workers own the listen socket + the primary respawns them; the sweep list also fixed a pid-cap bug — this host's `pid_max` exceeds 32768 so pids are enumerated from `/proc` instead of a capped loop).
 - **Integration**: `start.sh` boots it last at `:4000` (`--no-control`, `--control-port`, `--status`, `--stop all|control-center`); `scripts/smoke-routes.sh` sweeps the SPA + guard.

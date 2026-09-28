@@ -9,11 +9,11 @@
 
 set -u
 
-BACKEND="${1:-http://127.0.0.1:5001}"
-MEDIA="${2:-http://127.0.0.1:5002}"
-WEB="${3:-http://127.0.0.1:3001}"
-ADMIN="${4:-http://127.0.0.1:3000}"
-CONTROL="${5:-http://127.0.0.1:4000}"
+BACKEND="${1:-http://localhost:5001}"
+MEDIA="${2:-http://localhost:5002}"
+WEB="${3:-http://localhost:3001}"
+ADMIN="${4:-http://localhost:3000}"
+CONTROL="${5:-http://localhost:4000}"
 
 fail=0
 

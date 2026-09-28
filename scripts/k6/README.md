@@ -48,11 +48,11 @@ k6 speaks HTTPS natively — point the bases at an `https://` URL (e.g. your pro
 domain) and run. For the local stack, terminate TLS in front of the services:
 
 ```bash
-node scripts/k6/tls-proxy.mjs &            # https://127.0.0.1:8443 → dev stack
+node scripts/k6/tls-proxy.mjs &            # https://localhost:8443 → dev stack
 ~/bin/k6 run scripts/k6/site-walkthrough.js \
-  -e SITE_BASE=https://127.0.0.1:8443 \
-  -e API_BASE=https://127.0.0.1:8443 \
-  -e MEDIA_BASE=https://127.0.0.1:8443
+  -e SITE_BASE=https://localhost:8443 \
+  -e API_BASE=https://localhost:8443 \
+  -e MEDIA_BASE=https://localhost:8443
 ```
 
 Every request now carries a real handshake + TLS record encryption. (Self-signed

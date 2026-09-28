@@ -153,7 +153,7 @@ export async function applyKeys(updates: EnvUpdate[], { skipSync = false }: { sk
 // ---------------------------------------------------------------------------
 function runSyncEnv(): Promise<string> {
   const gateway = rootEnvValue('GATEWAY_URL');
-  const base = gateway ? new URL(gateway).hostname : '127.0.0.1';
+  const base = gateway ? new URL(gateway).hostname : 'localhost';
   const proto = gateway ? new URL(gateway).protocol.replace(':', '') : 'http';
   const args = [
     `${ROOT}/scripts/sync-env.mjs`,

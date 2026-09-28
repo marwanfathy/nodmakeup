@@ -55,10 +55,10 @@ function loadCcEnv(): Record<string, string> {
 export const ccEnv = loadCcEnv();
 
 export const port = Number(ccEnv.CC_PORT || 4000);
-export const host = ccEnv.CC_HOST || '127.0.0.1';
+export const host = ccEnv.CC_HOST || 'localhost';
 export const sampleMs = Number(ccEnv.CC_SAMPLE_MS || 5000);
 export const seriesCap = Number(ccEnv.CC_SERIES_CAP || 180);
-export const prometheusUrl = (ccEnv.PROMETHEUS_URL || 'http://127.0.0.1:9090').replace(/\/$/, '');
+export const prometheusUrl = (ccEnv.PROMETHEUS_URL || 'http://localhost:9090').replace(/\/$/, '');
 export const boundUrl = `http://${host}:${port}`;
 
 export interface OperatorInfo {
@@ -160,8 +160,8 @@ export const SERVICES: ServiceDef[] = [
     // repo). --metrics is a GLOBAL flag in cloudflared 2025.11+ and each
     // connector pins its own local metrics port, which doubles as the /proc
     // discovery key (see PROC_PATTERNS) and the readyz probe.
-    probes: [{ url: 'http://127.0.0.1:38512/healthcheck', match: 200 }],
-    cmd: 'cloudflared --metrics 127.0.0.1:38512 tunnel run --token "$(cat "${HOME}/.cloudflared/tunnel-api.token")"',
+    probes: [{ url: 'http://localhost:38512/healthcheck', match: 200 }],
+    cmd: 'cloudflared --metrics localhost:38512 tunnel run --token "$(cat "${HOME}/.cloudflared/tunnel-api.token")"',
     links: ['https://api.nodmakeup.com'],
   },
   {
@@ -171,8 +171,8 @@ export const SERVICES: ServiceDef[] = [
     portKey: '',
     defaultPort: 0,
     health: [],
-    probes: [{ url: 'http://127.0.0.1:38513/healthcheck', match: 200 }],
-    cmd: 'cloudflared --metrics 127.0.0.1:38513 tunnel run --token "$(cat "${HOME}/.cloudflared/tunnel-media.token")"',
+    probes: [{ url: 'http://localhost:38513/healthcheck', match: 200 }],
+    cmd: 'cloudflared --metrics localhost:38513 tunnel run --token "$(cat "${HOME}/.cloudflared/tunnel-media.token")"',
     links: ['https://media.nodmakeup.com'],
   },
   {
@@ -187,7 +187,7 @@ export const SERVICES: ServiceDef[] = [
     portKey: '',
     defaultPort: 0,
     health: [],
-    probes: [{ url: 'http://127.0.0.1:${metricsPort}/healthcheck', match: 200 }],
+    probes: [{ url: 'http://localhost:${metricsPort}/healthcheck', match: 200 }],
     liveFrom: {
       file: 'tunnel-quick-api.log',
       patterns: [
@@ -195,7 +195,7 @@ export const SERVICES: ServiceDef[] = [
         { key: 'metricsPort', re: /Starting metrics server on 127\.0\.0\.1:(\d+)\/metrics/ },
       ],
     },
-    cmd: 'cloudflared tunnel --url http://127.0.0.1:5001',
+    cmd: 'cloudflared tunnel --url http://localhost:5001',
     links: [],
   },
   {
@@ -205,7 +205,7 @@ export const SERVICES: ServiceDef[] = [
     portKey: '',
     defaultPort: 0,
     health: [],
-    probes: [{ url: 'http://127.0.0.1:${metricsPort}/healthcheck', match: 200 }],
+    probes: [{ url: 'http://localhost:${metricsPort}/healthcheck', match: 200 }],
     liveFrom: {
       file: 'tunnel-quick-media.log',
       patterns: [
@@ -213,7 +213,7 @@ export const SERVICES: ServiceDef[] = [
         { key: 'metricsPort', re: /Starting metrics server on 127\.0\.0\.1:(\d+)\/metrics/ },
       ],
     },
-    cmd: 'cloudflared tunnel --url http://127.0.0.1:5002',
+    cmd: 'cloudflared tunnel --url http://localhost:5002',
     links: [],
   },
 ];
@@ -232,7 +232,7 @@ export function servicePort(service: ServiceDef): number {
 }
 
 export function serviceUrl(service: ServiceDef): string {
-  return `http://127.0.0.1:${servicePort(service)}`;
+  return `http://localhost:${servicePort(service)}`;
 }
 
 /** Read a service's live values from its own log (see ServiceDef.liveFrom).
@@ -265,14 +265,14 @@ export function discoverLive(svc: ServiceDef): Record<string, string> {
   return out;
 }
 
-/** Render a template like `http://127.0.0.1:${metricsPort}/healthcheck` with
+/** Render a template like `http://localhost:${metricsPort}/healthcheck` with
  *  discovered values; unresolved `${...}` stays literal. */
 export function resolveTemplate(template: string, live: Record<string, string>): string {
   return template.replace(/\$\{(\w+)\}/g, (_, key: string) => live[key] ?? `\${${key}}`);
 }
 
 /** The admin app is a localhost-based SPA: SAFE_ORIGINS trusts
- *  http://localhost:3000, not 127.0.0.1 — so the embed/launch URL uses the
+ *  http://localhost:3000, not localhost — so the embed/launch URL uses the
  *  localhost form or the admin's own API calls are CORS-blocked. */
 export function adminPanelUrl(): string | null {
   const admin = serviceByName('admin');

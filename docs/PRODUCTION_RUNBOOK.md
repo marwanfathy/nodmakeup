@@ -24,7 +24,7 @@ dcp ps worker
 dcp logs --tail=200 worker
 
 # 2. Check queue depth — rewards piling up?
-redis-cli -h 127.0.0.1 -p 6379 llen bull:rewards:wait
+redis-cli -h localhost -p 6379 llen bull:rewards:wait
 
 # 3. Restart the worker to trigger the 5s auto-reconnect path
 dcp restart worker
@@ -208,7 +208,7 @@ dcp exec redis redis-cli CLIENT LIST
 ## Scenario G — Investigating an Outage / Restarting Services (Control Center)
 
 **Symptom:** storefront/admin unreachable, backend 5xx, or "why is it slow".
-The Control Center (`http://127.0.0.1:4000`, binds localhost only) is the
+The Control Center (`http://localhost:4000`, binds localhost only) is the
 fastest way to see everything at once and take action without touching a shell.
 
 ```bash
@@ -231,12 +231,12 @@ node /srv/nod-makeup/control-center/src/server.js   # or: ./start.sh
 #    → Flags tab (runtime feature toggles, .runtime/flags.json).
 
 # 5. Service recovery via the API (same as the buttons):
-curl -s http://127.0.0.1:4000/api/auth/login -H 'Content-Type: application/json' \
+curl -s http://localhost:4000/api/auth/login -H 'Content-Type: application/json' \
   -d '{"username":"OPERATOR","password":"***"}' -c /tmp/cc.cookies
-curl -s -b /tmp/cc.cookies http://127.0.0.1:4000/api/dashboard/overview \
+curl -s -b /tmp/cc.cookies http://localhost:4000/api/dashboard/overview \
   | jq '.services[] | {name, running, up, latencyMs}'
-curl -s -b /tmp/cc.cookies -X POST http://127.0.0.1:4000/api/control/backend/restart \
-  -H "X-CSRF-Token: $(curl -s -b /tmp/cc.cookies http://127.0.0.1:4000/api/auth/me | jq -r .csrfToken)"
+curl -s -b /tmp/cc.cookies -X POST http://localhost:4000/api/control/backend/restart \
+  -H "X-CSRF-Token: $(curl -s -b /tmp/cc.cookies http://localhost:4000/api/auth/me | jq -r .csrfToken)"
 
 # 6. Stop/start semantics: SIGTERM → SIGKILL after the grace window, then a
 #    /proc sweep kills stragglers (media's cluster workers own the listen

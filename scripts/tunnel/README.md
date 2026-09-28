@@ -17,14 +17,14 @@ and run" token is stored **on this server only**:
 
 | Connector  | Token file (chmod 600, never committed) | Metrics port (probe) | Hostname |
 | ---------- | --------------------------------------- | -------------------- | -------- |
-| api        | `~/.cloudflared/tunnel-api.token`       | `127.0.0.1:38512/healthcheck` | `api.nodmakeup.com`   |
-| media      | `~/.cloudflared/tunnel-media.token`     | `127.0.0.1:38513/healthcheck` | `media.nodmakeup.com` |
+| api        | `~/.cloudflared/tunnel-api.token`       | `localhost:38512/healthcheck` | `api.nodmakeup.com`   |
+| media      | `~/.cloudflared/tunnel-media.token`     | `localhost:38513/healthcheck` | `media.nodmakeup.com` |
 
 Command each card runs (metrics is a *global* flag in cloudflared ≥ 2025.11):
 
 ```bash
-cloudflared --metrics 127.0.0.1:38512 tunnel run --token "$(cat ~/.cloudflared/tunnel-api.token)"
-cloudflared --metrics 127.0.0.1:38513 tunnel run --token "$(cat ~/.cloudflared/tunnel-media.token)"
+cloudflared --metrics localhost:38512 tunnel run --token "$(cat ~/.cloudflared/tunnel-api.token)"
+cloudflared --metrics localhost:38513 tunnel run --token "$(cat ~/.cloudflared/tunnel-media.token)"
 ```
 
 ### Dashboard public-hostname mapping (do once per tunnel)

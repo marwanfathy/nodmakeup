@@ -8,7 +8,7 @@ import type { NextConfig } from 'next';
 //    never does and stays strict.
 //  - frame-src http://localhost:3000 allows embedding the NOD Studio admin
 //    app (the Admin Panel tab). The admin app's own API calls only work from
-//    origins SAFE_ORIGINS trusts (localhost, not 127.0.0.1), hence localhost.
+//    origins SAFE_ORIGINS trusts (localhost, not localhost), hence localhost.
 //  - connect-src opens the dev HMR websocket (ws:// on the cc origin).
 const IS_DEV = process.env.NODE_ENV === 'development';
 const CSP = [
@@ -16,7 +16,7 @@ const CSP = [
   `script-src 'self' 'unsafe-inline'${IS_DEV ? " 'unsafe-eval'" : ''}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data:",
-  "connect-src 'self' ws://127.0.0.1:4000 ws://localhost:4000",
+  "connect-src 'self' ws://localhost:4000 ws://localhost:4000",
   "frame-src 'self' http://localhost:3000",
   "frame-ancestors 'self'",
   "base-uri 'self'",

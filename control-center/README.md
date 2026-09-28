@@ -9,7 +9,7 @@ Built as a **Next.js App Router + TypeScript** app: pages in `app/`, typed
 route handlers under `app/api/`, server logic in `lib/`, and client panels in
 `components/`. It replaces the old Express server + vanilla-JS SPA entirely.
 
-English-only UI. Binds `127.0.0.1:4000` by default — it exposes process
+English-only UI. Binds `localhost:4000` by default — it exposes process
 control and secrets editing, so keep it localhost-bound (or VPN-gated) in
 production.
 
@@ -34,14 +34,14 @@ production.
 ```bash
 cd control-center
 npm install            # once
-npm run dev            # next dev -H 127.0.0.1 -p ${CC_PORT:-4000}
+npm run dev            # next dev -H localhost -p ${CC_PORT:-4000}
 ```
 
 Alternatives: `npm run build && npm start` for a production build, and
 `./start.sh` from the repo root starts the control center last with the rest
 of the stack (see below).
 
-First run: open http://127.0.0.1:4000 — if no operator hash exists yet, the
+First run: open http://localhost:4000 — if no operator hash exists yet, the
 setup screen writes `CC_USERNAME` / `CC_PASSWORD_HASH` (bcrypt) into
 `control-center/.env` and creates the HMAC session secret in
 `.runtime/secret`. Log in, then use the Overview to manage services.
@@ -61,9 +61,9 @@ The Admin tab serves the NOD Studio admin app inside an `<iframe>` pointing at
 **`http://localhost:3000`** (the admin service's own port). The localhost form
 matters: the backend's `SAFE_ORIGINS` only accepts `localhost` origins for
 browser API calls, so the iframe must be localhost — not the control center's
-own `127.0.0.1`. The CSP (`next.config.ts`) allows it via
+own `localhost`. The CSP (`next.config.ts`) allows it via
 `frame-src 'self' http://localhost:3000`. The header/API URLs you see
-elsewhere display as `127.0.0.1` for accuracy, but the iframe and
+elsewhere display as `localhost` for accuracy, but the iframe and
 "Open in new tab" always use the localhost form.
 
 ## Dev-mode singleton state

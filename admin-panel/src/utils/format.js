@@ -63,7 +63,7 @@ export const mediaSrc = (src) => {
     if (/^https?:\/\//i.test(src)) {
         try {
             const url = new URL(src);
-            if (url.hostname === 'localhost' || url.hostname === '127.0.0.1' || url.hostname === window.location.hostname) {
+            if (url.hostname === 'localhost' || url.hostname === 'localhost' || url.hostname === window.location.hostname) {
                 return `${window.location.protocol}//${window.location.hostname}${url.port ? `:${url.port}` : ''}${url.pathname}${url.search}`;
             }
         } catch { /* invalid URL — return as-is */ }

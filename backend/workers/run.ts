@@ -42,8 +42,8 @@ const startHealthServer = () => {
         send(res, 404, { status: 'not_found' });
     });
 
-    server.listen(HEALTH_PORT, '127.0.0.1', () => {
-        logger.child({ service: 'worker' }).info(`health server listening on 127.0.0.1:${HEALTH_PORT}`);
+    server.listen(HEALTH_PORT, 'localhost', () => {
+        logger.child({ service: 'worker' }).info(`health server listening on localhost:${HEALTH_PORT}`);
     });
     server.on('error', (err) => logger.child({ service: 'worker' }).warn(err, 'health server error'));
 };

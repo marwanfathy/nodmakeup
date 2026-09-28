@@ -8,10 +8,10 @@
   Measured on      : this machine, production build (next start :3005)
                      and dev server (:3001) for the image optimiser
   Services under test:
-      backend API   127.0.0.1:5001   (Express + Prisma + MariaDB 10.11.14)
-      storefront    127.0.0.1:3001   (Next.js 16.2.2 dev)
-                     127.0.0.1:3005   (Next.js 16.2.2 production)
-      media         127.0.0.1:5002
+      backend API   localhost:5001   (Express + Prisma + MariaDB 10.11.14)
+      storefront    localhost:3001   (Next.js 16.2.2 dev)
+                     localhost:3005   (Next.js 16.2.2 production)
+      media         localhost:5002
       admin panel   0.0.0.0:3000
 
   Every number in this report was measured, not estimated. Where a figure
@@ -584,7 +584,7 @@
       stat -c '%y %n' next.config.ts .next/BUILD_ID
 
   Server-rendered body text (the primary regression signal)
-      curl -s http://127.0.0.1:3005/en | python3 -c "
+      curl -s http://localhost:3005/en | python3 -c "
       import re,sys
       s=sys.stdin.read()
       d=re.sub(r'<script.*?</script>','',s,flags=re.S)

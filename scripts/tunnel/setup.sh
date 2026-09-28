@@ -6,8 +6,8 @@
 # internet through ONE outbound Cloudflare named tunnel, so the Vercel-deployed
 # storefront can call them over HTTPS without any open firewall ports.
 #
-#   api.nodmakeup.com    ->  http://127.0.0.1:5001   (/api/*, health)
-#   media.nodmakeup.com  ->  http://127.0.0.1:5002   (/uploads/*, /thumbnails/*)
+#   api.nodmakeup.com    ->  http://localhost:5001   (/api/*, health)
+#   media.nodmakeup.com  ->  http://localhost:5002   (/uploads/*, /thumbnails/*)
 #
 # Usage:
 #   ./setup.sh            # full setup (login is skipped if already done)
@@ -73,11 +73,11 @@ credentials-file: ${CRED_FILE}
 ingress:
   # API gateway (Express, port 5001)
   - hostname: ${API_HOST}
-    service: http://127.0.0.1:5001
+    service: http://localhost:5001
 
   # Media server (port 5002): /uploads and /thumbnails only
   - hostname: ${MEDIA_HOST}
-    service: http://127.0.0.1:5002
+    service: http://localhost:5002
 
   # Everything else: reject
   - service: http_status:404

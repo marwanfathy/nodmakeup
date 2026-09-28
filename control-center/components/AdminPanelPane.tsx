@@ -16,8 +16,8 @@ export default function AdminPanelPane() {
       const data = await api<OverviewPayload>('/api/dashboard/overview');
       const svc = (data.services || []).find((s) => s.name === 'admin');
       // Prefer the server's localhost form: the admin SPA's API calls only
-      // work from origins SAFE_ORIGINS trusts (localhost, not 127.0.0.1).
-      const url = data.adminUrl || (svc?.url ? svc.url.replace('127.0.0.1', 'localhost') : 'http://localhost:3000');
+      // work from origins SAFE_ORIGINS trusts (localhost, not localhost).
+      const url = data.adminUrl || (svc?.url ? svc.url.replace('localhost', 'localhost') : 'http://localhost:3000');
       setSrc(url);
       const isRunning = Boolean(svc?.running);
       setRunning(isRunning);

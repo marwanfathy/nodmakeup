@@ -342,10 +342,10 @@ if [ "$START_WEB" -eq 1 ]; then
 fi
 
 # Control Center (operational dashboard — starts last so it can watch every
-# service it manages). Next.js (App Router) on 127.0.0.1:$CC_PORT.
+# service it manages). Next.js (App Router) on localhost:$CC_PORT.
 if [ "$START_CONTROL" -eq 1 ]; then
   start_service control-center "$(service_label control-center)" "$CC_PORT" \
-    "cd \"$ROOT/control-center\" && CC_PORT=$CC_PORT npx next dev -H 127.0.0.1 -p $CC_PORT"
+    "cd \"$ROOT/control-center\" && CC_PORT=$CC_PORT npx next dev -H localhost -p $CC_PORT"
 fi
 
 echo ""
@@ -354,7 +354,7 @@ echo "    Admin Panel:  ${PROTO}://${BASE}:${ADMIN_PORT}"
 echo "    Main Website: ${PROTO}://${BASE}:${WEB_PORT}"
 echo "    Backend API:  ${PROTO}://${BASE}:${BACKEND_PORT}"
 echo "    Media Server: ${PROTO}://${BASE}:${MEDIA_PORT}"
-echo "    Control Ctr:  http://127.0.0.1:${CC_PORT}  (operator-only; binds localhost)"
+echo "    Control Ctr:  http://localhost:${CC_PORT}  (operator-only; binds localhost)"
 echo "  ──────────────────────────────────────────"
 echo "    Logs:        $LOGS_DIR/<service>.log"
 echo "    PIDs:        $RUN_DIR/<service>.pid"

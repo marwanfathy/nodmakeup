@@ -49,13 +49,13 @@ const PROC_PATTERNS: Record<ServiceName, string[]> = {
   admin: ['react-scripts start', 'react-scripts/scripts/start.js', 'react-scripts/dev'],
   // Each connector pins a distinct metrics port (cf. config.ts) — that's the
   // cmdline key that tells the two cloudflared processes apart.
-  'tunnel-api': ['--metrics 127.0.0.1:38512'],
-  'tunnel-media': ['--metrics 127.0.0.1:38513'],
-  // Quick tunnels: `cloudflared tunnel --url http://127.0.0.1:PORT` — the
+  'tunnel-api': ['--metrics localhost:38512'],
+  'tunnel-media': ['--metrics localhost:38513'],
+  // Quick tunnels: `cloudflared tunnel --url http://localhost:PORT` — the
   // --url value is the discriminator between the two, and matches only the
   // quick-tunnel process (token connectors have no `--url`).
-  'tunnel-quick-api': ['--url http://127.0.0.1:5001'],
-  'tunnel-quick-media': ['--url http://127.0.0.1:5002'],
+  'tunnel-quick-api': ['--url http://localhost:5001'],
+  'tunnel-quick-media': ['--url http://localhost:5002'],
 };
 
 /** Scan /proc for live pids whose cmdline matches the service (shared with

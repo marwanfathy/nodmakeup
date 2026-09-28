@@ -170,6 +170,10 @@ export interface DeriveClientBaseUrlInput {
 export function deriveClientBaseUrl({ kind, envUrl, browserLocation }: DeriveClientBaseUrlInput): string {
   const defaultPort = defaultPortOf(kind);
   const env = safeParseUrl(envUrl);
+  // All three spellings of the loopback interface. Missing one here is not
+  // cosmetic: a name that is absent is treated as a real deployed host, so the
+  // env URL is returned verbatim and the browser is pointed at the machine's own
+  // address instead of the one the page was opened on.
   const isLoopback = env ? ['localhost', '127.0.0.1', '::1'].includes(env.hostname) : false;
   const envPort = env?.port || '';
 
