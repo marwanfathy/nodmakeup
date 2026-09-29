@@ -35,8 +35,13 @@ export class GeoError extends Error {
 
 // A fix older than this is a different street, but reusing a recent one saves
 // the customer a second slow lock.
-const POSITION_TIMEOUT_MS = 15_000;
 const POSITION_MAX_AGE_MS = 60_000;
+
+// Split so the precise attempt gets the time it needs to actually lock onto the
+// satellites, while the fallback on a device with no GPS radio still gets long
+// enough to answer from the network rather than timing out as well.
+const PRECISE_POSITION_TIMEOUT_MS = 12_000;
+const COARSE_POSITION_TIMEOUT_MS = 6_000;
 
 const GEOCODER_ENDPOINT = 'https://nominatim.openstreetmap.org/reverse';
 const GEOCODER_TIMEOUT_MS = 8_000;
@@ -53,20 +58,54 @@ export function isGeolocationSupported(): boolean {
 /**
  * Ask the device where it is. Rejects with a {@link GeoError} whose `reason` is
  * safe to show to the customer.
+ *
+ * Precision is asked for first, because the address a driver ends up reading is
+ * only ever as good as the fix behind it. Network positioning on its own can be
+ * hundreds of metres out in a city — several streets — and that is the single
+ * biggest cause of a delivery address pointing at the wrong house. So a
+ * GPS-grade fix is requested, with the larger share of the time budget.
+ *
+ * If the device has no GPS radio at all — a laptop, a desktop — that request
+ * cannot be satisfied and the browser eventually gives up. Rather than leaving
+ * the button dead on those machines, a second attempt asks for the network fix.
+ * The retry is only reached when the first attempt failed for a reason more
+ * coordinates could fix; a refusal is never retried, because the answer would be
+ * the same refusal and the customer would just watch the spinner twice for
+ * nothing.
  */
 export function getCurrentPosition(): Promise<Coordinates> {
-  return new Promise((resolve, reject) => {
-    if (!isGeolocationSupported()) {
-      reject(new GeoError('unsupported'));
-      return;
-    }
-    // Geolocation is gated on a secure context, so over plain http (a LAN IP,
-    // for instance) the browser fails with a generic error unless we say why.
-    if (typeof window !== 'undefined' && !window.isSecureContext) {
-      reject(new GeoError('insecure'));
-      return;
-    }
+  if (!isGeolocationSupported()) return Promise.reject(new GeoError('unsupported'));
 
+  // Geolocation is gated on a secure context, so over plain http (a LAN IP,
+  // for instance) the browser fails with a generic error unless we say why.
+  if (typeof window !== 'undefined' && !window.isSecureContext) {
+    return Promise.reject(new GeoError('insecure'));
+  }
+
+  return requestPosition({
+    enableHighAccuracy: true,
+    timeout: PRECISE_POSITION_TIMEOUT_MS,
+    maximumAge: POSITION_MAX_AGE_MS,
+  }).catch((error: unknown) => {
+    if (!(error instanceof GeoError)) throw error;
+    if (error.reason !== 'unavailable' && error.reason !== 'timeout') throw error;
+
+    return requestPosition({
+      enableHighAccuracy: false,
+      timeout: COARSE_POSITION_TIMEOUT_MS,
+      maximumAge: POSITION_MAX_AGE_MS,
+    }).catch((fallback: unknown) => {
+      // A refusal on the retry is the real answer and outranks the first
+      // attempt's "no fix" -- it is what the customer needs to be told.
+      if (fallback instanceof GeoError && fallback.reason === 'denied') throw fallback;
+      throw error;
+    });
+  });
+}
+
+/** One `getCurrentPosition` call, normalised into this module's own types. */
+function requestPosition(options: PositionOptions): Promise<Coordinates> {
+  return new Promise((resolve, reject) => {
     navigator.geolocation.getCurrentPosition(
       (position) =>
         resolve({
@@ -84,23 +123,7 @@ export function getCurrentPosition(): Promise<Coordinates> {
         else if (error.code === 3) reject(new GeoError('timeout'));
         else reject(new GeoError('unavailable'));
       },
-      {
-        // Deliberately *not* asking for a GPS-grade fix. Everything a fix is used
-        // for here — a governorate and a street a driver can read — is settled by
-        // tens of metres, and network positioning resolves that from Wi-Fi and
-        // cell towers in about a second.
-        //
-        // Asking for high accuracy is worse than useless on the machines this is
-        // most often used from. A MacBook or an iPad has no GPS radio, so Safari
-        // is asked for an accuracy it has no sensor to deliver: it spends the
-        // whole 15s budget failing to get one and reports POSITION_UNAVAILABLE
-        // or TIMEOUT rather than the answer it already knew how to give. That
-        // turned a working "Use my current location" into a dead button on
-        // exactly the devices most likely to be sitting on a desk.
-        enableHighAccuracy: false,
-        timeout: POSITION_TIMEOUT_MS,
-        maximumAge: POSITION_MAX_AGE_MS,
-      },
+      options,
     );
   });
 }
@@ -175,7 +198,38 @@ interface GeocodeResult {
  * a perfectly good fallback and an error would only cost the customer the
  * feature.
  */
-async function reverseGeocode({ lat, lng }: Coordinates, locale: string): Promise<GeocodeResult | null> {
+/**
+ * How much detail the geocoder is entitled to claim, given how good the fix is.
+ *
+ * This is the difference between an address that is right and one that merely
+ * looks right. Nominatim at zoom 18 answers with a specific house number and a
+ * building name, and it answers *confidently* for any coordinate it is handed —
+ * including one that is four streets out. A network-derived fix in a city as
+ * dense as Cairo is routinely that far out, so a hard-coded zoom of 18 converts
+ * ordinary location error into a precise-looking address for the wrong
+ * building. That is the worst outcome available: the customer reads the field
+ * back, believes it, and a driver is sent to the wrong house.
+ *
+ * So the zoom is derived from the radius the device actually reported. A fix
+ * good to a few metres earns a house number; a fix good to a kilometre gets an
+ * honest "somewhere around here" answer instead of a fabricated one. The pin
+ * is kept either way, so the precision that does exist is never thrown away.
+ */
+function zoomForAccuracy(accuracy: number): number {
+  // 0 means the device declined to say, not that the fix is perfect.
+  if (!Number.isFinite(accuracy) || accuracy <= 0) return 12;
+  if (accuracy <= 30) return 18; // house number and building
+  if (accuracy <= 100) return 17; // street
+  if (accuracy <= 300) return 16; // street and surrounding blocks
+  if (accuracy <= 1_000) return 15; // neighbourhood
+  if (accuracy <= 5_000) return 13; // suburb
+  return 11; // city
+}
+
+async function reverseGeocode(
+  { lat, lng, accuracy }: Coordinates,
+  locale: string,
+): Promise<GeocodeResult | null> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), GEOCODER_TIMEOUT_MS);
 
@@ -184,7 +238,8 @@ async function reverseGeocode({ lat, lng }: Coordinates, locale: string): Promis
       format: 'jsonv2',
       lat: String(lat),
       lon: String(lng),
-      zoom: '18', // building level, where the data exists
+      // Building level, but only where the fix is good enough to justify it.
+      zoom: String(zoomForAccuracy(accuracy)),
       addressdetails: '1',
       'accept-language': locale === 'ar' ? 'ar' : 'en',
     });
