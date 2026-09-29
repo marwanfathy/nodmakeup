@@ -23,6 +23,8 @@ import { localePath } from '../../lib/i18n/paths';
 import { formatPrice } from '../../lib/format';
 import { normalizeEgyptianPhone, isValidEgyptianPhone, toInternationalEgyptianPhone, formatPhoneForLocale, EG_PHONE_PREFIX } from '../../lib/phone';
 import { getCurrentPosition, locateFix, mergeAddress, matchesPlace, GeoError, ADDRESS_MAX } from '../../lib/geolocation';
+import type { GeoFailure } from '../../lib/geolocation';
+import { isApplePlatform } from '../../lib/platform';
 import { governorateLabel } from '../../lib/i18n/governorates';
 import GovernorateSelect from './GovernorateSelect';
 import './CheckoutPage.css';
@@ -60,6 +62,24 @@ const COUPON_REASON_KEYS: Record<CouponRejectionReason, string> = {
     PERSONALIZED_NEEDS_PHONE: 'checkout.coupon.personalizedNeedsPhone',
     NOT_OWNED: 'checkout.coupon.notOwned',
 };
+
+/**
+ * Which sentence a location failure gets.
+ *
+ * Only the refusal varies, and only because the way back in differs: Safari will
+ * not ask again once it has said no, so the customer has to be sent to the exact
+ * place the switch lives. Every other failure is the same advice on every
+ * platform — an insecure connection, a missing API, no fix — so those keep the
+ * single shared message rather than growing a branch per browser.
+ *
+ * Resolved per call rather than in a module constant: `navigator` is not there
+ * during the server render, so a value captured at module scope would be false on
+ * the server and true in the browser, and the two would not agree.
+ */
+function geoFailureMessageKey(reason: GeoFailure): string {
+    return reason === 'denied' && isApplePlatform() ? 'checkout.geo.denied.apple' : `checkout.geo.${reason}`;
+}
+
 
 /**
  * Refusals the shopper can only clear by changing the phone number.
@@ -343,7 +363,7 @@ export default function CheckoutPage() {
             }
         } catch (error) {
             const reason = error instanceof GeoError ? error.reason : 'unavailable';
-            setGeoNote({ tone: 'warn', text: t(`checkout.geo.${reason}`) });
+            setGeoNote({ tone: 'warn', text: t(geoFailureMessageKey(reason)) });
         } finally {
             setIsLocating(false);
         }

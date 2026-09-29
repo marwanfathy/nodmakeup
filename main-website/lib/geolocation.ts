@@ -103,29 +103,119 @@ export function getCurrentPosition(): Promise<Coordinates> {
   });
 }
 
-/** One `getCurrentPosition` call, normalised into this module's own types. */
+/** A fix this good is not worth holding the receiver open any longer for. */
+const GOOD_ENOUGH_ACCURACY_M = 25;
+
+/**
+ * One position request that keeps the *best* fix rather than the first.
+ *
+ * `getCurrentPosition` resolves with whatever the receiver happens to hold at
+ * that instant, and the first reading after a cold start is the worst one: the
+ * satellites have only just been acquired and the almanac is still settling, so
+ * the reported radius can be several times the settled one. This is worst on
+ * iOS and Safari, which is where it was reported from — asked for its best
+ * accuracy, Core Location will return a 40-metre fix almost immediately and then
+ * go on improving it, and that first, worst reading is the one the customer
+ * would otherwise have been given.
+ *
+ * `watchPosition` keeps delivering as the fix converges, so the best reading
+ * available inside the budget is chosen instead of the first one to arrive.
+ * The watch is always cleared, including on every error path: a leaked watch
+ * holds the GPS receiver on and drains the battery for as long as the page is
+ * open, which is a far worse bug than the one being fixed.
+ */
 function requestPosition(options: PositionOptions): Promise<Coordinates> {
+  const geo = navigator.geolocation;
+  // No watch to open — a single reading is all this browser offers.
+  if (typeof geo.watchPosition !== 'function') return readPositionOnce(geo, options);
+
+  return new Promise<Coordinates>((resolve, reject) => {
+    let best: Coordinates | undefined;
+    let watchId: number | undefined;
+    let settled = false;
+    let deadline: ReturnType<typeof setTimeout>;
+
+    // The good-enough fix, the deadline and the error can each win this race, so
+    // clearing the watch lives in one place rather than in three.
+    //
+    // The `watchId !== undefined` guard is not about the callbacks being
+    // reordered: the spec delivers every callback asynchronously, so by the time
+    // one runs, `watchPosition` has already returned an id. It is there because
+    // `watchPosition` is allowed to throw, and in that path there is no watch to
+    // clear and no id to clear it with.
+    const finish = (settle: () => void): void => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(deadline);
+      if (watchId !== undefined) geo.clearWatch(watchId);
+      settle();
+    };
+
+    // The spec applies `timeout` only until the *first* fix lands, so the search
+    // needs a deadline of its own or it can outlive the button that started it.
+    deadline = setTimeout(
+      () => finish(() => (best === undefined ? reject(new GeoError('timeout')) : resolve(best))),
+      options.timeout ?? PRECISE_POSITION_TIMEOUT_MS,
+    );
+
+    try {
+      watchId = geo.watchPosition(
+        (position) => {
+          const fix = toCoordinates(position);
+          if (best === undefined || outranks(fix, best)) best = fix;
+          // A fix that reports no accuracy says nothing about how good it is, so
+          // it is kept only as a last resort and never ends the search by itself.
+          if (fix.accuracy > 0 && fix.accuracy <= GOOD_ENOUGH_ACCURACY_M) {
+            const winner = best;
+            finish(() => resolve(winner as Coordinates));
+          }
+        },
+        (error) => finish(() => reject(toGeoError(error))),
+        options,
+      );
+    } catch (error: unknown) {
+      // Safari has been observed to throw here rather than report an error.
+      finish(() => reject(error instanceof GeoError ? error : new GeoError('unavailable')));
+    }
+  });
+}
+
+/** A single reading, for the browsers that have no `watchPosition`. */
+function readPositionOnce(geo: Geolocation, options: PositionOptions): Promise<Coordinates> {
   return new Promise((resolve, reject) => {
-    navigator.geolocation.getCurrentPosition(
-      (position) =>
-        resolve({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-          accuracy: position.coords.accuracy ?? 0,
-        }),
-      (error) => {
-        // The three codes are fixed by the spec: 1 PERMISSION_DENIED,
-        // 2 POSITION_UNAVAILABLE, 3 TIMEOUT. Compared as numbers rather than as
-        // `error.PERMISSION_DENIED`, because that is a property on the prototype
-        // and reading it off the instance is one more thing that can be undefined
-        // in a browser we have not tested on.
-        if (error.code === 1) reject(new GeoError('denied'));
-        else if (error.code === 3) reject(new GeoError('timeout'));
-        else reject(new GeoError('unavailable'));
-      },
+    geo.getCurrentPosition(
+      (position) => resolve(toCoordinates(position)),
+      (error) => reject(toGeoError(error)),
       options,
     );
   });
+}
+
+/** A fix that reported no accuracy ranks last, never first. */
+function outranks(candidate: Coordinates, current: Coordinates): boolean {
+  const rank = (fix: Coordinates): number =>
+    fix.accuracy > 0 ? fix.accuracy : Number.POSITIVE_INFINITY;
+  return rank(candidate) < rank(current);
+}
+
+function toCoordinates(position: GeolocationPosition): Coordinates {
+  return {
+    lat: position.coords.latitude,
+    lng: position.coords.longitude,
+    accuracy: position.coords.accuracy ?? 0,
+  };
+}
+
+/**
+ * The spec fixes the three codes: 1 PERMISSION_DENIED, 2 POSITION_UNAVAILABLE,
+ * 3 TIMEOUT. Compared as numbers rather than as `error.PERMISSION_DENIED`,
+ * because that is a property on the prototype and reading it off the instance is
+ * one more thing that can be undefined in a browser nobody has tested on.
+ */
+function toGeoError(error: GeolocationPositionError): GeoError {
+  if (error.code === 1) return new GeoError('denied');
+  if (error.code === 3) return new GeoError('timeout');
+  return new GeoError('unavailable');
 }
 
 /** The coordinates on their own, for showing or storing a precise pin. */

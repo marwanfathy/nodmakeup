@@ -182,6 +182,7 @@ const en: Dict = {
   'checkout.geo.unsupported': 'This browser cannot share your location.',
   'checkout.geo.insecure': 'Sharing a location needs a secure (https) connection.',
   'checkout.geo.denied': 'Your browser is blocking location access for this site. Re-allow it under the site settings in your browser, or type your address — it works the same.',
+  'checkout.geo.denied.apple': 'Your browser is blocking location for this site. In Safari, open the page controls in the address bar, choose Website Settings, then set Location to Allow — otherwise type your address.',
   'checkout.geo.unavailable': 'Could not work out your location. Check that location services are switched on, or type your address instead.',
   'checkout.geo.timeout': 'Your location took too long to find. Please try again.',
 
@@ -489,6 +490,7 @@ const ar: Dict = {
   'checkout.geo.unsupported': 'لا يمكن لهذا المتصفح مشاركة موقعك.',
   'checkout.geo.insecure': 'تتطلب مشاركة الموقع اتصالاً آمناً (https).',
   'checkout.geo.denied': 'متصفحك يمنع الوصول إلى الموقع. فعّليه من إعدادات المواقع في المتصفح، أو اكتبي عنوانك — سيعمل بنفس الطريقة.',
+  'checkout.geo.denied.apple': 'متصفحك يمنع الوصول إلى الموقع. في سفاري، افتحي قائمة الصفحة في شريط العنوان، ثم اختاري «إعدادات الموقع»، واضغطي «سماح» على الموقع — أو اكتبي عنوانك.',
   'checkout.geo.unavailable': 'تعذّر تحديد موقعك. تأكدي من تشغيل خدمة تحديد الموقع، أو اكتبي عنوانك مباشرة.',
   'checkout.geo.timeout': 'استغرق تحديد موقعك وقتًا طويلاً. من فضلك حاولي مرة أخرى.',
 
