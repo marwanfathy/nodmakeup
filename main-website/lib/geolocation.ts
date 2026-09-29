@@ -12,8 +12,8 @@
 export type GeoFailure =
   | 'unsupported' // no geolocation in this browser
   | 'insecure' // needs a secure context (HTTPS, or localhost)
-  | 'denied' // the customer refused the permission prompt
-  | 'unavailable' // no fix: GPS off, or indoors with no network fix
+  | 'denied' // refused: the prompt was dismissed, or the browser/OS blocks it
+  | 'unavailable' // no fix: location services off, or nothing in range
   | 'timeout'; // the device never reported a position
 
 export interface Coordinates {
@@ -75,12 +75,29 @@ export function getCurrentPosition(): Promise<Coordinates> {
           accuracy: position.coords.accuracy ?? 0,
         }),
       (error) => {
-        if (error.code === error.PERMISSION_DENIED) reject(new GeoError('denied'));
-        else if (error.code === error.TIMEOUT) reject(new GeoError('timeout'));
+        // The three codes are fixed by the spec: 1 PERMISSION_DENIED,
+        // 2 POSITION_UNAVAILABLE, 3 TIMEOUT. Compared as numbers rather than as
+        // `error.PERMISSION_DENIED`, because that is a property on the prototype
+        // and reading it off the instance is one more thing that can be undefined
+        // in a browser we have not tested on.
+        if (error.code === 1) reject(new GeoError('denied'));
+        else if (error.code === 3) reject(new GeoError('timeout'));
         else reject(new GeoError('unavailable'));
       },
       {
-        enableHighAccuracy: true,
+        // Deliberately *not* asking for a GPS-grade fix. Everything a fix is used
+        // for here — a governorate and a street a driver can read — is settled by
+        // tens of metres, and network positioning resolves that from Wi-Fi and
+        // cell towers in about a second.
+        //
+        // Asking for high accuracy is worse than useless on the machines this is
+        // most often used from. A MacBook or an iPad has no GPS radio, so Safari
+        // is asked for an accuracy it has no sensor to deliver: it spends the
+        // whole 15s budget failing to get one and reports POSITION_UNAVAILABLE
+        // or TIMEOUT rather than the answer it already knew how to give. That
+        // turned a working "Use my current location" into a dead button on
+        // exactly the devices most likely to be sitting on a desk.
+        enableHighAccuracy: false,
         timeout: POSITION_TIMEOUT_MS,
         maximumAge: POSITION_MAX_AGE_MS,
       },

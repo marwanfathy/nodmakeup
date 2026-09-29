@@ -145,6 +145,18 @@ const nextConfig: NextConfig = {
         source: '/fonts/:path*.woff2',
         headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
       },
+      {
+        // Geolocation is only ever used by the checkout address field, so it is
+        // stated rather than left to the platform default. `geolocation=(self)` is
+        // what every browser already assumes, which is exactly why it is worth
+        // writing down: if a CDN, a proxy or a future config change ever narrows
+        // the policy, the symptom is Safari refusing with no prompt and nothing in
+        // the response to explain it. One header here makes that impossible to
+        // miss. The features we do not use are not listed, because listing them as
+        // denied is a claim about the whole site and would need auditing.
+        source: '/:path*',
+        headers: [{ key: 'Permissions-Policy', value: 'geolocation=(self)' }],
+      },
     ];
   },
 

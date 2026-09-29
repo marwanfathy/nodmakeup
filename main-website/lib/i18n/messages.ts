@@ -181,8 +181,8 @@ const en: Dict = {
   'checkout.geoGovUnmatched': 'Location added, but it is outside the areas we deliver to. Please choose your governorate.',
   'checkout.geo.unsupported': 'This browser cannot share your location.',
   'checkout.geo.insecure': 'Sharing a location needs a secure (https) connection.',
-  'checkout.geo.denied': 'Location access was denied. You can type your address instead.',
-  'checkout.geo.unavailable': 'Could not get a location fix. Try again somewhere with a clearer sky.',
+  'checkout.geo.denied': 'Your browser is blocking location access for this site. Re-allow it under the site settings in your browser, or type your address — it works the same.',
+  'checkout.geo.unavailable': 'Could not work out your location. Check that location services are switched on, or type your address instead.',
   'checkout.geo.timeout': 'Your location took too long to find. Please try again.',
 
   // --- shop ---
@@ -488,8 +488,8 @@ const ar: Dict = {
   'checkout.geoGovUnmatched': 'تمت إضافة الموقع، لكنه خارج المناطق التي نوصّل إليها. من فضلك اختاري المحافظة.',
   'checkout.geo.unsupported': 'لا يمكن لهذا المتصفح مشاركة موقعك.',
   'checkout.geo.insecure': 'تتطلب مشاركة الموقع اتصالاً آمناً (https).',
-  'checkout.geo.denied': 'تم رفض الوصول إلى الموقع. يمكنك كتابة عنوانك بدلًا من ذلك.',
-  'checkout.geo.unavailable': 'تعذّر تحديد الموقع. حاولي مرة أخرى في مكان مكشوف.',
+  'checkout.geo.denied': 'متصفحك يمنع الوصول إلى الموقع. فعّليه من إعدادات المواقع في المتصفح، أو اكتبي عنوانك — سيعمل بنفس الطريقة.',
+  'checkout.geo.unavailable': 'تعذّر تحديد موقعك. تأكدي من تشغيل خدمة تحديد الموقع، أو اكتبي عنوانك مباشرة.',
   'checkout.geo.timeout': 'استغرق تحديد موقعك وقتًا طويلاً. من فضلك حاولي مرة أخرى.',
 
   // --- shop ---
