@@ -85,7 +85,13 @@ const ProductViewPage: FC<ProductViewPageProps> = ({ initialProduct = null }) =>
     const [navHeight, setNavHeight] = useState<number>(0);
 
     useEffect(() => {
-        const nav = document.querySelector<HTMLElement>('.navbar-wrapper');
+        // `.navbar-wrapper` is the rule that used to hold the header's background
+        // and its fixed positioning — but the navbar component never renders it,
+        // it emits a bare <header> around `.navbar`. Querying the dead class meant
+        // this returned early on every page load, --nav-h kept its 80px fallback,
+        // and a header that is genuinely shorter than that left a gap of dead
+        // space above the gallery. Measured from the header that actually exists.
+        const nav = document.querySelector<HTMLElement>('.navbar');
         if (!nav) return;
         const publish = () => setNavHeight(nav.getBoundingClientRect().height);
         publish();

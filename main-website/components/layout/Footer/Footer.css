@@ -11,6 +11,11 @@
     background-color: var(--footer-bg);
     color: var(--footer-text);
     padding-top: 4rem;
+    /* The home indicator. Every iPhone from X onwards has one, it sits over the
+       bottom of the page, and it does not scroll away — so the last row of the
+       footer is unreadable and untappable without this. 0 on every device that
+       has no indicator, so nothing else moves. */
+    padding-bottom: calc(1.5rem + var(--safe-bottom, 0px));
     font-size: 0.9rem;
     margin-top: auto; /* Pushes footer to bottom if page is short */
 }
@@ -129,6 +134,16 @@
 .social-links a {
     color: #fff;
     transition: transform 0.2s;
+    /* The icon is 24x24, which is well under the 44pt touch target iOS asks
+       for, and these are in the footer — the one place a thumb is least likely
+       to be precise. The icon keeps its drawn size; only the tappable box grows,
+       and it grows symmetrically so the row stays centred. */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    margin: -10px; /* reclaim the 20px of added height, keeping the row's rhythm */
 }
 
 .social-links a:hover {

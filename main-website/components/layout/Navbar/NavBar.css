@@ -27,6 +27,14 @@
   max-width: 1400px; /* Standard wide screen max-width */
   margin: 0 auto;
   padding: 0 1.618rem; /* Golden Ratio padding */
+  /* The status bar and the notch on every iPhone from X onwards. It has to go
+     on the bar's own padding rather than on a wrapper, because the wrapper that
+     used to hold the header's background (`.navbar-wrapper`) is not rendered —
+     the component emits a bare <header> around this element. The bar itself is
+     transparent, so the space this opens above it shows the page background,
+     which is exactly what Safari already showed above it before `viewport-fit`
+     started pulling the page up under the cutout. */
+  padding-top: var(--safe-top, 0px);
   box-sizing: border-box;
 }
 
@@ -153,7 +161,15 @@ letter-spacing: .5px;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 8px; /* Larger hit area */
+  /* 44px is the iOS minimum touch target. The 8px of padding this used to
+     carry put the button at 38x38 — and it is the control a thumb reaches for
+     most often, on every page, often one-handed. The badge is positioned
+     relative to this box, so a larger box also gives the badge more room to
+     sit clear of the icon. */
+  padding: 0;
+  min-width: 44px;
+  min-height: 44px;
+  justify-content: center;
   line-height: 1;
   position: relative;
   display: flex;
@@ -270,6 +286,15 @@ letter-spacing: .5px;
   left: 0;
   width: 100%;
   height: 100%;
+  /* A full-bleed fixed panel is positioned against the viewport, so it cannot
+     inherit body's safe-area padding and has to opt in itself. The drawer inside
+     already floats 16px off the edge; without this its close button would sit
+     under the notch and the last item in the basket behind the home indicator. */
+  padding-top: var(--safe-top, 0px);
+  padding-left: var(--safe-left, 0px);
+  padding-right: var(--safe-right, 0px);
+  padding-bottom: var(--safe-bottom, 0px);
+  box-sizing: border-box;
   z-index: 1050;
   pointer-events: none;
   visibility: hidden;
@@ -433,6 +458,19 @@ letter-spacing: .5px;
   justify-content: center;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
   transition: background-color 0.2s, transform 0.15s;
+  position: relative;
+}
+
+/* Same reasoning as the checkout's stepper: the 30px face and the pill around it
+   are what the eye reads and what the row lays out, so neither is resized. The
+   hit area is extended instead, by a pseudo-element inset past the button's own
+   edges. These are the + and - for a line in the cart drawer, at the very bottom
+   of the screen where a thumb is least precise. */
+.quantity-control button::after {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  border-radius: var(--r-circle);
 }
 .quantity-control button:hover:not(:disabled) {
   background-color: #ececee;
@@ -620,6 +658,14 @@ letter-spacing: .5px;
   left: 0;
   width: 100%;
   height: 100%;
+  /* Same reasoning as the cart drawer: full-bleed and fixed, so the insets have
+     to be claimed here rather than inherited from body. The drawer slides in
+     from the left, which in landscape is the side the notch is on. */
+  padding-top: var(--safe-top, 0px);
+  padding-left: var(--safe-left, 0px);
+  padding-right: var(--safe-right, 0px);
+  padding-bottom: var(--safe-bottom, 0px);
+  box-sizing: border-box;
   z-index: 2000; /* Higher than regular content */
   visibility: hidden;
   transition: visibility 0.3s;

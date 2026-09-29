@@ -784,6 +784,20 @@
   justify-content: center;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
   transition: background-color 0.2s, transform 0.15s;
+  position: relative;
+}
+
+/* A 30px button is a small target for the two controls a shopper reaches for
+   most on a phone. The white face stays 30px and the pill around it keeps its
+   size, because both are laid out by the row; what grows is the hit area, via a
+   pseudo-element inset past the button's own edges. A pseudo-element is part of
+   its element for hit-testing, so a tap in that ring still presses this button
+   and nowhere else. */
+.quantity-control button::after {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  border-radius: var(--r-circle);
 }
 
 .quantity-control button:hover:not(:disabled) {

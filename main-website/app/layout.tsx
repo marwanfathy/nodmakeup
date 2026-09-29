@@ -1,5 +1,6 @@
 import React, { Suspense } from 'react';
 import { cookies } from 'next/headers';
+import type { Viewport } from 'next';
 import { CartProvider } from '../contexts/CartContext';
 import Nav from '../components/layout/Navbar/NavBar';
 import Footer from '../components/layout/Footer/Footer'; // Ensure this path is correct based on your folder structure
@@ -17,6 +18,26 @@ import { defaultLocale, Locale } from '../lib/i18n/messages';
 
 export const metadata = {
   description: 'Welcome!',
+};
+
+/**
+ * `viewport-fit=cover` is what turns the notch, the status bar and the home
+ * indicator into real layout constraints instead of decoration the page may
+ * slide underneath. Without it the browser reports every
+ * `env(safe-area-inset-*)` as 0 — so on iPhone X and on every iPhone since,
+ * the safe-area padding written throughout these stylesheets silently
+ * computed to nothing and the first row of the navigation sat under the
+ * Dynamic Island. It has to stay `cover` for as long as any rule reads `env()`.
+ *
+ * It is deliberately the only setting here: no `maximum-scale`, no
+ * `user-scalable: false`. Pinching to zoom is how a low-vision customer reads
+ * the page, and taking it away fails them to tidy a layout the insets alone
+ * already fix.
+ */
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
 };
 
 export default async function RootLayout({

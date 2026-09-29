@@ -35,6 +35,22 @@
   height: 32px;
   border-radius: var(--r-circle);
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  position: relative;
+}
+
+/* The tap area, grown without touching anything visible.
+   32px is a poor target on a phone and these are picked by thumb in the middle
+   of a purchase, but the circle is the product's colour — growing it would
+   misrepresent the shade, and the `scale(1.1)` pop on the active one is
+   calibrated to 32px. A pseudo-element extends the button's hit area to 44x44
+   while the element itself stays exactly 32px, so the row's 10px gaps, its wrap
+   points and the active-state pop are all unchanged. A pseudo-element counts as
+   part of its element for hit-testing, which is what makes this work. */
+.color-swatch::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: var(--r-circle);
 }
 
 .size-swatch {
