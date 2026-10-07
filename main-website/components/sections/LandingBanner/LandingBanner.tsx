@@ -19,7 +19,7 @@ import "./LandingBanner.css";
 // arrives. The banner does: it has this copy. A refetch would fire on every page
 // load for the whole minute the API is down, and could not succeed when the
 // server-side read of the same endpoint had just failed.
-const FALLBACK_IMAGE = '/uploads/images/WhatsApp Image 2026-04-08 at 4.52.06 AM(1).jpeg';
+const FALLBACK_IMAGE = '/';
 
 type LanBannerProps = {
   /** Resolved on the server; null when no banner is live or the fetch failed. */

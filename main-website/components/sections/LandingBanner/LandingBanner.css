@@ -1,6 +1,6 @@
 /* Container Spacing (to give it that "floating card" look) */
 .lan-banner-wrapper {
-  padding: 20px; /* Space around the whole banner */
+  padding: var(--space-5); /* Space around the whole banner */
   width: 100%;
   box-sizing: border-box;
 }
@@ -25,7 +25,9 @@
 .lan-banner-overlay {
   position: absolute;
   bottom: 60px; /* Positioned at the bottom */
-  left: 60px;   /* Positioned at the left */
+  /* Start edge, never `left`: the block has to mirror to the right-hand side
+     of the photo in Arabic, the way every other section's content does. */
+  inset-inline-start: 60px;
   z-index: 10;
   color: #ffffff;
   max-width: 600px;
@@ -34,37 +36,36 @@
 /* Tagline: Small, Uppercase, Spaced */
 .lan-tagline {
   text-transform: uppercase;
-  font-size: 0.8rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   letter-spacing: 0.15em;
-  margin-bottom: 8px;
+  margin-bottom: var(--space-2);
 }
 
 /* Title: Lowercase, "Rhode" style spacing */
 .lan-title {
-  font-size: 3.5rem;
+  font-size: var(--font-size-7xl);
   font-weight: 400;
-  margin-bottom: 24px;
+  margin-bottom: var(--space-6);
   letter-spacing: -0.02em;
-  line-height: 1;
+  line-height: var(--line-height-none);
 }
 
 /* The Pill Button (Rhode Ghost Style) */
 .lan-pill-button {
-  background: transparent;
-  color: #ffffff;
-  border: 1.5px solid #ffffff; /* White border only */
-  padding: 12px 32px;
+  color: #fff;
+  border: 1.5px solid #fff; /* White border only */
+  padding: var(--space-3) var(--space-8);
   border-radius: var(--r-control);
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
-  backdrop-filter: blur(5px);
   display: inline-block;
   text-decoration: none;
+  backdrop-filter: blur(5px);
 }
 
 .lan-pill-button:hover {
@@ -75,7 +76,7 @@
 /* MOBILE RESPONSIVENESS */
 @media (max-width: 768px) {
   .lan-banner-wrapper {
-    padding: 10px;
+    padding: var(--space-3);
   }
   
   .lan-banner-container {
@@ -85,12 +86,11 @@
 
   .lan-banner-overlay {
     bottom: 40px;
-    left: 30px;
-    right: 30px;
+    inset-inline: 30px; /* both edges: identical in either direction */
   }
 
   .lan-title {
-    font-size: 2.2rem;
+    font-size: var(--font-size-4xl);
   }
 
   .lan-pill-button {
