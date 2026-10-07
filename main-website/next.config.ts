@@ -126,6 +126,10 @@ function buildRemotePatterns(): RemotePattern[] {
   return out;
 }
 
+// Built once: the image allowlist is both the matcher and, below, the signal
+// for whether internal hosts appear in the list at all.
+const remotePatterns = buildRemotePatterns();
+
 const nextConfig: NextConfig = {
   // Dev-server origin allowlist — same SAFE_ORIGINS list the backend trusts.
   allowedDevOrigins:
@@ -168,19 +172,25 @@ const nextConfig: NextConfig = {
     // because lib/config.ts re-derives the media host from window.location in
     // the browser: a phone opening the LAN address pulls images from
     // 192.168.1.18:5002, which is not in any static list unless we add it.
-    remotePatterns: buildRemotePatterns(),
+    remotePatterns,
     // AVIF first: Next only emits the first format the client advertises
     // support for, so browsers that can do AVIF get ~30% smaller files and
     // everything else falls through to WebP. Never serve the originals.
     formats: ['image/avif', 'image/webp'],
     // Next 16 refuses to optimise loopback and private-range hosts by default
     // (SSRF hardening — a remote user must not be able to make the optimiser
-    // fetch internal addresses). That is correct in production, where media
-    // lives on the public media.nodmakeup.com, and wrong in development, where
-    // the media service is this same machine on localhost:5002 or
-    // 192.168.1.18:5002. Opt in for dev only; the guard stays on for the build
-    // that actually ships.
-    dangerouslyAllowLocalIP: process.env.NODE_ENV !== 'production',
+    // fetch internal addresses). The switch is keyed on the allowlist itself
+    // rather than on NODE_ENV, because the guard can only ever matter when a
+    // pattern names an internal host, and a pattern only names one when this
+    // deployment was configured with a service on the local network. Keying it
+    // on NODE_ENV made the shipped build unrunnable on a dev box: `next start`
+    // served every image as 400 "url parameter is not allowed", since media
+    // there is localhost:5002. Production configures the public
+    // media.nodmakeup.com, produces no internal pattern, and keeps the guard
+    // exactly as Next shipped it. remotePatterns still confines the optimiser
+    // to those hosts with their ports, so allowing a local IP never widens
+    // what can be fetched past the services this deployment already names.
+    dangerouslyAllowLocalIP: remotePatterns.some((p) => isLocalHost(p.hostname)),
     // Small above-fold art (hero, PDP main image) is what LCP waits on, so it
     // must not be lazy. Everything else defaults to lazy.
     deviceSizes: [360, 480, 640, 828, 1080, 1200, 1600, 1920],
