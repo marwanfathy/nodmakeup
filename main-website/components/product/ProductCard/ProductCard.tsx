@@ -98,7 +98,10 @@ const KikoProductCard: FC<ProductCardProps> = ({ product }) => {
             className="nod-product-card__image"
             width={971}
             height={1619}
-            sizes="(max-width: 480px) 30vw, (max-width: 1024px) 22vw, 200px"
+            /* The photo now spans the whole card, so sizes track the card, not
+               a 70% strip: 2-up to 767px, 3-up to 1023px, 4-up to 1399px, then
+               the 5-up grid where the card is capped at 250px. */
+            sizes="(max-width: 767px) 50vw, (max-width: 1023px) 32vw, (max-width: 1399px) 25vw, 250px"
           />
         </div>
 

@@ -14,7 +14,9 @@
   cursor: default;
 }
 
-/* The moving gradient background */
+/* The moving gradient background. Defined here as well as in HeroSlider.css
+   on purpose: both sheets are global, each page loads only its own, so the
+   shop has to carry its own copy. */
 .skeleton-bg {
   background: #f0f0f0;
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
@@ -23,46 +25,56 @@
   border-radius: var(--r-card);
 }
 
-/* --- Specific Element Sizes --- */
+/* --- Band sizes ----------------------------------------------------------
+   Scoped under .skeleton-card: .skeleton-button and friends are also declared
+   by HeroSlider.css for the hero's own loader, and with global sheets and equal
+   specificity the hero's 140px-wide button was winning on the home page.
 
-/* Text Lines */
-.skeleton-text {
-  margin-bottom: 6px;
+   Every band is the height of the band it stands in for, and the card's own
+   grid/gap/space-between places them — so the shimmer sits exactly where the
+   name, description and price land and nothing jumps when they arrive. */
+.skeleton-card .skeleton-text {
+  margin: 0;
 }
 
-.skeleton-desc {
-  width: 90%;
-  height: 10px;
-}
-
-.skeleton-desc-short {
-  width: 60%;
-  height: 10px;
-  margin-bottom: 12px;
-}
-
-.skeleton-name {
+/* One line at 16px / 1.5 */
+.skeleton-card .skeleton-name {
   width: 80%;
-  height: 16px; /* Larger for title */
-  margin-bottom: 10px;
+  height: var(--space-6);
 }
 
-.skeleton-price {
+/* The two-line description block: two 16px lines with the card's 8px rhythm
+   between them, inside the same 40px the real description holds. */
+.skeleton-card .skeleton-desc {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 90%;
+  height: var(--space-10);
+}
+
+.skeleton-card .skeleton-line {
+  display: block;
+  height: var(--space-4);
+}
+
+/* The price row: a 20px figure on a 1.5 line box */
+.skeleton-card .skeleton-price {
   width: 40%;
-  height: 14px;
+  height: 30px;
 }
 
-/* The Variant Pill */
-.skeleton-pill {
-  width: 120px; /* Approximate width of your pill */
+/* The shade pill (the real one measures 31px) */
+.skeleton-card .skeleton-pill {
+  width: 120px;
   max-width: 100%; /* Shrink inside tight mobile cards */
-  height: 28px; /* Height of the pill */
+  height: var(--space-8);
   border-radius: var(--r-chip);
 }
 
-/* The Button */
-.skeleton-button {
+/* The button: 12px + 12px padding around an 18px line box */
+.skeleton-card .skeleton-button {
   width: 100%;
-  height: 45px; /* Matches your button height */
+  height: 42px;
   border-radius: var(--r-control);
 }

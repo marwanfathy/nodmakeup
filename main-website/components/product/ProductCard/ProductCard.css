@@ -1,295 +1,322 @@
-/* --- Main Card Container --- */
+/* ===========================================================================
+   Product card
+   ----------------------------------------------------------------------------
+   Structure (ProductCardSkeleton mirrors it element for element):
+
+     .nod-product-card            grid — rows: 1fr auto auto
+       ├─ __main-link             grid — rows: auto 1fr
+       │    ├─ __image-wrapper    square slot, photo shown whole (contain)
+       │    └─ __details          name / description / price, space-between
+       ├─ __variant-wrapper       reserves the pill's 40px row
+       └─ __cta-container         the button
+
+   What makes a row of cards read as one line:
+   • every band is full width, so image, pill and button share the same edges;
+   • the first row absorbs the slack and a grid row stretches its items, so
+     the pill and the button sit on the same line in every card of a row —
+     whether a name runs to two lines or a sale price has to wrap;
+   • inside __details, space-between pins the price just above the pill.
+   Spacing is --space-*, type is --font-size-* / --line-height-*.
+   =========================================================================== */
+
+/* --- Card --------------------------------------------------------------- */
 .nod-product-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  display: grid;
+  grid-template-rows: 1fr auto auto;
+  /* Fills a stretched parent (.shop-card-wrapper is a grid, swiper slides are
+     sized by JS) so all cards in a row share one height. On an auto-height
+     parent this resolves to auto. */
+  height: 100%;
   width: 100%;
-  max-width: 250px; /* Adjust as needed for your grid */
+  /* Grid and flex items take an automatic minimum of min-content. Without
+     min-width: 0 here the shade pill set the width of the whole shop grid
+     track — column 1 came out 19px wider than column 2 and every band below
+     the image shifted by that much. */
+  min-width: 0;
+  max-width: 250px;
+  margin-inline: auto; /* centres the card in cells wider than 250px */
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
   background-color: #fff;
 }
 
-/* --- Links --- */
+/* --- The two links (photo block, shade pill) ---------------------------- */
 .nod-product-card__main-link,
 .nod-product-card__variant-selector {
   text-decoration: none;
   color: inherit;
   width: 100%;
+  min-width: 0;
 }
 
-/* --- Image Section --- */
+.nod-product-card__main-link {
+  display: grid;
+  grid-template-rows: auto 1fr; /* photo keeps its square, details take the rest */
+}
+
+/* --- Image slot --------------------------------------------------------- */
 .nod-product-card__image-wrapper {
   position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
-  margin-bottom: 1rem;
-  /* Centering container: whatever dimensions .nod-product-card__image is
-     given, the photo stays pinned to the middle of the slot. */
+  margin-bottom: var(--space-4);
+  /* Same radius the skeleton's block draws with, so loading and loaded look
+     alike. The photo is inset 20% each side by contain, so the corners it
+     rounds are the photo's margins, not the product. */
+  border-radius: var(--r-card);
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .nod-product-card__image {
-  width: 70%;
+  width: 100%;
   height: 100%;
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: cover; /* Use 'contain' to prevent cropping */
-  object-position: center; /* Keep the visible part centered whatever the photo's size/aspect */
+  /* The photos are portrait (0.6) with the product running from 14% to 91% of
+     the frame, so cropping a square slot would clip it — contain keeps the
+     whole photo. The side margins it leaves are the photo's own white
+     background meeting the white card, i.e. invisible on every
+     white-background shot, and the band now spans the full card width so it
+     lines up with the pill and the button underneath it. */
+  object-fit: contain;
+  object-position: center;
 }
 
+/* Sale badge and bestseller tag are mutually exclusive: one rule, so the two
+   can never drift apart (they were two copies of the same inset, one of them
+   off the 4px grid). inset-inline-start mirrors it for Arabic. */
+.nod-badge-sale,
 .nod-product-card__bestseller-tag {
-color: #fff;
-  z-index: 5;
-  text-transform: uppercase;
-  background-color: #000;
-  border-radius: var(--r-chip);
-  padding: 4px 8px;
-  font-size: 12px;
-  font-weight: 700;
   position: absolute;
-  top: 10px;
-  left: 20px;
+  top: var(--space-3);
+  inset-inline-start: var(--space-5);
+  z-index: 5;
+  padding: var(--space-1) var(--space-2);
+  background-color: #000;
+  color: #fff;
+  border-radius: var(--r-chip);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
+  font-weight: 700;
+  text-transform: uppercase;
 }
 
-/* --- Text Details Section --- */
+/* --- Details: name / description / price -------------------------------- */
 .nod-product-card__details {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0 0.5rem;
-  height: 140px;
-}
-
-.nod-product-card__description {
-  font-size: 0.8rem;
-  color: #545454; /* ink-secondary — was #6b6b6b, crisper now */
-  margin: 0;
-  height: 40px; /* Give a fixed height to align cards in a row */
-  overflow: hidden;
+  /* First line at the top, price at the bottom, description centred between
+     them — so the price lands directly above the pill however much room the
+     name took. */
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: 0 var(--space-2);
 }
 
 .nod-product-card__name {
-  font-size: 1rem;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2; /* two lines max: a long name can't push the price down */
+  overflow: hidden;
+  min-width: 0;
+  margin: 0;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
   font-weight: 500;
   color: #000;
+  overflow-wrap: anywhere; /* a long unbreakable word can't widen the track */
+}
+
+.nod-product-card__description {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  min-width: 0;
   margin: 0;
+  /* A fixed two-line block (14px × 1.3 × 2 = 36.4px inside 40px), so an empty
+     or one-line description still holds its place and the price below it
+     doesn't move. */
+  height: var(--space-10);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-snug);
+  color: #555;
 }
 
 .nod-product-card__price {
-  font-size: 1.1rem;
+  display: flex;
+  /* At 320px the two prices are wider than the card; wrapping keeps them
+     inside it instead of setting the width of the grid track. The row above
+     has room to grow, so nothing is pushed over the pill. */
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--space-2);
+  min-width: 0;
+  margin: 0;
+  font-size: var(--font-size-lg);
   font-weight: 700;
   color: #000;
-  margin: 0.25rem 0;
-  display: flex;
-  gap: 0.5rem;
-  align-items: baseline;
 }
 
 .nod-product-card__price--original {
-  font-size: 0.9rem;
+  font-size: var(--font-size-base);
   font-weight: 400;
-  color: #666;
+  color: #6b6b6b;
   text-decoration: line-through;
 }
 
-/* --- Variant Selector Wrapper (NEW) --- */
-.nod-product-card__variant-wrapper {
-  width: 100%;
-  height: 40px; /* Fixed height: reserves space for the pill */
-  display: flex;
-  align-items: center; /* Vertically centers the pill */
-  justify-content: center; /* Horizontally centers the pill */
-  margin-top: 0.5rem; /* Consistent spacing from the price */
-  margin-bottom: 0.5rem;
+.nod-product-card__price--current {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: #000;
 }
 
-/* --- Variant Selector Pill (Updated) --- */
+.nod-product-card__price--current.sale-color {
+  color: #d32f2f;
+}
+
+/* --- Variant shade pill -------------------------------------------------- */
+.nod-product-card__variant-wrapper {
+  width: 100%;
+  min-width: 0;
+  height: var(--space-10); /* reserves the pill's row whether or not it renders */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
 .nod-product-card__variant-selector {
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0;
+  /* The line that lets a narrow column shrink: the shade name is nowrap, so
+     without this its min-content became the card's — and the grid's. */
+  min-width: 0;
+  max-width: 100%;
+  margin-top: 0;
+  padding: var(--space-1) var(--space-2);
   border: 1px solid #ccc;
   border-radius: var(--r-control);
   background-color: white;
-  text-decoration: none;
   color: #333;
-  font-size: 0.85rem;
-  padding: 4px 6px;
-  gap: 0;
-  transition: border-color 0.2s;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
   cursor: pointer;
-  
-  /* IMPORTANT: Remove margin-top from here, it is now handled by the wrapper */
-  margin-top: 0; 
-  max-width: 100%; /* Prevents it from breaking the layout */
+  transition: border-color 0.2s;
 }
 
-/* ... Rest of your existing styles ... */
-/* --- Call to Action Button --- */
-.nod-product-card__cta-container {
-  width: 100%;
-  padding-top: 1rem;
-}
-
-.nod-product-card__cta-button {
-  background-color: #000;
-  color: #fff;
-  width: 100%;
-  border-radius: var(--r-control);
-  padding: 10px 24px;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  transition: all 0.3s;
-}
 .nod-product-card__variant-selector:hover {
-border-color: #000;
+  border-color: #000;
 }
 
 .selector-left {
-display: flex;
-align-items: center;
-gap: 8px;           
-padding-right: 10px; 
-padding-left: 2px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  padding-inline-start: var(--space-half); /* swatch to the pill edge */
+  padding-inline-end: var(--space-3); /* shade name to the divider */
+}
+
+/* One shade only: there is no right-hand group, so space-between would leave
+   the swatch pinned against the start edge. Auto margins centre it instead. */
+.selector-left:only-child {
+  margin-inline: auto;
 }
 
 .mini-color-swatch {
-width: 18px;
-height: 18px;
-border-radius: var(--r-circle);
-border: 1px solid #e0e0e0; 
-flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--r-circle);
+  border: 1px solid #e0e0e0;
+  flex-shrink: 0;
 }
 
 .mini-color-swatch.no-color {
-  border-radius: var(--r-circle);
-background-color: #eee;
+  background-color: #eee;
 }
 
 .variant-name {
-white-space: nowrap;
-overflow: hidden;
-text-overflow: ellipsis;
-max-width: 150px; 
-color: #000000;   
+  flex: 1 1 auto;
+  min-width: 0; /* shade name ellipsizes instead of setting the card's width */
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #000;
 }
 
 .selector-right {
-display: flex;
-align-items: center;
-gap: 4px;
-border-left: 1px solid #ccc; 
-padding-left: 10px;          
-height: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+  height: 100%;
+  /* Logical: in RTL the group flips to the other side of the pill, and the
+     divider has to stay between it and the shade name. */
+  border-inline-start: 1px solid #ccc;
+  padding-inline-start: var(--space-3);
 }
 
 .variant-count {
-font-weight: 700; /* Bold number like the screenshot */
-color: #000;
+  font-weight: 700;
+  color: #000;
 }
 
 .variant-arrow {
-font-weight: 700;
-font-size: 1rem;
-line-height: 1;
-color: #333;
+  font-weight: 700;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-none);
+  color: #333;
 }
-.nod-product-card__cta-button:hover:not(:disabled) {
+
+/* Points along the reading direction rather than always eastward. */
+html[dir='rtl'] .variant-arrow {
+  transform: scaleX(-1);
+}
+
+/* --- Add to bag ---------------------------------------------------------- */
+.nod-product-card__cta-container {
+  width: 100%;
+  min-width: 0;
+  padding-top: var(--space-4);
+}
+
+.nod-product-card__cta-button {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: var(--space-3) var(--space-6);
+  border: none;
   background-color: #000;
+  color: #fff;
+  border-radius: var(--r-control);
+  text-decoration: none;
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .nod-product-card__cta-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
-.nod-badge-sale {
-  position: absolute;
-  top: 10px;
-  left: 20px;
-  background-color: #000000; /* لون أحمر قوي */
-  color: white;
-  padding: 4px 8px;
-  font-size: 12px;
-  font-weight: 700;
-  border-radius: var(--r-chip);
-  z-index: 5;
-  text-transform: uppercase;
 
-}
-
-/* 2. تحسين عرض الأسعار */
-.nod-product-card__price {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.nod-product-card__price--original {
-  text-decoration: line-through;
-  color: #6B6B6B;
-  font-size: 0.9em;
-}
-
-.nod-product-card__price--current {
-  font-weight: 700;
-  font-size: 1.1em;
-  color: #000;
-}
-
-.nod-product-card__price--current.sale-color {
-  color: #d32f2f; /* تلوين السعر الجديد بالأحمر عند الخصم */
-}
-
-/* 3. تقييمات النجوم */
-.nod-product-rating {
-  display: flex;
-  align-items: center;
-  font-size: 12px;
-  margin-bottom: 4px;
-}
-
-.nod-product-rating .stars {
-  color: #8A6D00; /* لون ذهبي (contrast-safe on white) */
-  letter-spacing: 1px;
-}
-
-.nod-product-rating .review-count {
-  color: #6B6B6B;
-  margin-left: 4px;
-  font-size: 11px;
-}
-
-/* 4. تفاعل زر الإضافة للسلة */
-.nod-product-card__cta-button {
-  transition: all 0.3s ease;
-  /* (احتفظ بتنسيقك الأصلي هنا وأضف الحالات التالية) */
-}
-
-/* حالة النجاح */
+/* Added to bag: green, and no longer clickable. */
 .nod-product-card__cta-button.added {
-  background-color: #28a745 !important; /* أخضر */
-  border-color: #28a745 !important;
-  color: white !important;
+  background-color: #28a745;
+  color: #fff;
   cursor: default;
-}
-
-/* تحسين القراءة */
-.nod-product-card__description {
-    font-size: 13px; /* تأكد أنه ليس صغيراً جداً */
-    color: #555;
-    line-height: 1.4;
-    margin-bottom: 4px;
-    /* تحديد عدد الأسطر */
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
 }
