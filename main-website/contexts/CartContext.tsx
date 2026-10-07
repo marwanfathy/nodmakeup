@@ -8,8 +8,7 @@ import {
     removeItemFromCart as apiRemoveItemFromCart,
     CartObject,
 } from '../lib/api';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { useI18n } from '../lib/i18n/client';
 
 const getApiErrorMessage = (error: unknown, fallback: string): string => {
     if (error && typeof error === 'object' && 'response' in error) {
@@ -28,6 +27,18 @@ const emptyCartSummary = {
     amountLeftForFreeShipping: 0,
 };
 
+/** Which cart operation produced a failure, so the surface that started it can
+ *  render the message itself instead of a shared popup. */
+export type CartAction = 'add' | 'update' | 'remove';
+
+export interface CartMutationError {
+    action: CartAction;
+    message: string;
+    /** The cart line the failure belongs to. Absent for `add`, which happens
+     *  before any line exists. */
+    itemId?: string;
+}
+
 interface CartContextType {
     cart: CartObject | null;
     isCartLoading: boolean;
@@ -38,6 +49,19 @@ interface CartContextType {
     addItemToCart: (variantId: string, quantity: number, options?: { openCart?: boolean }) => Promise<boolean>;
     updateItemQuantity: (cartItemId: string, newQuantity: number) => Promise<void>;
     removeItem: (cartItemId: string) => Promise<void>;
+    /** The last failed mutation, or null. Held here rather than popped up so the
+     *  control that was pressed can show the reason next to itself, where the
+     *  shopper is already looking. */
+    mutationError: CartMutationError | null;
+    dismissMutationError: () => void;
+    /** Cart lines with a request in flight. The controls for a busy line are
+     *  disabled, so a second tap cannot queue a quantity change against a
+     *  response that has not arrived yet. */
+    busyItemIds: ReadonlySet<string>;
+    /** Increments on every successful add. The bag badge animates off this
+     *  instead of a popup — the badge moving is the confirmation, and it is
+     *  confirmation the shopper was already looking at. */
+    addSequence: number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -49,15 +73,30 @@ export const useCart = (): CartContextType => {
 };
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
+    const { t } = useI18n();
     const [cart, setCart] = useState<CartObject | null>(null);
     const [isCartLoading, setIsCartLoading] = useState(true);
     const [isCartOpen, setIsCartOpen] = useState(false);
+    const [mutationError, setMutationError] = useState<CartMutationError | null>(null);
+    const [busyItemIds, setBusyItemIds] = useState<ReadonlySet<string>>(() => new Set());
+    const [addSequence, setAddSequence] = useState(0);
 
     const syncSessionId = useCallback((cartObj: CartObject) => {
         if (cartObj && cartObj.cartSessionId) {
             localStorage.setItem('fallback_cart_id', cartObj.cartSessionId);
         }
     }, []);
+
+    const markBusy = useCallback((itemId: string, busy: boolean) => {
+        setBusyItemIds((prev) => {
+            const next = new Set(prev);
+            if (busy) next.add(itemId);
+            else next.delete(itemId);
+            return next;
+        });
+    }, []);
+
+    const dismissMutationError = useCallback(() => setMutationError(null), []);
 
     const fetchCart = useCallback(async () => {
         setIsCartLoading(true);
@@ -80,15 +119,20 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }, [fetchCart]);
 
     const addItemToCart = async (variantId: string, quantity: number, options?: { openCart?: boolean }): Promise<boolean> => {
+        // A new attempt clears the previous complaint, so a shopper who fixed the
+        // problem and pressed again is not still looking at the old reason.
+        setMutationError(null);
         try {
             const updatedCart = await apiAddItemToCart(variantId, quantity);
             setCart(updatedCart);
             syncSessionId(updatedCart);
-            toast.success("Item added to your bag!");
+            setAddSequence((n) => n + 1);
             if (options?.openCart !== false) setIsCartOpen(true);
             return true;
         } catch (error: unknown) {
-            toast.error(getApiErrorMessage(error, "Could not add item."));
+            // No popup: the product page renders this beside the button that was
+            // pressed, which is also the control the shopper needs to retry with.
+            setMutationError({ action: 'add', message: getApiErrorMessage(error, t('cart.addFailed')) });
             return false;
         }
     };
@@ -96,26 +140,36 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     const updateItemQuantity = async (cartItemId: string, newQuantity: number) => {
         if (newQuantity <= 0) return removeItem(cartItemId);
         const originalCart = cart;
+        setMutationError(null);
+        markBusy(cartItemId, true);
         try {
             const updatedCartFromServer = await apiUpdateItemQuantity(cartItemId, newQuantity);
             setCart(updatedCartFromServer);
             syncSessionId(updatedCartFromServer);
         } catch {
-            toast.error("Could not update quantity.");
+            // The quantity is rolled back to what the server still believes, and
+            // the row says why — the pair matters, because a number that silently
+            // springs back is indistinguishable from a number that never moved.
             setCart(originalCart);
+            setMutationError({ action: 'update', itemId: cartItemId, message: t('cart.updateFailed') });
+        } finally {
+            markBusy(cartItemId, false);
         }
     };
 
     const removeItem = async (cartItemId: string) => {
         const originalCart = cart;
+        setMutationError(null);
+        markBusy(cartItemId, true);
         try {
             const updatedCartFromServer = await apiRemoveItemFromCart(cartItemId);
-            toast.info("Item removed.");
             setCart(updatedCartFromServer);
             syncSessionId(updatedCartFromServer);
         } catch {
-            toast.error("Could not remove item.");
             setCart(originalCart);
+            setMutationError({ action: 'remove', itemId: cartItemId, message: t('cart.removeFailed') });
+        } finally {
+            markBusy(cartItemId, false);
         }
     };
 
@@ -138,9 +192,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         <CartContext.Provider value={{
             cart, isCartLoading, isCartOpen, setIsCartOpen,
             itemCount: cart?.summary?.itemCount || 0,
-            fetchCart, addItemToCart, updateItemQuantity, removeItem
+            fetchCart, addItemToCart, updateItemQuantity, removeItem,
+            mutationError, dismissMutationError, busyItemIds, addSequence
         }}>
-            <ToastContainer position="bottom-right" autoClose={2000} theme="light" />
             {children}
         </CartContext.Provider>
     );

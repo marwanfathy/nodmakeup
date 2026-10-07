@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -16,7 +16,6 @@ import {
     CouponRejectionReason,
     mediaUrl,
 } from '@/lib/api';
-import { toast } from 'react-toastify'; 
 import Spinner from '../../components/ui/Spinner'; // shared loading spinner
 import { useI18n } from '../../lib/i18n/client';
 import { localePath } from '../../lib/i18n/paths';
@@ -99,11 +98,14 @@ const PaymentIcon = () => (<svg stroke="currentColor" fill="none" strokeWidth="2
 const LocationIcon = () => (<svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="7"></circle><circle cx="12" cy="12" r="2.5"></circle><line x1="12" y1="1" x2="12" y2="4"></line><line x1="12" y1="20" x2="12" y2="23"></line><line x1="1" y1="12" x2="4" y2="12"></line><line x1="20" y1="12" x2="23" y2="12"></line></svg>);
 // Tag for the discount section header.
 const TagIcon = () => (<svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>);
+// Bag, for the empty-cart state. Sits at the same 1em scale as the section
+// icons, so the empty state belongs to the same page as the form it replaced.
+const BagIcon = () => (<svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>);
 // Egypt flag for the phone prefix — same asset the navbar region link uses.
 const flagIconPath = mediaUrl('/uploads/assets/icons/flag-egypt.svg');
 
 export default function CheckoutPage() {
-    const { cart, fetchCart, updateItemQuantity, removeItem, isCartLoading } = useCart();
+    const { cart, fetchCart, updateItemQuantity, removeItem, isCartLoading, busyItemIds, mutationError } = useCart();
     const router = useRouter();
     const { locale, t } = useI18n();
 
@@ -128,6 +130,7 @@ export default function CheckoutPage() {
     const [submitAttempted, setSubmitAttempted] = useState(false);
     const [errors, setErrors] = useState<FieldErrors>({});
     const fieldRefs = useRef<Partial<Record<FieldName, HTMLElement | null>>>({});
+    const couponInputRef = useRef<HTMLInputElement | null>(null);
     // The discount box's own error, held apart from the field errors above: it is
     // a reason the code was refused rather than something the shopper typed
     // wrong, and it is shown on the code input rather than on a field above it.
@@ -141,39 +144,65 @@ export default function CheckoutPage() {
     const [isLocating, setIsLocating] = useState(false);
     const [geoNote, setGeoNote] = useState<{ tone: 'ok' | 'warn'; text: string } | null>(null);
 
+    // Shipping zones are what turn a governorate into a shipping price, so a
+    // failure to load them is not a cosmetic problem: the order can still be
+    // placed, but the total will be wrong. That is worth holding on screen with
+    // a way to try again, rather than a toast that was gone in two seconds and
+    // left a dropdown that silently listed nothing.
+    const [zonesFailed, setZonesFailed] = useState(false);
+
+    // The order the API refused, or null. Held on the page rather than popped:
+    // it is the reason the shopper is still looking at a filled-in form instead
+    // of on the confirmation page, and it is only true until they change
+    // something about the order.
+    const [submitError, setSubmitError] = useState<string | null>(null);
+
+    const focusField = useCallback((field: FieldName) => {
+        const el = fieldRefs.current[field];
+        el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el?.focus({ preventScroll: true });
+    }, []);
+
+    // Any change to the order makes an earlier refusal stale, so it is dropped
+    // rather than left sitting next to a form it no longer describes. Watching
+    // the values rather than hooking each handler is deliberate: there are
+    // several ways in (typing, the governorate list, the code, a quantity in the
+    // summary) and a refusal that outlives its cause is worse than no refusal at
+    // all — it tells the shopper their order was refused when it now differs
+    // from the one that was.
+    useEffect(() => {
+        setSubmitError(null);
+    }, [formData, appliedDiscount, couponCode]);
+
     useEffect(() => {
         if (!cart && !isCartLoading) {
             fetchCart();
         }
     }, [fetchCart, cart, isCartLoading]);
 
-    useEffect(() => {
-        const fetchZones = async () => {
-            try {
-                const response = await getShippingZones();
-                setShippingZones(response || []);
-            } catch {
-                toast.error(t('checkout.toast.shippingFailed'));
-            } finally {
-                setAreZonesLoading(false);
-            }
-        };
-        fetchZones();
+    const loadShippingZones = useCallback(async () => {
+        setAreZonesLoading(true);
+        setZonesFailed(false);
+        try {
+            const response = await getShippingZones();
+            setShippingZones(response || []);
+        } catch {
+            setZonesFailed(true);
+        } finally {
+            setAreZonesLoading(false);
+        }
     }, []);
 
     useEffect(() => {
-        if (isCartLoading || isOrderPlaced) return;
+        void loadShippingZones();
+    }, [loadShippingZones]);
 
-        if (!cart || cart.items.length === 0) {
-            const timer = setTimeout(() => {
-                if (!isOrderPlaced) { 
-                    toast.info(t('checkout.toast.emptyCart'));
-                    router.replace(localePath('/shop', locale));
-                }
-            }, 500);
-            return () => clearTimeout(timer);
-        }
-    }, [cart, isCartLoading, router, isOrderPlaced]);
+    // The empty-bag case used to be a blank page for half a second, a toast
+    // saying "redirecting", and then a redirect — so a shopper who arrived here
+    // by bookmark or a stale link was shown nothing at all to explain what had
+    // happened. It is now a state on the page with the way out of it. (Ordering
+    // still works: `isOrderPlaced` is set before the cart is refetched, so the
+    // emptying that follows a successful order is never mistaken for this.)
 
     const { shippingCost, discountAmount, total, subtotal, originalShippingCost } = useMemo(() => {
         const sub = cart?.summary?.subtotal || 0;
@@ -212,7 +241,7 @@ export default function CheckoutPage() {
 
     // --- Per-field validation -------------------------------------------
     // One rule per field, so each input can explain its own problem instead of
-    // a single "fill everything in" toast. The phone is checked after
+    // a single "fill everything in" message. The phone is checked after
     // normalization, which is what actually gets submitted.
     const validateField = (field: FieldName, values: FormData): string | undefined => {
         switch (field) {
@@ -376,7 +405,7 @@ export default function CheckoutPage() {
      * from the code's `THANKS-` prefix that the code was personal and warned
      * about the phone number — a guess, because nothing about the prefix makes a
      * code personal, so a real personal code under any other name fell through to
-     * the API and came back as an English sentence in a toast. Both paths asked
+     * the API and came back as an English sentence in a popup. Both paths asked
      * for something the shopper could not see, and neither said what to do.
      *
      * Now the API says which of four things went wrong, the wording comes from
@@ -388,7 +417,13 @@ export default function CheckoutPage() {
     const handleApplyCoupon = async () => {
         const code = couponCode.trim();
         if (!code) {
-            toast.info(t('checkout.toast.couponEmpty'));
+            // Nothing was typed, so the input is the thing to point at: mark it
+            // invalid, say why, and put the cursor in it. A popup about an empty
+            // box is the one case where the message and the thing to fix are the
+            // same element, so that element should get the message and the focus.
+            setCouponError(t('checkout.err.couponEmpty'));
+            setCouponErrorTargetsPhone(false);
+            couponInputRef.current?.focus();
             return;
         }
 
@@ -405,8 +440,11 @@ export default function CheckoutPage() {
                 phoneForCoupon ? toInternationalEgyptianPhone(phoneForCoupon) : '',
             );
 
+            // No confirmation popup: the applied discount now appears in the
+            // order summary as its own line AND the code box shows a
+            // `role="status"` success note, so the state is visible in two places
+            // and announced once. A third copy in the corner was noise.
             setAppliedDiscount(validatedCoupon);
-            toast.success(t('checkout.toast.couponApplied', { name: validatedCoupon.name }));
         } catch (error: unknown) {
             setAppliedDiscount(null);
             const reason = readCouponRejection(error);
@@ -417,9 +455,10 @@ export default function CheckoutPage() {
             }
             // The API refused without saying why — a network drop or a fault. No
             // reason is invented here, because telling a shopper their code is
-            // expired when the request never arrived would be a plain lie.
-            setCouponError(t('checkout.toast.couponFailed'));
-            toast.error(t('checkout.toast.couponFailed'));
+            // expired when the request never arrived would be a plain lie. This
+            // used to be shown twice, once inline and once as a popup saying the
+            // identical words; the inline one is the one next to the code.
+            setCouponError(t('checkout.err.couponFailed'));
         } finally {
             setIsApplyingCoupon(false);
         }
@@ -450,17 +489,21 @@ export default function CheckoutPage() {
         e.preventDefault();
 
         // Surface every problem at once, then send the user to the first one.
+        // A refused submit clears the order-level complaint, because that
+        // complaint was about the order as it was then, and this is a new
+        // attempt at it.
         setSubmitAttempted(true);
+        setSubmitError(null);
         const found = validateAll(formData);
         setErrors(found);
         if (Object.keys(found).length > 0) {
+            // Straight to the first field that is complaining. It is the field
+            // the shopper has to change, its error is already rendered beneath
+            // it, and moving focus there is what lets them type over the
+            // problem immediately. Screen readers announce the field and its
+            // error together, because the input carries aria-describedby.
             const firstInvalid = (Object.keys(formData) as FieldName[]).find((f) => found[f]);
-            if (firstInvalid) {
-                const el = fieldRefs.current[firstInvalid];
-                el?.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
-                el?.focus?.();
-            }
-            toast.error(t('checkout.err.summary'));
+            if (firstInvalid) focusField(firstInvalid);
             return;
         }
 
@@ -494,7 +537,11 @@ export default function CheckoutPage() {
                 error && typeof error === 'object' && 'response' in error
                     ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
                     : undefined;
-            toast.error(message || t('checkout.toast.checkoutFailed'));
+            // Kept beside the button that was pressed, and it stays until the
+            // shopper changes something: a refusal is a fact about the order
+            // they are looking at, and two seconds in a corner is not long
+            // enough to read an order-related sentence or to act on it.
+            setSubmitError(message || t('checkout.err.submit'));
             setIsProcessing(false);
         } 
     };
@@ -552,7 +599,24 @@ export default function CheckoutPage() {
         );
     }
 
-    if (cart.items.length === 0 && !isOrderPlaced) return null;
+    // An empty bag is a legitimate place to land, so it is a page rather than a
+    // redirect: it says what happened and offers the only useful next step.
+    if (cart.items.length === 0 && !isOrderPlaced) {
+        return (
+            <div className="modern-checkout-page">
+                <div className="checkout-container">
+                    <div className="checkout-empty-state">
+                        <BagIcon />
+                        <h1>{t('checkout.emptyCart.title')}</h1>
+                        <p>{t('checkout.emptyCart.body')}</p>
+                        <Link href={localePath('/shop', locale)} className="place-order-button co-empty-cta">
+                            {t('checkout.emptyCart.cta')}
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="modern-checkout-page">
@@ -578,7 +642,8 @@ export default function CheckoutPage() {
                             <div className="section-header"><ShippingIcon /><h3>{t('checkout.shipping')}</h3></div>
 
                             {/* Each field owns its label, its value and its error, so a
-                                problem is reported where it happens instead of in a toast. */}
+                                problem is reported where it happens rather than
+                                in a message somewhere else. */}
                             <div className={`checkout-field ${errors.customer_name ? 'has-error' : ''}`}>
                                 <label htmlFor="customer_name">{t('checkout.fullName')}</label>
                                 <input
@@ -700,6 +765,18 @@ export default function CheckoutPage() {
                                     onSettled={() => handleBlur('shipping_governorate')}
                                 />
                                 {errors.shipping_governorate && <span className="field-error" id="err-shipping_governorate">{errors.shipping_governorate}</span>}
+                                {/* Without shipping zones the dropdown lists nothing
+                                    and the order total silently comes out wrong, so
+                                    the failure is stated here with the one action
+                                    that can fix it. */}
+                                {zonesFailed && (
+                                    <div className="co-inline-alert" role="alert">
+                                        <span>{t('checkout.err.zonesFailed')}</span>
+                                        <button type="button" onClick={() => void loadShippingZones()} disabled={areZonesLoading}>
+                                            {areZonesLoading ? <Spinner size="small" /> : t('checkout.retry')}
+                                        </button>
+                                    </div>
+                                )}
                             </div>
 
                             <div className={`checkout-field ${errors.customer_notes ? 'has-error' : ''}`}>
@@ -745,6 +822,7 @@ export default function CheckoutPage() {
                                         type="text"
                                         placeholder={t('checkout.discountCode')}
                                         value={couponCode}
+                                        ref={couponInputRef}
                                         onChange={(e) => {
                                             setCouponCode(e.target.value.toUpperCase());
                                             // Editing the code invalidates whatever was said
@@ -794,6 +872,13 @@ export default function CheckoutPage() {
                             forward; there is no second action to reach by accident. */}
                         <div className="checkout-actions">
                             <Link href={localePath('/', locale)} className="return-to-cart-link"> {t('checkout.continue')}</Link>
+                            {/* A refusal to place the order, sitting with the button
+                                that was refused. It is the reason the shopper is
+                                still looking at a filled-in form, so it stays put
+                                until they change something and try again. */}
+                            {submitError && (
+                                <p className="co-submit-error" role="alert">{submitError}</p>
+                            )}
                             <button type="submit" className="place-order-button" data-track="place_order" disabled={isProcessing}>
                                 {isProcessing ? <Spinner /> : t('checkout.placeOrder', { total: formatPrice(total, locale) })}
                             </button>
@@ -807,8 +892,15 @@ export default function CheckoutPage() {
                             const displayPrice = item.effectiveSalePrice ?? item.originalPrice;
                             const imageUrl = mediaUrl(item.imageUrl) || '/default-image.png';
                             const itemName = locale === 'ar' ? (item.productNameAr || item.productName) : item.productName;
+                            // The same per-line state the bag drawer uses, so a
+                            // refusal to change a quantity is reported on the
+                            // line it happened to here as well — the drawer is
+                            // closed on this page, so without this the message
+                            // would be rendered where nobody is looking.
+                            const lineBusy = busyItemIds.has(item.id);
+                            const lineError = mutationError?.itemId === item.id ? mutationError.message : null;
                             return (
-                               <div className="summary-item" key={item.id}>
+                               <div className={`summary-item ${lineBusy ? 'is-busy' : ''}`} key={item.id} aria-busy={lineBusy}>
                                    <div className="summary-item-image">
                                        <Image src={imageUrl} alt={itemName} width={72} height={120} sizes="72px" />
                                        <span className="summary-item-quantity">{item.quantity}</span>
@@ -822,12 +914,29 @@ export default function CheckoutPage() {
                                        <div className="summary-item-price"><span>{formatPrice(displayPrice * item.quantity, locale)}</span></div>
                                        <div className="summary-item-controls">
                                            <div className="quantity-control">
-                                               <button type="button" onClick={() => updateItemQuantity(item.id, item.quantity - 1)} aria-label="Decrease quantity">−</button>
+                                               <button
+                                                 type="button"
+                                                 onClick={() => updateItemQuantity(item.id, item.quantity - 1)}
+                                                 aria-label={t('cart.decreaseQuantity')}
+                                                 disabled={lineBusy || item.quantity <= 1}
+                                               >−</button>
                                                <span>{item.quantity}</span>
-                                               <button type="button" onClick={() => updateItemQuantity(item.id, item.quantity + 1)} aria-label="Increase quantity">+</button>
+                                               <button
+                                                 type="button"
+                                                 onClick={() => updateItemQuantity(item.id, item.quantity + 1)}
+                                                 aria-label={t('cart.increaseQuantity')}
+                                                 disabled={lineBusy}
+                                               >+</button>
                                            </div>
-                                           <button type="button" className="remove-item-btn" onClick={() => removeItem(item.id)}>{t('checkout.remove')}</button>
+                                           <button
+                                             type="button"
+                                             className="remove-item-btn"
+                                             onClick={() => removeItem(item.id)}
+                                             aria-label={`${t('checkout.remove')}: ${itemName}`}
+                                             disabled={lineBusy}
+                                           >{t('checkout.remove')}</button>
                                        </div>
+                                       {lineError && <p className="cart-item-error" role="alert">{lineError}</p>}
                                    </div>
                                </div>
                            );

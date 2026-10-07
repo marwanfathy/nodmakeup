@@ -85,8 +85,6 @@ const en: Dict = {
   // --- product page ---
   'pdp.loadError': 'Product could not be loaded.',
   'pdp.unavailable': 'This product is currently unavailable.',
-  'pdp.selectVariant': 'Please select a variant.',
-  'pdp.checkoutError': 'Could not proceed to checkout.',
   'pdp.dataIncomplete': 'Product data incomplete.',
   'pdp.details': 'Product Details',
   'pdp.quantity': 'Quantity',
@@ -110,11 +108,24 @@ const en: Dict = {
   'variant.sku': 'SKU:',
 
   // --- cart ---
+  // Every one of these replaced a popup. What is left is either a label for a
+  // control, a refusal that sits next to the control that caused it, or a line
+  // for the screen-reader live region. Nothing here is a notification to read
+  // and dismiss.
   'cart.title': 'Shopping Bag',
+  'cart.close': 'Close bag',
   'cart.empty': 'Your bag is empty.',
+  'cart.continueShopping': 'Browse products',
   'cart.subtotal': 'Subtotal',
   'cart.checkout': 'Go to Checkout',
   'cart.removeItem': 'Remove item',
+  'cart.decreaseQuantity': 'Decrease quantity',
+  'cart.increaseQuantity': 'Increase quantity',
+  'cart.addFailed': 'We could not add that to your bag. Please try again.',
+  'cart.updateFailed': 'We could not change that quantity, so it has been put back.',
+  'cart.removeFailed': 'We could not remove that item. Please try again.',
+  'cart.announcedAdded': 'Added {count} item(s) to your bag.',
+  'cart.announcedRemoved': 'Removed {count} item(s) from your bag.',
 
   // --- checkout ---
   'checkout.header': 'Complete your purchase',
@@ -140,13 +151,12 @@ const en: Dict = {
   'checkout.selectGov': 'Select governorate',
   'checkout.total': 'Total',
   'checkout.remove': 'Remove',
-  'checkout.toast.emptyCart': 'Your cart is empty. Redirecting...',
-  'checkout.toast.fillFields': 'Please fill in all required fields.',
-  'checkout.toast.couponEmpty': 'Please enter a coupon code.',
-  'checkout.toast.couponApplied': 'Coupon "{name}" applied!',
-  'checkout.toast.couponFailed': 'We could not check that code. Please try again.',
-  'checkout.toast.checkoutFailed': 'Checkout failed.',
-  'checkout.toast.shippingFailed': 'Could not fetch shipping information.',
+  // An empty bag is a page with the way out of it, not a redirect.
+  'checkout.emptyCart.title': 'There is nothing in your bag',
+  'checkout.emptyCart.body':
+    'Your bag is empty, so there is no order to check out yet.',
+  'checkout.emptyCart.cta': 'Continue shopping',
+  'checkout.retry': 'Try again',
   // --- Per-field validation ---
   'checkout.err.nameRequired': 'Please enter your name.',
   'checkout.err.nameShort': 'Name must be at least 3 characters.',
@@ -156,7 +166,14 @@ const en: Dict = {
   'checkout.err.addressShort': 'Please add a bit more detail so the driver can find you.',
   'checkout.err.govRequired': 'Please choose your governorate.',
   'checkout.err.notesLong': 'Notes are limited to 500 characters.',
-  'checkout.err.summary': 'Please fix the highlighted fields.',
+  // Shown beside the governorate list, with a retry button — without shipping
+  // zones the total is wrong, so this is not a cosmetic failure.
+  'checkout.err.zonesFailed':
+    'We could not load the delivery areas, so shipping cost is not being calculated. Try again before placing your order.',
+  'checkout.err.couponEmpty': 'Enter a discount code first.',
+  'checkout.err.couponFailed': 'We could not check that code. Please try again.',
+  'checkout.err.submit':
+    'We could not place this order. Nothing was charged and nothing was ordered — please try again.',
 
   // --- Coupon refusals -----------------------------------------------------
   // One key per reason the API can report, and each one names the next move
@@ -394,8 +411,6 @@ const ar: Dict = {
   // --- product page ---
   'pdp.loadError': 'تعذر تحميل المنتج.',
   'pdp.unavailable': 'هذا المنتج غير متوفر حالياً.',
-  'pdp.selectVariant': 'يرجى اختيار نسخة المنتج.',
-  'pdp.checkoutError': 'تعذر متابعة إجراءات الدفع.',
   'pdp.dataIncomplete': 'بيانات المنتج غير مكتملة.',
   'pdp.details': 'تفاصيل المنتج',
   'pdp.quantity': 'الكمية',
@@ -420,10 +435,19 @@ const ar: Dict = {
 
   // --- cart ---
   'cart.title': 'حقيبة التسوق',
+  'cart.close': 'إغلاق الحقيبة',
   'cart.empty': 'حقيبتك فارغة.',
+  'cart.continueShopping': 'تصفّحي المنتجات',
   'cart.subtotal': 'المجموع الفرعي',
   'cart.checkout': 'إتمام الشراء',
   'cart.removeItem': 'إزالة المنتج',
+  'cart.decreaseQuantity': 'إنقاص الكمية',
+  'cart.increaseQuantity': 'زيادة الكمية',
+  'cart.addFailed': 'تعذّرت إضافة المنتج إلى حقيبتك. من فضلك حاولي مرة أخرى.',
+  'cart.updateFailed': 'تعذّر تغيير الكمية، فعُدَّت إلى ما كانت عليه.',
+  'cart.removeFailed': 'تعذّرت إزالة المنتج. من فضلك حاولي مرة أخرى.',
+  'cart.announcedAdded': 'تمت إضافة {count} منتج إلى حقيبتك.',
+  'cart.announcedRemoved': 'تمت إزالة {count} منتج من حقيبتك.',
 
   // --- checkout ---
   'checkout.header': 'أكملي عملية الشراء',
@@ -449,13 +473,10 @@ const ar: Dict = {
   'checkout.selectGov': 'اختر المحافظة',
   'checkout.total': 'الإجمالي',
   'checkout.remove': 'إزالة',
-  'checkout.toast.emptyCart': 'سلة التسوق فارغة. جارٍ إعادة التوجيه...',
-  'checkout.toast.fillFields': 'يرجى ملء جميع الحقول المطلوبة.',
-  'checkout.toast.couponEmpty': 'يرجى إدخال كود الخصم.',
-  'checkout.toast.couponApplied': 'تم تطبيق الكود "{name}"!',
-  'checkout.toast.couponFailed': 'تعذّر التحقق من الكود. من فضلك حاولي مرة أخرى.',
-  'checkout.toast.checkoutFailed': 'فشلت عملية الدفع.',
-  'checkout.toast.shippingFailed': 'تعذر جلب معلومات الشحن.',
+  'checkout.emptyCart.title': 'لا يوجد شيء في حقيبتك',
+  'checkout.emptyCart.body': 'حقيبتك فارغة، فما زال هناك طلب لإتمامه.',
+  'checkout.emptyCart.cta': 'متابعة التسوق',
+  'checkout.retry': 'حاولي مرة أخرى',
   // --- أخطاء الحقول ---
   'checkout.err.nameRequired': 'من فضلك أدخلي اسمك.',
   'checkout.err.nameShort': 'الاسم يجب أن يكون 3 أحرف على الأقل.',
@@ -465,7 +486,12 @@ const ar: Dict = {
   'checkout.err.addressShort': 'أضيفي تفاصيل أكثر حتى يتمكّن المندوب من الوصول إليك.',
   'checkout.err.govRequired': 'من فضلك اختاري المحافظة.',
   'checkout.err.notesLong': 'الملاحظات محدودة بـ 500 حرف.',
-  'checkout.err.summary': 'من فضلك صحّحي الحقول المميّزة.',
+  'checkout.err.zonesFailed':
+    'تعذر تحميل مناطق التوصيل، لذلك لا يتم احتساب الشحن. من فضلك حاولي مرة أخرى قبل تأكيد الطلب.',
+  'checkout.err.couponEmpty': 'أدخلي كود الخصم أولًا.',
+  'checkout.err.couponFailed': 'تعذّر التحقق من الكود. من فضلك حاولي مرة أخرى.',
+  'checkout.err.submit':
+    'تعذّر تأكيد الطلب. لم يتم خصم أي مبلغ ولم يتم تسجيل أي طلب — من فضلك حاولي مرة أخرى.',
 
   // --- رفض كود الخصم ---
   // كل سبب يقول ما حدث و ALSO ما يمكن فعله، لأن لكل سبب طريقة مختلفة للخروج

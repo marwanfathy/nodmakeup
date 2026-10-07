@@ -678,6 +678,145 @@
   font-size: 0.85rem;
 }
 
+/* ==========================================================================
+   Feedback that stays on the page
+   --------------------------------------------------------------------------
+   These three replaced the toast layer. They share one idea: a message about a
+   control sits with that control, so the eye is already there and the fix is
+   the thing next to the complaint.
+
+   Note what is NOT here: a summary of every problem at the top of the form. A
+   refused submit used to raise a list of all five fields at once, which put the
+   same sentence in two places — once in the list, once under each input — and
+   made a shopper feel they had been given five separate things to do rather
+   than one form to fill in. The inline errors are the single source: they are
+   rendered per field, they are announced with the field, and a refused submit
+   moves focus to the first one, so the work starts where the fix is.
+   ========================================================================== */
+
+/* The delivery-areas failure. Sits under the governorate list, which is the
+   control it is about, and carries the one action that can fix it. The warning
+   is deliberately louder than .field-hint next to it: this one means the order
+   total is wrong, not that a field could use more detail. */
+.co-inline-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 0.6rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid #e0a3a3;
+  border-radius: var(--r-field);
+  background-color: #fdf6f6;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: #8a2020;
+}
+
+.co-inline-alert > span {
+  flex: 1 1 12rem;
+}
+
+.co-inline-alert button {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 0.85rem;
+  background-color: #fff;
+  border: 1px solid #c99a9a;
+  border-radius: var(--r-field);
+  color: #8a2020;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.co-inline-alert button:hover:not(:disabled) {
+  border-color: #a01c1c;
+  color: #6b1616;
+}
+
+.co-inline-alert button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* A refused order, beside the button that was refused. It stays until something
+   about the order changes, because it is the reason the shopper is still
+   looking at a filled-in form instead of on the confirmation page. */
+.co-submit-error {
+  flex: 1 0 100%;
+  order: -1;
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid #e0a3a3;
+  border-inline-start: 4px solid #c62828;
+  border-radius: var(--r-field);
+  background-color: #fdf6f6;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: #8a2020;
+}
+
+/* The empty bag, as a page. It replaced a blank half-second followed by a
+   redirect, which explained nothing; this says what happened and offers the one
+   useful next step. */
+.checkout-empty-state {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.5rem;
+  min-height: 60vh;
+  padding: 3rem 1.5rem;
+  /* The safe-area inset, so the state clears the home indicator on a phone
+     rather than sitting under it. */
+  padding-bottom: max(3rem, calc(3rem + env(safe-area-inset-bottom)));
+}
+
+.checkout-empty-state > svg {
+  font-size: 2.5rem;
+  color: #b0b0b6;
+  margin-bottom: 0.5rem;
+}
+
+.checkout-empty-state h1 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.checkout-empty-state p {
+  margin: 0 0 1rem;
+  max-width: 34ch;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #545454;
+}
+
+.co-empty-cta {
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+/* A summary line with a change in flight. Same dimming as the drawer's cart
+   line, for the same reason: the controls are disabled, and the row says so. */
+.summary-item.is-busy .summary-item-controls,
+.summary-item.is-busy .remove-item-btn {
+  opacity: 0.45;
+  transition: opacity 0.15s ease;
+}
+
+.remove-item-btn:disabled {
+  cursor: default;
+}
+
 .discount-input-row button:not(.discount-remove-btn) {
   background-color: #efefef;
   color: #545454;

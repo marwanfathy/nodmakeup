@@ -205,6 +205,25 @@ letter-spacing: .5px;
   border: 1px solid #f0f0f0;
 }
 
+/* Confirmation that an item went in, without a popup.
+   The bag is the control the shopper pressed and the one the drawer opens
+   from, so moving it is confirmation in the place they were already looking.
+   The badge scales because the number inside it changed — a nudge on the icon
+   alone would be read as the button reacting to a press, which is a different
+   event and already has one (`:active`). transform and opacity only, so this
+   stays on the compositor and cannot force a layout of the fixed header.
+   The global prefers-reduced-motion block in design-system/variables.css
+   collapses the duration, which leaves the badge at its resting size. */
+.cart-button.is-bumping .cart-badge {
+  animation: cart-badge-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes cart-badge-pop {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.45); }
+  100% { transform: scale(1); }
+}
+
 /* ==========================================================================
    5. Main Navigation Links (Golden Ratio: Base 16px)
    ========================================================================== */
@@ -390,6 +409,27 @@ letter-spacing: .5px;
   position: relative;
   padding-right: 20px;
 }
+
+/* A line with a request in flight. The dimming is the visible half of the
+   no-toast arrangement: the controls stop responding because they are disabled,
+   and the row says so rather than a message appearing somewhere else. Opacity
+   alone would also dim the text, so the product name and image are held at full
+   strength and only the controls recede. */
+.cart-item.is-busy .quantity-control,
+.cart-item.is-busy .cart-item-remove-btn {
+  opacity: 0.45;
+  transition: opacity 0.15s ease;
+}
+
+/* Why a change was refused, on the line it belongs to. Sized and coloured to
+   match .field-error on the checkout form — the same fault, reported the same
+   way, in both places a cart line can be edited. */
+.cart-item-error {
+  margin: 2px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: #c62828;
+}
 .cart-item-image {
   width: 90px;
   height: auto;
@@ -475,8 +515,18 @@ letter-spacing: .5px;
 .quantity-control button:hover:not(:disabled) {
   background-color: #ececee;
 }
-.quantity-control button:active {
+.quantity-control button:active:not(:disabled) {
   transform: scale(0.92);
+}
+
+/* A stepper that cannot step. Shown as a pressed-in control rather than merely
+   dimmed, so it reads as unavailable at a glance instead of looking like a
+   button that has stopped working. `--` is a minus sign, not a hyphen. */
+.quantity-control button:disabled {
+  cursor: default;
+  color: #b0b0b6;
+  background-color: #f7f7f9;
+  box-shadow: none;
 }
 .quantity-control span {
   font-size: 0.95rem;
@@ -498,8 +548,33 @@ letter-spacing: .5px;
   padding: 0;
   transition: color 0.2s;
 }
-.cart-item-remove-btn:hover {
+.cart-item-remove-btn:hover:not(:disabled) {
   color: #e53e3e;
+}
+.cart-item-remove-btn:disabled {
+  color: #d0d0d4;
+  cursor: default;
+}
+
+/* An empty bag is a state, not a dead end, so it carries the way out of it.
+   Buttons, because it navigates. */
+.cart-empty-cta {
+  display: block;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0.85rem 1.5rem;
+  background-color: #1a1a1a;
+  color: #fff;
+  border: none;
+  border-radius: var(--r-control);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.cart-empty-cta:hover {
+  background-color: #333;
 }
 .cart-sidebar-footer {
   background-color: #fff;

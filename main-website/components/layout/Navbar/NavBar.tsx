@@ -41,7 +41,19 @@ const Nav = () => {
   const pathname = usePathname();
   const { locale, t } = useI18n();
   // We only need basic cart state here to toggle the sidebar and show the badge
-  const { isCartOpen, setIsCartOpen, itemCount } = useCart();
+  const { isCartOpen, setIsCartOpen, itemCount, addSequence } = useCart();
+
+  // The bag confirms an add by moving. A one-shot CSS animation keyed off the
+  // add counter, so the badge pops once per item added and then returns to rest.
+  // This is what replaced "Item added to your bag!" — the shopper is already
+  // looking at the bag they just pressed, and the drawer opens on top of it.
+  const [isBagBumping, setIsBagBumping] = React.useState(false);
+  React.useEffect(() => {
+    if (addSequence === 0) return;
+    setIsBagBumping(true);
+    const timer = setTimeout(() => setIsBagBumping(false), 450);
+    return () => clearTimeout(timer);
+  }, [addSequence]);
   
   // --- Language switch target (same page, other locale) ---
   const nextLocale = locale === 'en' ? 'ar' : 'en';
@@ -137,7 +149,11 @@ const Nav = () => {
             
             <div className="navbar-top-right">
               <div className="cart-container">
-                <button className="cart-button" onClick={() => setIsCartOpen(!isCartOpen)} aria-label={t('nav.openBag')}>
+                <button
+                  className={`cart-button ${isBagBumping ? 'is-bumping' : ''}`}
+                  onClick={() => setIsCartOpen(!isCartOpen)}
+                  aria-label={t('nav.openBag')}
+                >
                   <Image className="cart-icon" src={cartIconPath} alt={t('nav.cartAlt')} width={512} height={512} sizes="22px" />
                   {itemCount > 0 && <span className="cart-badge">{itemCount}</span>}
                 </button>

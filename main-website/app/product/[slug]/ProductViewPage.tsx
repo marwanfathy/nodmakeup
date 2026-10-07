@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef, FC } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { toast } from 'react-toastify';
 import { 
     getProductBySlug, 
     fetchRelatedProducts, 
@@ -31,7 +30,7 @@ interface ProductViewPageProps {
 const ProductViewPage: FC<ProductViewPageProps> = ({ initialProduct = null }) => {
     const params = useParams();
     const router = useRouter();
-    const { addItemToCart } = useCart();
+    const { addItemToCart, mutationError, dismissMutationError } = useCart();
     const { locale, t } = useI18n();
     const slug = params.slug as string;
 
@@ -52,6 +51,21 @@ const ProductViewPage: FC<ProductViewPageProps> = ({ initialProduct = null }) =>
     );
     const [isProcessing, setIsProcessing] = useState<boolean>(false);
     const [quantity, setQuantity] = useState<number>(1);
+
+    // A refusal from the API, held by the cart context. It is shown under the
+    // buy buttons rather than in a popup, because the shopper is looking at
+    // those buttons and the fix is to press one of them again — quite possibly
+    // with a different quantity or variant, which the message stays up for.
+    const addError = mutationError?.action === 'add' ? mutationError.message : null;
+
+    // Changing the variant is also an answer to a previous refusal, so the
+    // message is spent the moment a different one is chosen. Without this it
+    // outlives its cause and sits under the buttons over a product that is now
+    // perfectly buyable.
+    const handleVariantSelect = (variant: ProductVariantDetail) => {
+        setSelectedVariant(variant);
+        dismissMutationError();
+    };
 
     const [relatedProducts, setRelatedProducts] = useState<ProductSummary[]>([]);
     const [loadingRelated, setLoadingRelated] = useState<boolean>(true);
@@ -166,24 +180,27 @@ const ProductViewPage: FC<ProductViewPageProps> = ({ initialProduct = null }) =>
         });
     };
 
+    // Both buy buttons share this one guard. It is a type narrowing rather than
+    // a real branch: the render below bails out with `pdp.dataIncomplete` when
+    // there is no selected variant, so these buttons are never on screen without
+    // one. (They used to pop a "please select a variant" toast that could not
+    // fire, which is the same dead code wearing a notification.)
     const handleAddToCart = async () => {
-        if (!selectedVariant) return toast.error(t('pdp.selectVariant'));
+        if (!selectedVariant) return;
         setIsProcessing(true);
         await addItemToCart(selectedVariant.id, quantity);
         setIsProcessing(false);
     };
 
     const handleBuyNow = async () => {
-        if (!selectedVariant) return toast.error(t('pdp.selectVariant'));
+        if (!selectedVariant) return;
         setIsProcessing(true);
-        try {
-            const success = await addItemToCart(selectedVariant.id, quantity, { openCart: false });
-            if (success) router.push(localePath('/checkout', locale));
-        } catch {
-            toast.error(t('pdp.checkoutError'));
-        } finally {
-            setIsProcessing(false);
-        }
+        // `addItemToCart` reports its own refusal through the context rather
+        // than by throwing, so the message under the buttons covers this path
+        // too and there is nothing to catch here.
+        const success = await addItemToCart(selectedVariant.id, quantity, { openCart: false });
+        if (success) router.push(localePath('/checkout', locale));
+        setIsProcessing(false);
     };
 
     // --- SKELETON LOADING STATE ---
@@ -360,7 +377,7 @@ const ProductViewPage: FC<ProductViewPageProps> = ({ initialProduct = null }) =>
                             <VariantSelector 
                                 product={product}
                                 selectedVariant={selectedVariant}
-                                onVariantSelect={setSelectedVariant}
+                                onVariantSelect={handleVariantSelect}
                             />
 
                             {/* Quantity */}
@@ -399,6 +416,12 @@ const ProductViewPage: FC<ProductViewPageProps> = ({ initialProduct = null }) =>
                                         {t('pdp.buyNow')}
                                     </button>
                                 </>
+                            )}
+                            {/* A refusal from the API belongs to the buttons, not to
+                                the swatches: it is fixed by pressing one of them
+                                again, possibly with a different quantity. */}
+                            {addError && (
+                                <p className="pdp-action-error" role="alert">{addError}</p>
                             )}
                         </div>
 
