@@ -3,7 +3,7 @@
   display: flex;
   width: 100%;
   max-width: 1280px;
-  margin: 2rem auto;
+  margin: var(--space-8) auto;
   background-color: #fff;
   min-height: 550px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -14,7 +14,7 @@
   place-items: center;
   width: 100%;
   max-width: 1280px;
-  margin: 2rem auto;
+  margin: var(--space-8) auto;
   min-height: 550px;
   background-color: #ffffff;
   border-radius: var(--r-surface);
@@ -28,34 +28,34 @@
 /* --- Left Side: Content Panel (No changes here) --- */
 .hero-slider-content {
   flex: 1;
-  padding: 4rem;
+  padding: var(--space-16);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
 }
 .hero-main-title {
-  font-size: 2.5rem;
+  font-size: var(--font-size-5xl);
   font-weight: 300;
   color: #333;
   letter-spacing: 0.5px;
-  line-height: 1.2;
+  line-height: var(--line-height-tight);
   text-transform: uppercase;
 }
 .hero-main-desc {
-  font-size: 1.4rem;
+  font-size: var(--font-size-2xl);
   font-weight: 180;
   color: #777777c5;
   letter-spacing: 0.5px;
-  margin: 0 0 2rem 0;
-  line-height: 1.2;
+  margin: 0 0 var(--space-8) 0;
+  line-height: var(--line-height-tight);
   text-transform: uppercase;
 }
 .hero-slider-controls {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
 }
 .hero-play-pause {
   position: relative;
@@ -68,7 +68,7 @@
   background-color: transparent;
   display: grid;
   place-items: center;
-  font-size: 10px;
+  font-size: var(--font-size-2xs);
   font-weight: bold;
   color: #000;
   text-align: center;
@@ -105,14 +105,14 @@
 }
 .hero-thumbnails {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 .hero-thumbnail {
   width: 50px;
   height: 50px;
   border-radius: var(--r-circle);
   border: 2px solid transparent;
-  padding: 2px;
+  padding: var(--space-half);
   cursor: pointer;
   background-color: transparent;
   overflow: hidden;
@@ -135,8 +135,8 @@
   height: 180px; 
   width: 100%;
   overflow: hidden;
-  margin-bottom: 1.5rem; /* Space between text and "Shop Now" button */
-  margin-top: 1rem;      /* Space between controls and text */
+  margin-bottom: var(--space-6); /* Space between text and "Shop Now" button */
+  margin-top: var(--space-4);      /* Space between controls and text */
 }
 .hero-slide-text-inner {
   transition: transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1);
@@ -151,22 +151,22 @@
   flex-direction: column;
   justify-content: center; /* Vertically center the content */
   align-items: center;     /* Horizontally center the text */
-  padding: 0 1rem;         /* Prevent text from touching edges */
+  padding: 0 var(--space-4);         /* Prevent text from touching edges */
 }
 /* 4. The Dynamic Title */
 .hero-slide-title {
-  font-size: 2rem;
+  font-size: var(--font-size-4xl);
   font-weight: 400;
   color: #000;
-  margin: 0 0 0.8rem 0; /* Add gap between Title and Description */
-  line-height: 1.2;
+  margin: 0 0 var(--space-3) 0; /* Add gap between Title and Description */
+  line-height: var(--line-height-tight);
 }
 
 .hero-slide-subtitle {
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   color: #666;
   margin: 0;
-  line-height: 1.5; /* Improve readability */
+  line-height: var(--line-height-normal); /* Improve readability */
   max-width: 90%;   /* Keep lines from getting too wide */
 }
 .hero-cta-button {
@@ -174,10 +174,10 @@
   color: #000;
   border: 1px solid #e0e0e0;
   border-radius: var(--r-control);
-  padding: 10px 24px;
+  padding: var(--space-3) var(--space-6);
   text-decoration: none;
   font-weight: 600;
-  font-size: 0.8rem;
+  font-size: var(--font-size-xs);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
@@ -259,17 +259,17 @@ aspect-ratio: 1;
   }
   .hero-slider-content {
     order: 2;
-    padding: 2rem;
+    padding: var(--space-8);
   }
   .hero-slider-image-panel {
     order: 1;
     height: 60vh;
   }
   .hero-main-title {
-    font-size: 2rem;
+    font-size: var(--font-size-4xl);
   }
   .hero-slide-title {
-    font-size: 1.5rem;
+    font-size: var(--font-size-2xl);
   }
 }
 /* =========================================
@@ -282,10 +282,10 @@ aspect-ratio: 1;
     flex-direction: column;
     height: auto;
     min-height: auto;
-    padding-bottom: 2rem;
+    padding-bottom: var(--space-8);
     position: relative;
     width: 95%; 
-    margin: 1rem auto;
+    margin: var(--space-4) auto;
   }
 
   /* 2. "Unwrap" the Left Content Panel to reorder children */
@@ -298,9 +298,9 @@ aspect-ratio: 1;
   /* Order 1: Main Title ("MEET OUR ICONS") */
   .hero-main-title {
     order: 1;
-    font-size: 1.8rem;
-    margin-top: 1rem;
-    margin-bottom: 0.5rem;
+    font-size: var(--font-size-3xl);
+    margin-top: var(--space-4);
+    margin-bottom: var(--space-2);
     width: 100%;
     text-align: center;
   }
@@ -314,8 +314,8 @@ aspect-ratio: 1;
     order: 2;
     width: 100%;
     justify-content: center;
-    margin-bottom: 1.5rem;
-    padding-top: 0.5rem;
+    margin-bottom: var(--space-6);
+    padding-top: var(--space-2);
   }
 
   /* Order 3: The Image Composition */
@@ -324,7 +324,7 @@ aspect-ratio: 1;
     flex: none;
     width: 100%;
     height: 380px; /* Fixed height for the image mosaic */
-    margin-bottom: 1rem;
+    margin-bottom: var(--space-4);
     border-radius: var(--r-surface);
   }
 
@@ -335,7 +335,7 @@ aspect-ratio: 1;
     /* IMPORTANT: Must be fixed height to match JS (180px) for animation to work */
     height: 180px; 
     overflow: hidden; /* Masks the sliding text */
-    margin: 0 0 0.5rem 0;
+    margin: 0 0 var(--space-2) 0;
   }
 
   /* Ensure the inner items match the wrapper height */
@@ -345,19 +345,19 @@ aspect-ratio: 1;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 0 1rem;
+    padding: 0 var(--space-4);
   }
   
   .hero-slide-title {
-    font-size: 1.5rem;
+    font-size: var(--font-size-2xl);
     text-align: center;
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--space-2);
   }
   
   .hero-slide-subtitle {
-    font-size: 0.9rem;
+    font-size: var(--font-size-sm);
     text-align: center;
-    line-height: 1.4;
+    line-height: var(--line-height-snug);
   }
 
   /* Order 5: The CTA Button */
@@ -433,13 +433,13 @@ aspect-ratio: 1;
 .skeleton-title-main {
   width: 70%;
   height: 40px;
-  margin-bottom: 20px;
+  margin-bottom: var(--space-5);
 }
 
 .skeleton-desc-main {
   width: 40%;
   height: 20px;
-  margin-bottom: 30px;
+  margin-bottom: var(--space-8);
 }
 
 .skeleton-circle-big {
@@ -457,13 +457,13 @@ aspect-ratio: 1;
 .skeleton-slide-title {
   width: 60%;
   height: 30px;
-  margin-bottom: 10px;
+  margin-bottom: var(--space-3);
 }
 
 .skeleton-slide-subtitle {
   width: 90%;
   height: 14px;
-  margin-bottom: 8px;
+  margin-bottom: var(--space-2);
 }
 
 .skeleton-button {
@@ -481,7 +481,7 @@ aspect-ratio: 1;
 /* Mobile Tweaks for Skeleton */
 @media (max-width: 900px) {
   .skeleton-title-main {
-    margin: 1.5rem auto 0.5rem auto;
+    margin: var(--space-6) auto var(--space-2) auto;
   }
   .skeleton-desc-main {
     display: none;

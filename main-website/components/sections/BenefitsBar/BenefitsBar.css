@@ -4,7 +4,7 @@
   background-color: #fff;
   border-top: 1px solid #f2f2f2;
   border-bottom: 1px solid #f2f2f2;
-  padding: 2.5rem 0;
+  padding: var(--space-10) 0;
   margin: 0 auto;
 }
 
@@ -15,8 +15,8 @@
   display: flex;
   justify-content: space-around;
   align-items: flex-start;
-  padding: 0 20px;
-  gap: 20px;
+  padding: 0 var(--space-5);
+  gap: var(--space-5);
 }
 
 /* --- Individual Item --- */
@@ -34,7 +34,7 @@
 .benefit-icon {
   width: 36px;
   height: 36px;
-  margin-bottom: 1.2rem;
+  margin-bottom: var(--space-5);
   color: #000;
   display: flex;
   align-items: center;
@@ -55,11 +55,11 @@
 /* --- Text Styling --- */
 .benefit-text {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  font-size: 0.75rem; /* ~12px */
+  font-size: var(--font-size-xs); /* ~12px */
   font-weight: 700;
   letter-spacing: 1.2px;
   text-transform: uppercase;
-  line-height: 1.5;
+  line-height: var(--line-height-normal);
   color: #1a1a1a;
   max-width: 200px; /* Prevents text from being too wide */
 }
@@ -71,23 +71,23 @@
 /* Tablet (Small Desktop / iPad) */
 @media (max-width: 1024px) {
   .benefits-wrapper {
-    gap: 30px;
+    gap: var(--space-8);
   }
   .benefit-text {
-    font-size: 0.7rem;
+    font-size: var(--font-size-xs);
   }
 }
 
 /* Mobile (Phones) */
 @media (max-width: 768px) {
   .benefits-bar-container {
-    padding: 1.5rem 8px;
+    padding: var(--space-6) var(--space-2);
   }
   
   .benefits-wrapper {
     display: grid;
     grid-template-columns: repeat(3, 1fr); /* 3 benefits beside each other (free-shipping hidden) */
-    gap: 1rem 6px;
+    gap: var(--space-4) var(--space-2);
   }
   
   .benefit-item {
@@ -98,23 +98,23 @@
   .benefit-icon {
     width: 26px;
     height: 26px;
-    margin-bottom: 0.6rem;
+    margin-bottom: var(--space-2);
   }
 
   .benefit-text {
-    font-size: 0.58rem;
+    font-size: var(--font-size-2xs);
     letter-spacing: 0.5px;
-    padding: 0 2px;
+    padding: 0 var(--space-half);
   }
 }
 
 /* Very Small Screens (iphone SE etc) */
 @media (max-width: 360px) {
     .benefits-wrapper {
-        gap: 0.8rem 4px;
+        gap: var(--space-3) var(--space-1);
     }
     .benefit-text {
-        font-size: 0.5rem;
+        font-size: var(--font-size-3xs);
         letter-spacing: 0.3px;
     }
     .benefit-icon {

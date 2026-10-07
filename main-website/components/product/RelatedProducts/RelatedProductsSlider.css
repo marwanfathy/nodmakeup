@@ -2,25 +2,25 @@
 .related-product-slider-container {
     width: 100%;
     max-width: 1400px;
-    margin: 4rem auto; /* Centers the whole block vertically and horizontally */
-    padding: 0 20px;
+    margin: var(--space-16) auto; /* Centers the whole block vertically and horizontally */
+    padding: 0 var(--space-5);
     box-sizing: border-box;
 }
   
 /* Title Styling */
 .related-slider-title {
     text-align: center;
-    font-size: 3.5rem;
+    font-size: var(--font-size-7xl);
     font-weight: 300;
     letter-spacing: 2px;
     text-transform: uppercase;
     color: #333;
-    margin-bottom: 2.9rem;
+    margin-bottom: var(--space-12);
 }
   
 /* Swiper Container Spacing */
 .related-slider-content {
-    padding-bottom: 40px; /* Space for pagination dots */
+    padding-bottom: var(--space-10); /* Space for pagination dots */
     display: flex;
     justify-content: center; /* Ensures content wrapper is centered */
 }
@@ -49,8 +49,8 @@
 .related-slider-loading-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    padding: 10px 0 40px 0;
+    gap: var(--space-4);
+    padding: var(--space-3) 0 var(--space-10) 0;
     width: 100%;
     justify-content: center; /* Centers the grid items */
 }
@@ -59,7 +59,7 @@
 @media (min-width: 640px) {
     .related-slider-loading-grid {
         grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
+        gap: var(--space-5);
     }
 }
 
@@ -67,7 +67,7 @@
 @media (min-width: 768px) {
     .related-slider-loading-grid {
         grid-template-columns: repeat(3, 1fr);
-        gap: 25px;
+        gap: var(--space-6);
     }
 }
 
@@ -75,7 +75,7 @@
 @media (min-width: 1024px) {
     .related-slider-loading-grid {
         grid-template-columns: repeat(4, 1fr);
-        gap: 30px;
+        gap: var(--space-8);
     }
 }
 
@@ -83,25 +83,25 @@
 @media (min-width: 1280px) {
     .related-slider-loading-grid {
         grid-template-columns: repeat(5, 1fr);
-        gap: 30px;
+        gap: var(--space-8);
     }
 }
 
 /* --- MOBILE RESPONSIVENESS --- */
 @media (max-width: 768px) {
     .related-product-slider-container {
-        margin: 2rem auto;
-        padding-left: 15px; 
-        padding-right: 15px;
+        margin: var(--space-8) auto;
+        padding-left: var(--space-4); 
+        padding-right: var(--space-4);
     }
   
     .related-slider-title {
-        font-size: 2rem;
-        margin-bottom: 1.5rem;
+        font-size: var(--font-size-4xl);
+        margin-bottom: var(--space-6);
         font-weight: 500;
     }
     
     .related-slider-loading-grid {
-        gap: 15px;
+        gap: var(--space-4);
     }
 }

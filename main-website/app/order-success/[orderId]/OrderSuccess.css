@@ -4,7 +4,7 @@
     align-items: center;
     justify-content: center;
     background-color: #f9f9f9;
-    padding: 20px;
+    padding: var(--space-5);
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -32,7 +32,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 20px;
+    margin: 0 auto var(--space-5);
 }
 
 .success-icon {
@@ -44,16 +44,16 @@
 
 /* --- Typography --- */
 .success-title {
-    font-size: 2rem;
+    font-size: var(--font-size-4xl);
     color: #1a1a1a;
-    margin-bottom: 10px;
+    margin-bottom: var(--space-3);
     font-weight: 700;
 }
 
 .success-subtitle {
     color: #666;
-    font-size: 1rem;
-    margin-bottom: 30px;
+    font-size: var(--font-size-base);
+    margin-bottom: var(--space-8);
 }
 
 /* --- Details Box --- */
@@ -61,17 +61,17 @@
     background-color: #fafafa;
     border: 1px solid #eee;
     border-radius: var(--r-card);
-    padding: 20px;
-    margin-bottom: 30px;
+    padding: var(--space-5);
+    margin-bottom: var(--space-8);
     text-align: left;
 }
 
 .detail-row {
     display: flex;
     justify-content: space-between;
-    padding: 10px 0;
+    padding: var(--space-3) 0;
     border-bottom: 1px solid #eee;
-    font-size: 0.95rem;
+    font-size: var(--font-size-base);
 }
 
 .detail-row:last-child {
@@ -89,7 +89,7 @@
 
 /* --- Buttons --- */
 .success-actions {
-    margin-bottom: 20px;
+    margin-bottom: var(--space-5);
 }
 
 .btn-continue, .btn-home {
@@ -97,7 +97,7 @@
     background-color: #000;
     color: white;
     text-decoration: none;
-    padding: 14px 30px;
+    padding: var(--space-4) var(--space-8);
     border-radius: var(--r-control);
     font-weight: 600;
     transition: background 0.2s;
@@ -110,9 +110,9 @@
 }
 
 .email-note {
-    font-size: 0.85rem;
+    font-size: var(--font-size-sm);
     color: #6E6E73; /* ink-tertiary — was #888 (3.5:1) */
-    margin-top: 20px;
+    margin-top: var(--space-5);
 }
 
 /* --- Animations --- */
@@ -131,11 +131,11 @@
     .success-card {
         /* The ratio holds here too: the 20px side is the one the corner curve
            is measured against, so the radius steps down with it: 20 + 20 = 40. */
-        padding: 30px var(--space-5);
+        padding: var(--space-8) var(--space-5);
         border-radius: var(--r-panel);
     }
     .success-title {
-        font-size: 1.5rem;
+        font-size: var(--font-size-2xl);
     }
 }
 /* =====================================================================
@@ -157,7 +157,7 @@
 .os-skeleton--icon {
   width: 80px; /* matches .success-icon-wrapper */
   height: 80px;
-  margin: 0 auto 20px;
+  margin: 0 auto var(--space-5);
   border-radius: var(--r-circle);
 }
 

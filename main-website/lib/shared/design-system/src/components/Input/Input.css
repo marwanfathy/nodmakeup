@@ -86,11 +86,11 @@
 }
 
 .ds-input__inner:has(.ds-input__icon--left) .ds-input {
-  padding-left: 36px;
+  padding-left: var(--space-9);
 }
 
 .ds-input__inner:has(.ds-input__icon--right) .ds-input {
-  padding-right: 36px;
+  padding-right: var(--space-9);
 }
 
 /* Error state */
@@ -130,7 +130,7 @@
 /* Select */
 .ds-input__inner--select .ds-input {
   appearance: none;
-  padding-right: 40px;
+  padding-right: var(--space-10);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2386868B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
@@ -146,7 +146,7 @@
 }
 
 [dir="rtl"] .ds-input__inner--select .ds-input {
-  padding-left: 40px;
+  padding-left: var(--space-10);
   padding-right: var(--space-4);
   background-position: left 12px center;
 }

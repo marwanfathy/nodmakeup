@@ -26,7 +26,7 @@
   width: 100%;
   max-width: 1400px; /* Standard wide screen max-width */
   margin: 0 auto;
-  padding: 0 1.618rem; /* Golden Ratio padding */
+  padding: 0 var(--space-6); /* Golden Ratio padding */
   /* The status bar and the notch on every iPhone from X onwards. It has to go
      on the bar's own padding rather than on a wrapper, because the wrapper that
      used to hold the header's background (`.navbar-wrapper`) is not rendered —
@@ -89,7 +89,7 @@
   display: grid; 
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  padding: 0.618rem 0; /* Adjusted vertical padding */
+  padding: var(--space-2) 0; /* Adjusted vertical padding */
   min-height: 50px;
 }
 
@@ -140,10 +140,10 @@ letter-spacing: .5px;
   background: none;
   border: none;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   padding: 0;
   font-family: rubic, sans-serif;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   font-weight: 400;
   display: flex;
   text-decoration: none;
@@ -170,7 +170,7 @@ letter-spacing: .5px;
   min-width: 44px;
   min-height: 44px;
   justify-content: center;
-  line-height: 1;
+  line-height: var(--line-height-none);
   position: relative;
   display: flex;
   align-items: center;
@@ -197,7 +197,7 @@ letter-spacing: .5px;
   border-radius: var(--r-circle);
   width: 18px;
   height: 18px;
-  font-size: 10px;
+  font-size: var(--font-size-2xs);
   font-weight: 700;
   display: flex;
   justify-content: center;
@@ -244,15 +244,15 @@ letter-spacing: .5px;
   font-weight: 400;
   display: flex;
   align-items: center;
-  padding: 0 1.618rem; /* Wide spacing for elegance */
+  padding: 0 var(--space-6); /* Wide spacing for elegance */
 }
 
 .navbar-main-links a {
   letter-spacing: 1.6px;
   text-transform: capitalize;
-  padding: 5px 0;
+  padding: var(--space-1) 0;
   font-family: rubic, sans-serif;
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   text-decoration: none;
   transition: opacity .3s;
   display: inline-block;
@@ -269,15 +269,15 @@ letter-spacing: .5px;
 /* ... Keeping your functional sidebar CSS intact ... */
 /* Free Shipping Progress Bar */
 .cart-shipping-progress {
-    padding: 15px 20px;
+    padding: var(--space-4) var(--space-5);
     background-color: #f9f9f9;
     border-bottom: 1px solid #eee;
     text-align: center;
 }
 
 .shipping-message {
-    font-size: 0.9rem;
-    margin-bottom: 10px;
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--space-3);
     color: #333;
 }
 
@@ -342,7 +342,7 @@ letter-spacing: .5px;
   height: calc(100% - 32px); /* float inside the viewport so all corners show */
   width: 100%;
   max-width: 420px;
-  margin: 16px; /* curve-visible floating drawer */
+  margin: var(--space-4); /* curve-visible floating drawer */
   background-color: #ffffff;
   border-radius: var(--r-surface);
   box-shadow: -8px 0 30px rgba(0, 0, 0, 0.14);
@@ -357,7 +357,7 @@ letter-spacing: .5px;
   transform: translateX(0);
 }
 .cart-sidebar-header {
-  padding: 20px 24px;
+  padding: var(--space-5) var(--space-6);
   border-bottom: 1px solid #f0f0f0;
   display: flex;
   justify-content: space-between;
@@ -366,7 +366,7 @@ letter-spacing: .5px;
   border-radius: var(--r-surface) var(--r-surface) 0 0;
 }
 .cart-sidebar-header h4 {
-  font-size: 1.25rem; /* ~20px */
+  font-size: var(--font-size-xl); /* ~20px */
   font-weight: 600;
   margin: 0;
   text-transform: uppercase;
@@ -375,23 +375,23 @@ letter-spacing: .5px;
 .close-cart-btn {
   background: none;
   border: none;
-  font-size: 2rem;
-  line-height: 1;
+  font-size: var(--font-size-4xl);
+  line-height: var(--line-height-none);
   cursor: pointer;
   color: #6E6E73; /* ink-tertiary — was #888 (3.5:1) */
   padding: 0;
   transition: color 0.2s;
 }
 .cart-sidebar-body {
-  padding: 24px;
+  padding: var(--space-6);
   overflow-y: auto;
   flex-grow: 1;
 }
 .cart-empty-message {
   text-align: center;
-  padding: 40px 20px;
+  padding: var(--space-10) var(--space-5);
   color: #6E6E73; /* ink-tertiary — was #888 (3.5:1) */
-  font-size: 1rem;
+  font-size: var(--font-size-base);
 }
 
 /* Cart Items */
@@ -401,13 +401,13 @@ letter-spacing: .5px;
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--space-6);
 }
 .cart-item {
   display: flex;
-  gap: 16px;
+  gap: var(--space-4);
   position: relative;
-  padding-right: 20px;
+  padding-right: var(--space-5);
 }
 
 /* A line with a request in flight. The dimming is the visible half of the
@@ -425,9 +425,9 @@ letter-spacing: .5px;
    match .field-error on the checkout form — the same fault, reported the same
    way, in both places a cart line can be edited. */
 .cart-item-error {
-  margin: 2px 0 0;
-  font-size: 0.78rem;
-  line-height: 1.35;
+  margin: var(--space-half) 0 0;
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-snug);
   color: #c62828;
 }
 .cart-item-image {
@@ -442,29 +442,29 @@ letter-spacing: .5px;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 4px 0;
+  gap: var(--space-2);
+  padding: var(--space-1) 0;
 }
 .cart-item-text {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-half);
 }
 .cart-item-name {
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   font-weight: 500;
-  line-height: 1.4;
+  line-height: var(--line-height-snug);
   margin: 0;
   color: #1a1a1a;
 }
 .cart-item-variant {
-  font-size: 0.85rem;
+  font-size: var(--font-size-sm);
   color: #666;
-  margin: 4px 0 0 0;
+  margin: var(--space-1) 0 0 0;
   text-transform: capitalize;
 }
 .cart-item-price-total {
-  font-size: 1.05rem;
+  font-size: var(--font-size-base);
   font-weight: 600;
   color: #1a1a1a;
   margin: 0;
@@ -475,11 +475,11 @@ letter-spacing: .5px;
 .quantity-control {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   background-color: #f2f2f4;
   border: 1px solid #e4e4e6;
   border-radius: var(--r-control);
-  padding: 3px;
+  padding: var(--space-1);
   margin-top: auto; /* pin to the bottom of the item row */
   align-self: flex-start;
 }
@@ -490,8 +490,8 @@ letter-spacing: .5px;
   width: 30px;
   height: 30px;
   border-radius: var(--r-circle);
-  font-size: 1.1rem;
-  line-height: 1;
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-none);
   color: #1a1a1a;
   display: flex;
   align-items: center;
@@ -529,7 +529,7 @@ letter-spacing: .5px;
   box-shadow: none;
 }
 .quantity-control span {
-  font-size: 0.95rem;
+  font-size: var(--font-size-base);
   font-weight: 600;
   min-width: 28px;
   text-align: center;
@@ -541,8 +541,8 @@ letter-spacing: .5px;
   right: 0;
   background: none;
   border: none;
-  font-size: 1.3rem;
-  line-height: 1;
+  font-size: var(--font-size-xl);
+  line-height: var(--line-height-none);
   color: #aaa;
   cursor: pointer;
   padding: 0;
@@ -562,13 +562,13 @@ letter-spacing: .5px;
   display: block;
   width: 100%;
   margin: 0 auto;
-  padding: 0.85rem 1.5rem;
+  padding: var(--space-3) var(--space-6);
   background-color: #1a1a1a;
   color: #fff;
   border: none;
   border-radius: var(--r-control);
   font-family: inherit;
-  font-size: 0.95rem;
+  font-size: var(--font-size-base);
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s;
@@ -581,8 +581,8 @@ letter-spacing: .5px;
   border-top: 1px solid #f0f0f0;
   flex-direction: column;
   flex-shrink: 0;
-  gap: 16px;
-  padding: 35px;
+  gap: var(--space-4);
+  padding: var(--space-9);
   display: flex;
   box-shadow: 0 -4px 12px #0000000d;
   border-radius: 0 0 var(--r-surface) var(--r-surface);
@@ -590,13 +590,13 @@ letter-spacing: .5px;
 .cart-subtotal {
   display: flex;
   justify-content: space-between;
-  font-size: 1.1rem;
+  font-size: var(--font-size-lg);
   font-weight: 600;
 }
 .cart-sidebar-footer .checkout-btn {
   width: 100%;
-  padding: 10px; /* Slightly larger button */
-  font-size: 1rem;
+  padding: var(--space-3); /* Slightly larger button */
+  font-size: var(--font-size-base);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -621,7 +621,7 @@ letter-spacing: .5px;
 
 .discover-link-wrapper {
   position: relative;
-  padding: 0 25px;
+  padding: 0 var(--space-6);
 }
 .star-decorator {
   position: absolute;
@@ -653,15 +653,15 @@ letter-spacing: .5px;
 
 @media (max-width: 992px) {
   .navbar {
-    padding: 0 1rem;
+    padding: 0 var(--space-4);
   }
   .navbar-top {
     min-height: 50px;
   }
   /* Reduce fonts slightly on tablet but keep hierarchy */
-  .navbar-logo .logo { font-size: 32px; letter-spacing: 4px; }
-  .navbar-main-links a { font-size: 14px; }
-  .navbar-main-links li { padding: 0 12px; }
+  .navbar-logo .logo { font-size: var(--font-size-4xl); letter-spacing: 4px; }
+  .navbar-main-links a { font-size: var(--font-size-sm); }
+  .navbar-main-links li { padding: 0 var(--space-3); }
 }
 
 @media (max-width: 768px) {
@@ -672,7 +672,7 @@ letter-spacing: .5px;
   }
   
   .navbar-logo .logo {
-    font-size: 26px; /* Base * 1.618 */
+    font-size: var(--font-size-3xl); /* Base * 1.618 */
     letter-spacing: 3px;
   }
   
@@ -690,14 +690,14 @@ letter-spacing: .5px;
      The last media query in this file used to hide it again; that rule is gone
      too. */
   .region-display {
-    gap: 5px;
-    font-size: 11px;
+    gap: var(--space-1);
+    font-size: var(--font-size-xs);
     /* Now the only locale switch on a phone, so it needs a real tap target.
        The text is 16.5px tall on its own, well under the 44px WCAG minimum, and
        this is the only phone control left in the bar. Vertical padding grows
        the link to ~40px without adding layout width, and the bar is 50px tall
        with its items centred, so it still fits. */
-    padding: 12px 0;
+    padding: var(--space-3) 0;
   }
 
   /* Truncation guard, not a style choice. Without it a long translation or a
@@ -722,7 +722,7 @@ letter-spacing: .5px;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 5px;
+  padding: var(--space-1);
   color: #000;
 }
 
@@ -775,7 +775,7 @@ letter-spacing: .5px;
   max-width: 300px;
   /* Floated like the cart drawer so the curve is visible and both drawers
      read as the same object. */
-  margin: 16px;
+  margin: var(--space-4);
   height: calc(100% - 32px);
   background-color: #fff;
   border-radius: var(--r-surface);
@@ -784,7 +784,7 @@ letter-spacing: .5px;
   transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  padding: var(--space-5);
   box-shadow: 2px 0 8px rgba(0,0,0,0.1);
 }
 
@@ -797,13 +797,13 @@ letter-spacing: .5px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: var(--space-8);
   border-bottom: 1px solid #eee;
-  padding-bottom: 15px;
+  padding-bottom: var(--space-4);
 }
 
 .mobile-menu-title {
-  font-size: 1.2rem;
+  font-size: var(--font-size-xl);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -820,11 +820,11 @@ letter-spacing: .5px;
 .mobile-nav-links {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--space-5);
 }
 
 .mobile-link {
-  font-size: 1.1rem;
+  font-size: var(--font-size-lg);
   text-decoration: none;
   color: #111;
   text-transform: uppercase;
@@ -839,15 +839,15 @@ letter-spacing: .5px;
 /* --- Mobile Footer (Region) --- */
 .mobile-menu-footer {
   margin-top: auto; /* Pushes to bottom */
-  padding-top: 20px;
+  padding-top: var(--space-5);
   border-top: 1px solid #eee;
 }
 
 .region-display-mobile {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.85rem;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
   color: #555;
 }
 
@@ -856,9 +856,9 @@ letter-spacing: .5px;
    The drawer is RTL in Arabic: flex order flips, which is correct here. */
 .mobile-menu-footer-label {
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: var(--space-3);
   font-family: rubic, sans-serif;
-  font-size: 0.7rem;
+  font-size: var(--font-size-xs);
   letter-spacing: 1.5px;
   text-transform: uppercase;
   color: #888;
@@ -866,19 +866,19 @@ letter-spacing: .5px;
 
 .lang-toggle {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .lang-toggle__btn {
   flex: 1;
   min-height: 44px; /* comfortable tap target */
-  padding: 10px 14px;
+  padding: var(--space-3) var(--space-4);
   background: #fff;
   border: 1px solid #111;
   border-radius: var(--r-control);
   color: #111;
   font-family: rubic, sans-serif;
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
   letter-spacing: 0.5px;
   white-space: nowrap;
   cursor: pointer;
@@ -920,11 +920,11 @@ letter-spacing: .5px;
 
   /* 4. Adjust Top Bar Layout */
   .navbar-top {
-    padding: 10px 15px;
+    padding: var(--space-3) var(--space-4);
   }
 
   .navbar-logo h1 {
-    font-size: 1.8rem; /* Slightly smaller logo on mobile */
+    font-size: var(--font-size-3xl); /* Slightly smaller logo on mobile */
   }
 
   /* The left column is a 1fr track sharing the bar with a centred 100px logo.

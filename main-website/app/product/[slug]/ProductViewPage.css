@@ -28,7 +28,7 @@
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1.5fr 1fr; /* Image takes more space */
-  gap: 60px; /* Huge negative space */
+  gap: var(--space-16); /* Huge negative space */
 }
 
 /* --- Error --- */
@@ -61,7 +61,7 @@
   top: calc(var(--nav-h, 80px) + var(--space-4));
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: var(--space-8);
 }
 
 /* --- Breadcrumbs --- */
@@ -69,10 +69,10 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 8px;
-  font-size: 0.78rem;
+  gap: var(--space-2);
+  font-size: var(--font-size-xs);
   color: var(--lux-grey);
-  margin-bottom: -10px; /* pull back into the wrapper's gap */
+  margin-bottom: -8px; /* pull back into the wrapper's gap */
 }
 
 .breadcrumbs a {
@@ -85,8 +85,8 @@
      same baselines, same 8px gaps, same wrap points — while the hit area
      becomes a comfortable target. Wrapped text is unaffected because the
      negative margin gives the line box back what the padding took. */
-  padding: 13px 4px;
-  margin: -13px -4px;
+  padding: var(--space-3) var(--space-1);
+  margin: -12px -4px;
 }
 
 .breadcrumbs a:hover {
@@ -109,33 +109,33 @@
 
 /* --- Typography & Header --- */
 .product-brand {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   text-transform: uppercase;
   letter-spacing: 2px;
   color: var(--lux-grey);
   font-weight: 600;
   display: block;
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
 }
 
 .product-title {
   font-family: var(--lux-font-heading);
-  font-size: 2.5rem;
+  font-size: var(--font-size-5xl);
   font-weight: 400; /* Elegant thin weight */
-  line-height: 1.1;
+  line-height: var(--line-height-tight);
   color: var(--lux-black);
-  margin: 0 0 20px 0;
+  margin: 0 0 var(--space-5) 0;
 }
 
 /* --- One-line pitch, straight under the price --- */
 .product-subtitle {
-  font-size: 0.95rem;
-  line-height: 1.6;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
   color: #555;
   /* The full description now sits below the buy button, so this is the only
      copy above the fold. It gets room to breathe but never competes with the
      price or the CTA. */
-  margin: -8px 0 16px;
+  margin: -8px 0 var(--space-4);
   max-width: 46ch;
 }
 
@@ -143,12 +143,12 @@
 .price-block {
   display: flex;
   align-items: baseline;
-  gap: 12px;
-  margin-bottom: 10px;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
 }
 
 .price-current {
-  font-size: 1.5rem;
+  font-size: var(--font-size-2xl);
   font-weight: 500;
   color: var(--lux-black);
 }
@@ -158,7 +158,7 @@
 }
 
 .price-original {
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   text-decoration: line-through;
   color: #999;
 }
@@ -167,24 +167,24 @@
   border-radius: var(--r-chip);
   background-color: var(--lux-black);
   color: #fff;
-  font-size: 0.7rem;
-  padding: 2px 6px;
+  font-size: var(--font-size-xs);
+  padding: var(--space-half) var(--space-2);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 /* --- Quantity Selector --- */
 .quantity-wrapper {
-  margin-top: 25px;
+  margin-top: var(--space-6);
 }
 
 .quantity-wrapper .label {
   display: block;
-  font-size: 0.8rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
-  margin-bottom: 10px;
+  margin-bottom: var(--space-3);
   color: var(--lux-black);
 }
 
@@ -203,7 +203,7 @@
   height: 100%;
   border: none;
   background: transparent;
-  font-size: 1.2rem;
+  font-size: var(--font-size-xl);
   cursor: pointer;
   color: var(--lux-black);
   transition: background 0.2s;
@@ -222,22 +222,22 @@
   flex: 1;
   text-align: center;
   font-weight: 500;
-  font-size: 1rem;
+  font-size: var(--font-size-base);
 }
 
 /* --- Action Buttons --- */
 .product-actions {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-top: 10px;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
 }
 
 .btn-main, .btn-outline {
   border-radius: var(--r-control);
   width: 100%;
   height: 52px;
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
   text-transform: uppercase;
   letter-spacing: 1.5px;
   font-weight: 600;
@@ -276,8 +276,8 @@
 /* Kept as a real element (rather than a margin on .price-block) so the row
    survives being empty on an out-of-stock variant without collapsing oddly. */
 .stock-line {
-  margin: 10px 0 0;
-  font-size: 0.85rem;
+  margin: var(--space-3) 0 0;
+  font-size: var(--font-size-sm);
   min-height: 1.2em;
 }
 
@@ -296,35 +296,35 @@
 }
 
 .desc-heading {
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   text-transform: uppercase;
   letter-spacing: 1px;
   border-bottom: 1px solid var(--lux-black);
-  padding-bottom: 10px;
-  margin-bottom: 20px;
+  padding-bottom: var(--space-3);
+  margin-bottom: var(--space-5);
   display: inline-block;
 }
 
 .desc-content {
-  font-size: 0.95rem;
-  line-height: 1.7;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
   color: #444;
 }
 
 /* Fix generic HTML from API */
-.desc-content p { margin-bottom: 15px; }
-.desc-content ul { padding-left: 20px; margin-bottom: 15px; }
-.desc-content li { margin-bottom: 5px; }
+.desc-content p { margin-bottom: var(--space-4); }
+.desc-content ul { padding-left: var(--space-5); margin-bottom: var(--space-4); }
+.desc-content li { margin-bottom: var(--space-1); }
 
 /* --- RESPONSIVE MOBILE --- */
 @media (max-width: 900px) {
   .product-grid-container {
     grid-template-columns: 1fr;
-    gap: 30px;
+    gap: var(--space-8);
   }
 
   .product-info-section {
-    padding: 0 10px;
+    padding: 0 var(--space-3);
   }
 
   /* Disable sticky on mobile so user can scroll naturally */
@@ -333,7 +333,7 @@
   }
 
   .product-title {
-    font-size: 2rem;
+    font-size: var(--font-size-4xl);
   }
 
   /* In-page CTA returns to normal flow; the floating bar covers the gap while
@@ -341,7 +341,7 @@
   .product-actions {
     position: static;
     width: auto;
-    margin-top: 10px;
+    margin-top: var(--space-3);
     padding: 0;
     background: none;
     border: none;
@@ -370,8 +370,8 @@
     z-index: 90; /* under the nav drawer / cart sidebar (z-index 2000) */
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px;
+    gap: var(--space-3);
+    padding: var(--space-3);
     background: rgba(255, 255, 255, 0.97);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -392,20 +392,20 @@
   .pdp-floating-cta__price {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: var(--space-half);
     flex-shrink: 0;
-    line-height: 1.2;
+    line-height: var(--line-height-tight);
   }
 
   .pdp-floating-cta__price-now {
-    font-size: 1rem;
+    font-size: var(--font-size-base);
     font-weight: 700;
     color: var(--lux-black);
     white-space: nowrap;
   }
 
   .pdp-floating-cta__price-was {
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);
     color: #999;
     text-decoration: line-through;
     white-space: nowrap;
@@ -416,12 +416,12 @@
     flex: 1;
     min-width: 0;
     min-height: 50px;
-    padding: 0 16px;
+    padding: 0 var(--space-4);
     background: var(--lux-black);
     color: #fff;
     border: 1px solid var(--lux-black);
     font-family: var(--lux-font-body);
-    font-size: 0.85rem;
+    font-size: var(--font-size-sm);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1.5px;
@@ -454,19 +454,19 @@
    ===================================================================== */
 .trust-signals {
   list-style: none;
-  margin: 18px 0 0;
+  margin: var(--space-5) 0 0;
   padding: 0;
   display: flex;
   flex-wrap: wrap;          /* a 4th item, or a long translation, wraps
                                instead of pushing the page wide */
-  gap: 8px 18px;
+  gap: var(--space-2) var(--space-5);
 }
 
 .trust-signals li {
   position: relative;
-  padding-left: 20px;       /* room for the dot */
-  font-size: 0.8rem;
-  line-height: 1.5;
+  padding-left: var(--space-5);       /* room for the dot */
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
   color: var(--lux-muted, #6b6b6b);
 }
 
@@ -486,8 +486,8 @@
 
 /* --- Related products ------------------------------------------------- */
 .related-products-section {
-  margin-top: 4rem;
-  padding-top: 2rem;
+  margin-top: var(--space-16);
+  padding-top: var(--space-8);
   border-top: 1px solid #eee;
 }
 

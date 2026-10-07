@@ -17,7 +17,7 @@
 .main-image-container {
   position: relative;
   overflow: hidden;
-  margin-bottom: var(--pv-spacing-md); /* Use page variable from ProductViewPage.css or define locally */
+  margin-bottom: 0; /* flush: the thumbnail strip below carries its own top margin */
   border: none;
   width: 100%;
   background-color: var(--pv-bg-alt, #f9f9f9); /* Use page variable or fallback */
@@ -65,15 +65,14 @@
 .thumbnail-container {
   display: flex;
   flex-wrap: wrap;
-  /* Use page variables or define locally */
-  gap: var(--pv-spacing-sm, 10px);
+  gap: var(--space-3);
   justify-content: flex-start;
   width: 100%;
   padding: 0;
-  margin-top: var(--pv-spacing-sm, 10px);
+  margin-top: var(--space-3);
 }
 .thumbnail-button {
-  padding: 2px;
+  padding: var(--space-half);
   border: 1px solid transparent;
   background-color: transparent;
   cursor: pointer;

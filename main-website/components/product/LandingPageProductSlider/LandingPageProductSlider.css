@@ -2,7 +2,7 @@
 .landing-product-slider-container {
   width: 100%;
   max-width: 1400px;
-  margin: 6rem auto; /* Increased margin for more "air" */
+  margin: var(--space-24) auto; /* Increased margin for more "air" */
   display: flex;
   flex-direction: column;
   align-items: center; /* Centers the title and slider horizontally */
@@ -13,19 +13,28 @@
 .slider-title {
   text-align: center;
   /* Using the wide letter spacing we discussed */
-  font-size: 3.5rem; 
+  font-size: var(--font-size-7xl); 
   font-weight: 300;
   letter-spacing: 0.25em; /* This gives it the "Rhode" / Premium feel */
   text-transform: uppercase;
   color: #000; /* Pure black for high contrast */
-  margin-bottom: 4rem;
+  margin-bottom: var(--space-16);
   width: 100%;
+}
+
+/* Title placeholder shown while the collection loads */
+.skeleton-title {
+  display: inline-block;
+  width: 200px;
+  height: 24px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
 }
 
 /* --- THE SLIDER --- */
 .product-slider {
   width: 100%;
-  padding-bottom: 60px; /* More space for pagination */
+  padding-bottom: var(--space-16); /* More space for pagination */
   display: flex;
   justify-content: center;
 }
@@ -69,29 +78,31 @@
 /* --- LOADING GRID (Centered) --- */
 .product-slider-loading-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 30px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-8);
   width: 100%;
   justify-items: center; /* Centers items inside the grid cells */
   justify-content: center; /* Centers the grid itself */
-  padding: 10px 0 40px 0;
+  padding: var(--space-3) 0 var(--space-10) 0;
 }
 
 /* Responsive Grid Columns */
-@media (min-width: 768px) { .product-slider-loading-grid { grid-template-columns: repeat(3, 1fr); } }
-@media (min-width: 1024px) { .product-slider-loading-grid { grid-template-columns: repeat(4, 1fr); } }
+@media (min-width: 768px) { .product-slider-loading-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1024px) { .product-slider-loading-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 1280px) { .product-slider-loading-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
 
 /* --- MOBILE RESPONSIVENESS --- */
 @media (max-width: 768px) {
   .landing-product-slider-container {
-    margin: 3rem auto;
-    padding: 0 20px;
+    margin: var(--space-8) auto;
+    padding: 0 var(--space-3);
   }
 
   .slider-title {
-    font-size: 1.8rem; /* Scaled down for mobile */
+    font-size: var(--font-size-4xl); /* Scaled down for mobile */
     letter-spacing: 0.2em; /* Slightly tighter but still airy */
-    margin-bottom: 2rem;
+    margin-bottom: var(--space-6);
+    font-weight: 400;
   }
 
   .product-swiper .swiper-button-next,
@@ -100,7 +111,7 @@
   }
 
   .product-slider-loading-grid {
-    gap: 15px;
-    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

@@ -137,5 +137,5 @@ html[dir='rtl'] .cost-line .total-price {
 /* --- Stories tray is inset with a physical left padding inline; flip it --- */
 html[dir='rtl'] .stories-tray-container {
   padding-left: 0;
-  padding-right: 16px;
+  padding-right: var(--space-4);
 }

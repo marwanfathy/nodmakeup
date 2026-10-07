@@ -44,8 +44,14 @@
   --overlay-light: rgba(0, 0, 0, 0.4);
   --overlay-heavy: rgba(0, 0, 0, 0.6);
 
-  /* --- Spacing --- */
+  /* --- Spacing --------------------------------------------------------------
+     ONE GRID. `--space-N` is always N x 4px, so any two measurements in the
+     interface stand in a whole-number ratio to each other instead of landing
+     wherever they happened to be typed. 1px and 2px sit below the rhythm —
+     hairlines and tight inline clusters — and are the only non-multiples. */
   --space-0: 0;
+  --space-px: 1px;   /* hairline */
+  --space-half: 2px; /* tight inline cluster */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -59,27 +65,43 @@
   --space-12: 48px;
   --space-14: 56px;
   --space-16: 64px;
+  --space-18: 72px;
+  --space-20: 80px;
+  --space-22: 88px;
+  --space-24: 96px;
 
-  /* --- Typography --- */
+  /* --- Typography -----------------------------------------------------------
+     ONE TYPE SCALE. Thirteen steps in px, ≈1.15–1.25 apart through the body
+     range (12→14→16→18→20) and slightly wider above it, which is what keeps a
+     16px paragraph and a 40px heading reading as relatives rather than as
+     unrelated sizes. rem values, when written out, are the same numbers. */
   --font-sans: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --font-mono: 'SF Mono', 'Fira Code', 'Fira Mono', Menlo, Consolas, monospace;
   --font-arabic: 'Cairo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 
-  --font-size-xs: 11px;
-  --font-size-sm: 13px;
-  --font-size-base: 15px;
-  --font-size-lg: 17px;
-  --font-size-xl: 20px;
-  --font-size-2xl: 24px;
-  --font-size-3xl: 32px;
-  --font-size-4xl: 40px;
-  --font-size-5xl: 48px;
+  --font-size-3xs: 8px;    /* 0.5rem  */
+  --font-size-2xs: 10px;   /* 0.625rem */
+  --font-size-xs: 12px;    /* 0.75rem */
+  --font-size-sm: 14px;    /* 0.875rem */
+  --font-size-base: 16px;  /* 1rem    */
+  --font-size-lg: 18px;    /* 1.125rem */
+  --font-size-xl: 20px;    /* 1.25rem */
+  --font-size-2xl: 24px;   /* 1.5rem  */
+  --font-size-3xl: 28px;   /* 1.75rem */
+  --font-size-4xl: 32px;   /* 2rem    */
+  --font-size-5xl: 40px;   /* 2.5rem  */
+  --font-size-6xl: 48px;   /* 3rem    */
+  --font-size-7xl: 56px;   /* 3.5rem  */
 
   --font-weight-regular: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
 
+  /* Five steps, not a free-for-all. `none` (1) is for display headings that
+     want no leading at all; the rest widen to 1.6. Anything between two steps
+     rounds UP — Arabic sets taller Latin and never benefits from tighter. */
+  --line-height-none: 1;
   --line-height-tight: 1.1;
   --line-height-snug: 1.3;
   --line-height-normal: 1.5;

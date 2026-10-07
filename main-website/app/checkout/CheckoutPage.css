@@ -32,39 +32,39 @@
 }
 
 .checkout-form-column {
-  padding: 2.5rem 2rem;
+  padding: var(--space-10) var(--space-8);
   order: 1;
   border-right: 1px solid #e1e3e5;
 }
 
 @media (min-width: 992px) {
   .checkout-form-column {
-    padding: 3rem 5%;
+    padding: var(--space-12) 5%;
     order: 0;
   }
 }
 
 .order-summary-column {
   background-color: #fafafa;
-  padding: 2.5rem 2rem;
+  padding: var(--space-10) var(--space-8);
   order: 0;
 }
 
 @media (min-width: 992px) {
   .order-summary-column {
-    padding: 3rem 5%;
+    padding: var(--space-12) 5%;
     order: 1;
   }
 }
 
 .checkout-header {
-  margin-bottom: 2.5rem;
+  margin-bottom: var(--space-10);
 }
 
 .checkout-logo-link {
   display: inline-block;
   line-height: 0;
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--space-3);
 }
 .checkout-logo {
   width: 110px;
@@ -80,18 +80,18 @@
 
 
 .form-section {
-  margin-bottom: 2.5rem;
+  margin-bottom: var(--space-10);
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-4);
   /* Gap between form elements */
 }
 
 .section-header {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.5rem;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
   /* Reduced margin as gap is now on .form-section */
 }
 
@@ -104,7 +104,7 @@
 
 /* CORRECTED: The JSX uses h3, not h2 */
 .section-header h3 {
-  font-size: 1.25rem;
+  font-size: var(--font-size-xl);
   font-weight: 500;
   margin: 0;
 }
@@ -114,11 +114,11 @@
 .form-section select,
 .form-section textarea {
   width: 100%;
-  padding: 0.8rem 0.9rem;
+  padding: var(--space-3) var(--space-4);
   border: 1px solid #d3d3d3;
   border-radius: var(--r-field);
   background-color: #fff;
-  font-size: 0.95rem;
+  font-size: var(--font-size-base);
   transition: border-color 0.2s, box-shadow 0.2s;
   box-sizing: border-box;
 }
@@ -142,12 +142,12 @@
 .checkout-field {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  margin-bottom: 1rem;
+  gap: var(--space-1);
+  margin-bottom: var(--space-4);
 }
 
 .checkout-field > label {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -155,15 +155,15 @@
 }
 
 .checkout-field .field-hint {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: #888;
 }
 
 .checkout-field .field-error {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
-  font-size: 0.78rem;
+  gap: var(--space-1);
+  font-size: var(--font-size-xs);
   color: #c62828;
 }
 
@@ -174,15 +174,15 @@
   align-self: flex-start; /* .checkout-field is a column flex container */
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: var(--space-2);
   min-height: 40px; /* comfortable touch target */
-  margin-top: 0.15rem;
-  padding: 0 0.9rem;
+  margin-top: var(--space-half);
+  padding: 0 var(--space-4);
   border: 1px solid #d3d3d3;
   border-radius: var(--r-control);
   background-color: #fff;
   color: #333;
-  font-size: 0.8rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   cursor: pointer;
   transition: border-color 0.2s, background-color 0.2s, color 0.2s;
@@ -204,7 +204,7 @@
 /* Outcome of the lookup. Distinct from .field-error: the address itself may be
    perfectly valid, so this must not read as a validation failure. */
 .geo-note {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: #666;
 }
 .geo-note--ok {
@@ -271,12 +271,12 @@
   direction: ltr;
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0 0.7rem;
+  gap: var(--space-2);
+  padding: 0 var(--space-3);
   background-color: #f6f6f6;
   border-inline-end: 1px solid #e4e4e4;
   color: #333;
-  font-size: 0.95rem;
+  font-size: var(--font-size-base);
   font-weight: 600;
   user-select: none;
   white-space: nowrap;
@@ -312,16 +312,16 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 
 .phone-preview {
   direction: ltr; /* a phone number is an LTR run in any locale */
-  padding: 0.1rem 0.45rem;
+  padding: var(--space-half) var(--space-2);
   border-radius: var(--r-chip);
   background-color: #f0f0f0;
   color: #333;
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   letter-spacing: 0.5px;
   white-space: nowrap;
@@ -336,7 +336,7 @@
 .payment-option {
   display: flex;
   align-items: center;
-  padding: 1rem;
+  padding: var(--space-4);
   border: 1px solid #d3d3d3;
   border-radius: var(--r-card);
   cursor: pointer;
@@ -354,7 +354,7 @@
 }
 
 .payment-option input[type="radio"] {
-  margin-right: 1rem;
+  margin-right: var(--space-4);
   width: auto;
   /* Override default width */
 }
@@ -362,22 +362,22 @@
 .no-payment-methods {
   color: #8a6d3b;
   background-color: #fcf8e3;
-  padding: 1rem;
+  padding: var(--space-4);
   border-radius: var(--r-field); /* was 6px */
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
 }
 
 .checkout-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 2rem;
+  margin-top: var(--space-8);
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .return-to-cart-link {
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
   color: #545454;
   text-decoration: none;
   transition: color 0.2s;
@@ -391,9 +391,9 @@
   background-color: #1a1a1a;
   color: white;
   border: none;
-  padding: 1rem 2.5rem;
+  padding: var(--space-4) var(--space-10);
   border-radius: var(--r-control);
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s;
@@ -426,7 +426,7 @@
   background-color: #ffffff;
   border: 1px solid #ececee;
   border-radius: var(--r-card);
-  padding: 1.75rem 1.5rem;
+  padding: var(--space-7) var(--space-6);
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.06);
   animation: fadeIn 0.5s 0.1s ease-out backwards;
 }
@@ -444,9 +444,9 @@
 .summary-item {
   display: flex;
   align-items: flex-start;
-  gap: 1rem;
-  padding-bottom: 1.25rem;
-  margin-bottom: 1.25rem;
+  gap: var(--space-4);
+  padding-bottom: var(--space-5);
+  margin-bottom: var(--space-5);
   border-bottom: 1px solid #eef0f2;
 }
 
@@ -479,7 +479,7 @@
   border-radius: var(--r-circle);
   width: 24px;
   height: 24px;
-  font-size: 0.8rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -492,29 +492,29 @@
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-2);
 }
 
 .summary-item-text {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-half);
 }
 
 .summary-item-details h4 {
-  font-size: 0.95rem;
+  font-size: var(--font-size-base);
   font-weight: 500;
   margin: 0;
 }
 
 .summary-item-details .summary-item-text p {
-  font-size: 0.8rem;
+  font-size: var(--font-size-xs);
   color: #5F5F5F; /* ink-secondary */
   margin: 0;
 }
 
 .summary-item-price {
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   font-weight: 600;
   text-align: left;
 }
@@ -543,7 +543,7 @@
   top: 50%;
   width: 0.45rem;
   height: 0.45rem;
-  margin-top: -0.35rem;
+  margin-top: -4px;
   border-right: 1.5px solid #6e6e73;
   border-bottom: 1.5px solid #6e6e73;
   transform: rotate(45deg);
@@ -556,7 +556,7 @@
   inset-inline: 0;
   top: calc(100% + 4px);
   margin: 0;
-  padding: 0.25rem;
+  padding: var(--space-1);
   list-style: none;
   max-height: 15rem;
   overflow-y: auto;
@@ -570,9 +570,9 @@
 }
 
 .gov-select__option {
-  padding: 0.6rem 0.7rem;
+  padding: var(--space-2) var(--space-3);
   border-radius: calc(var(--r-field) - 4px);
-  font-size: 0.95rem;
+  font-size: var(--font-size-base);
   cursor: pointer;
 }
 
@@ -593,8 +593,8 @@
 }
 
 .gov-select__empty {
-  padding: 0.6rem 0.7rem;
-  font-size: 0.9rem;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
   color: #6e6e73;
 }
 
@@ -610,18 +610,18 @@
    aria-invalid, so a screen reader announces it against the right control. */
 .discount-input-row {
   display: flex;
-  gap: 0.75rem;
+  gap: var(--space-3);
   align-items: stretch;
 }
 
 .discount-input-row input {
   flex-grow: 1;
   min-width: 0;
-  padding: 0.8rem 0.9rem;
+  padding: var(--space-3) var(--space-4);
   border: 1px solid #d3d3d3;
   border-radius: var(--r-field);
   background-color: #fff;
-  font-size: 0.95rem;
+  font-size: var(--font-size-base);
   transition: border-color 0.2s, box-shadow 0.2s;
   /* Codes are read, not scanned for meaning, and letter-spacing breaks up the
      characters that have to be compared. */
@@ -647,10 +647,10 @@
   background: none;
   border: 1px solid #d3d3d3;
   border-radius: var(--r-field);
-  padding: 0 1rem;
+  padding: 0 var(--space-4);
   cursor: pointer;
   color: #545454;
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
 }
 
 .discount-remove-btn:hover {
@@ -675,7 +675,7 @@
 
 .field-success {
   color: #1c7c3e;
-  font-size: 0.85rem;
+  font-size: var(--font-size-sm);
 }
 
 /* ==========================================================================
@@ -701,15 +701,15 @@
 .co-inline-alert {
   display: flex;
   align-items: flex-start;
-  gap: 0.6rem;
+  gap: var(--space-2);
   flex-wrap: wrap;
-  margin-top: 0.6rem;
-  padding: 0.7rem 0.8rem;
+  margin-top: var(--space-2);
+  padding: var(--space-3) var(--space-3);
   border: 1px solid #e0a3a3;
   border-radius: var(--r-field);
   background-color: #fdf6f6;
-  font-size: 0.8rem;
-  line-height: 1.4;
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-snug);
   color: #8a2020;
 }
 
@@ -722,13 +722,13 @@
   display: inline-flex;
   align-items: center;
   min-height: 32px;
-  padding: 0 0.85rem;
+  padding: 0 var(--space-3);
   background-color: #fff;
   border: 1px solid #c99a9a;
   border-radius: var(--r-field);
   color: #8a2020;
   font-family: inherit;
-  font-size: 0.8rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   cursor: pointer;
 }
@@ -750,13 +750,13 @@
   flex: 1 0 100%;
   order: -1;
   margin: 0;
-  padding: 0.75rem 0.9rem;
+  padding: var(--space-3) var(--space-4);
   border: 1px solid #e0a3a3;
   border-inline-start: 4px solid #c62828;
   border-radius: var(--r-field);
   background-color: #fdf6f6;
-  font-size: 0.85rem;
-  line-height: 1.45;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
   color: #8a2020;
 }
 
@@ -770,38 +770,38 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
   min-height: 60vh;
-  padding: 3rem 1.5rem;
+  padding: var(--space-12) var(--space-6);
   /* The safe-area inset, so the state clears the home indicator on a phone
      rather than sitting under it. */
   padding-bottom: max(3rem, calc(3rem + env(safe-area-inset-bottom)));
 }
 
 .checkout-empty-state > svg {
-  font-size: 2.5rem;
+  font-size: var(--font-size-5xl);
   color: #b0b0b6;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-2);
 }
 
 .checkout-empty-state h1 {
   margin: 0;
-  font-size: 1.4rem;
+  font-size: var(--font-size-2xl);
   font-weight: 600;
   color: #1a1a1a;
 }
 
 .checkout-empty-state p {
-  margin: 0 0 1rem;
+  margin: 0 0 var(--space-4);
   max-width: 34ch;
-  font-size: 0.95rem;
-  line-height: 1.5;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
   color: #545454;
 }
 
 .co-empty-cta {
   text-decoration: none;
-  font-size: 0.95rem;
+  font-size: var(--font-size-base);
   font-weight: 500;
 }
 
@@ -821,9 +821,9 @@
   background-color: #efefef;
   color: #545454;
   border: 1px solid #d3d3d3;
-  padding: 0 1.5rem;
+  padding: 0 var(--space-6);
   border-radius: var(--r-control);
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s, color 0.2s;
@@ -850,15 +850,15 @@
 
 
 .cost-summary {
-  padding-top: 1.25rem;
+  padding-top: var(--space-5);
   border-top: 1px solid #e1e3e5;
 }
 
 .cost-line {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 0.75rem;
-  font-size: 0.95rem;
+  margin-bottom: var(--space-3);
+  font-size: var(--font-size-base);
 }
 
 .cost-line span:first-child {
@@ -866,15 +866,15 @@
 }
 
 .cost-line.total {
-  font-size: 1.1rem;
+  font-size: var(--font-size-lg);
   font-weight: 500;
-  margin-top: 1.25rem;
-  padding-top: 1.25rem;
+  margin-top: var(--space-5);
+  padding-top: var(--space-5);
   border-top: 1px solid #e1e3e5;
 }
 
 .total .total-price {
-  font-size: 1.25rem;
+  font-size: var(--font-size-xl);
   font-weight: 600;
   color: #121212;
 }
@@ -893,19 +893,19 @@
 .summary-item-controls {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-top: 4px;
+  gap: var(--space-4);
+  margin-top: var(--space-1);
 }
 
 /* Quantity stepper — soft pill with round buttons (matches the cart) */
 .quantity-control {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   background-color: #f2f2f4;
   border: 1px solid #e4e4e6;
   border-radius: var(--r-control);
-  padding: 3px;
+  padding: var(--space-1);
 }
 
 .quantity-control button {
@@ -915,8 +915,8 @@
   width: 30px;
   height: 30px;
   border-radius: var(--r-circle);
-  font-size: 1.1rem;
-  line-height: 1;
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-none);
   color: #1a1a1a;
   display: flex;
   align-items: center;
@@ -948,7 +948,7 @@
 }
 
 .quantity-control span {
-  font-size: 0.95rem;
+  font-size: var(--font-size-base);
   font-weight: 600;
   min-width: 28px;
   text-align: center;
@@ -959,7 +959,7 @@
   background: 0 0;
   border: none;
   color: #ef4444;
-  font-size: .8rem;
+  font-size: var(--font-size-xs);
   cursor: pointer;
   text-decoration: underline;
   padding: 0;
@@ -978,7 +978,7 @@
 
 .free-shipping-display del {
   color: #9ca3af; /* Light grey for the strikethrough text */
-  margin-right: 0.5rem;
+  margin-right: var(--space-2);
   font-weight: 400;
 }
 
@@ -1022,7 +1022,7 @@ color: #16a34a;
   /* 1. ADD PADDING: Ensures content doesn't touch the edges */
   .checkout-form-column,
   .order-summary-column {
-    padding: 1.5rem 1.25rem !important; /* 20px - 24px padding */
+    padding: var(--space-6) var(--space-5) !important; /* 20px - 24px padding */
   }
 
   /* 2. Center the logo on mobile */
@@ -1039,42 +1039,42 @@ color: #16a34a;
   .form-section input,
   .form-section select,
   .discount-input-row input {
-    font-size: 16px !important; /* Critical: prevents auto-zoom on iPhone */
-    padding: 12px; /* Larger touch target */
+    font-size: var(--font-size-base) !important; /* Critical: prevents auto-zoom on iPhone */
+    padding: var(--space-3); /* Larger touch target */
   }
 
   /* Keep the +20 prefix the same optical size as the number next to it */
   .phone-prefix {
-    font-size: 16px;
-    padding: 0 0.85rem;
+    font-size: var(--font-size-base);
+    padding: 0 var(--space-3);
   }
 
   /* 4. Action Buttons: Full Width and Stacked */
   .checkout-actions {
     flex-direction: column-reverse; /* Button on top, Link below */
-    gap: 1rem;
+    gap: var(--space-4);
     width: 100%;
-    margin-top: 1.5rem;
+    margin-top: var(--space-6);
   }
 
   .place-order-button {
     width: 100%; /* Full width */
     height: 55px; /* Taller for easier tapping */
-    font-size: 1.1rem;
+    font-size: var(--font-size-lg);
     margin: 0;
   }
 
   .return-to-cart-link {
     width: 100%;
     text-align: center;
-    padding: 10px;
+    padding: var(--space-3);
     display: block;
   }
 
   /* 5. Stack Discount Field for space */
   .discount-input-row {
     flex-direction: column;
-    gap: 10px;
+    gap: var(--space-3);
   }
 
   .discount-input-row button {
@@ -1105,7 +1105,7 @@ color: #16a34a;
 .co-skeleton--logo {
   width: 100px;
   height: 34px;
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
   border-radius: var(--r-thumb);
 }
 
@@ -1139,13 +1139,13 @@ color: #16a34a;
 .co-summary-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 0;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
 }
 
 .co-summary-lines {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
 }
