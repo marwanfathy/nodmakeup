@@ -56,6 +56,7 @@ export const orderApi = {
     updateStatus: (id, statusId) => api('put', `/api/v1/orders/${id}/status`, { statusId }),
     updateTransactionStatus: (id, status) => api('put', `/api/v1/orders/${id}/transaction-status`, { status }),
     sendReward: (id, payload) => api('post', `/api/v1/orders/${id}/send-reward`, payload),
+    sendUpdate: (id) => api('post', `/api/v1/orders/${id}/send-update`, {}),
 };
 
 export const discountApi = crud('/api/v1/orders/discounts');

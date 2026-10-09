@@ -7,7 +7,8 @@ import {
     updateOrderStatus,
     getAllOrderStatuses,
     updateTransactionStatus,
-    sendOrderReward, // <--- New Controller Function
+    sendOrderReward,
+    sendOrderUpdate,
 } from '../../controllers/admin/orderController';
 
 import { protect } from '../../middleware/authMiddleware';
@@ -35,8 +36,12 @@ router.route('/:id/status')
 router.route('/:orderId/transaction-status')
     .put(requireValidId, protect, updateTransactionStatus);
 
-// 6. NEW: Manually Send WhatsApp Reward
+// 6. Manually Send WhatsApp Reward
 router.route('/:orderId/send-reward')
     .post(requireValidId, protect, sendOrderReward);
+
+// 7. Manually Send WhatsApp Status Update (automated message to the customer)
+router.route('/:orderId/send-update')
+    .post(requireValidId, protect, sendOrderUpdate);
 
 export default router;

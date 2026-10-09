@@ -1,6 +1,7 @@
 import { Client, LocalAuth } from 'whatsapp-web.js';
 import qrcode from 'qrcode-terminal';
 import { createPostOrderDiscount } from './discountGenerator';
+import { trackOrderUrl } from '../utils/trackOrderUrl';
 
 // --- CONFIGURATION ---
 const MIN_DELAY_MS = 15000;
@@ -158,7 +159,19 @@ export const sendOrderThankYouWithReward = async (
 ) => {
     try {
         const generatedCode = await createPostOrderDiscount(customerPhone, customerName);
-        const message = `Hi ${customerName}! 👋\n\nThank you for placing your order (${orderNumber}) with NOD! We are excited to get it to you.\n\n🎁 *A Gift For You:*\nHere is a special discount code for your NEXT order: *${generatedCode}*\n\nThis code is valid for one use only. Enjoy!`;
+        const message = [
+            `Hi ${customerName}! 👋`,
+            '',
+            `Thank you for placing your order (${orderNumber}) with NOD! We are excited to get it to you.`,
+            '',
+            '📦 *Track your order any time:*',
+            trackOrderUrl(orderNumber),
+            '',
+            '🎁 *A Gift For You:*',
+            `Here is a special discount code for your NEXT order: *${generatedCode}*`,
+            '',
+            'This code is valid for one use only. Enjoy!',
+        ].join('\n');
         console.log(`🎁 [WhatsApp] Sending order thank you + reward to ${customerName} (${customerPhone}) for order ${orderNumber}`);
         await sendWhatsAppMessage(customerPhone, message);
     } catch (error) {

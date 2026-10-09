@@ -8,6 +8,7 @@ import { ORDER_CHIP } from './OrderListPage';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import LocalShippingRoundedIcon from '@mui/icons-material/LocalShippingRounded';
 import RedeemRoundedIcon from '@mui/icons-material/RedeemRounded';
+import SendRoundedIcon from '@mui/icons-material/SendRounded';
 
 const TransactionStatusOptions = ['Completed', 'Pending', 'Failed', 'Refunded'];
 
@@ -71,6 +72,18 @@ const OrderDetailPage = () => {
         } finally {
             setBusy(false);
             setTxStatusFor(null);
+        }
+    };
+
+    const sendUpdate = async () => {
+        setBusy(true);
+        try {
+            const res = await orderApi.sendUpdate(order.id);
+            toast.success(res.message || 'Update sent.');
+        } catch (err) {
+            toast.error(errMsg(err, 'Update failed to send.'));
+        } finally {
+            setBusy(false);
         }
     };
 
@@ -156,6 +169,9 @@ const OrderDetailPage = () => {
                     <div>
                         <button className="nd-btn nd-btn-secondary" disabled={busy || !newStatusId || newStatusId === order.statusId} onClick={updateStatus}>
                             <LocalShippingRoundedIcon style={{ fontSize: 16 }} /> Update status
+                        </button>
+                        <button className="nd-btn nd-btn-ghost" style={{ marginInlineStart: 10 }} onClick={sendUpdate} disabled={busy}>
+                            <SendRoundedIcon style={{ fontSize: 16 }} /> Send update on WhatsApp
                         </button>
                     </div>
                 </div>

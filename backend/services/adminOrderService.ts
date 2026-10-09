@@ -1,7 +1,8 @@
 // Admin order service — fulfillment domain for the admin panel.
 // Owns list/detail projections, status transitions with stock management
 // (inside a transaction + outbox), transaction-level status updates, and
-// manual WhatsApp reward sends with audit logging.
+// manual WhatsApp sends (status updates + thank-you rewards) with audit
+// logging.
 import prisma from '../config/prismaClient';
 import { AdminActionType, DiscountType, Prisma, TransactionStatus } from '@prisma/client';
 import { logAdminAction } from '../utils/logger';
@@ -10,6 +11,7 @@ import { sendWhatsAppMessage } from './whatsappService';
 import { recordOutboxEvent, enqueueOutboxEvent } from './outbox';
 import { logger } from '../config/logger';
 import { DomainError } from './domainError';
+import { trackOrderUrl } from '../utils/trackOrderUrl';
 
 // ----------------------------- list + detail -----------------------------
 
@@ -369,10 +371,26 @@ export async function sendOrderReward(input: {
         Number(discountValue),
     );
 
-    // 4. Construct Message
+    // 4. Construct Message — thank-you/reward copy plus the direct link to the
+    // customer's tracking page (the storefront prefills it via ?orderNumber=).
     const valueText = discountType === 'PERCENTAGE' ? `${discountValue}%` : `EGP ${discountValue}`;
 
-    const message = `Hi ${order.customerName}! 👋\n\nThank you for choosing nod (Order #${order.orderNumber}).\n\n🎁 *Special Gift:*\nWe created a special discount just for you!\n\nCode: *${generatedCode}*\nValue: *${valueText} Off*\n\nValid for your next order (One-time use). Enjoy!`;
+    const message = [
+        `Hi ${order.customerName}! 👋`,
+        '',
+        `Thank you for choosing nod (Order #${order.orderNumber}).`,
+        '',
+        '📦 *Track your order any time:*',
+        trackOrderUrl(order.orderNumber),
+        '',
+        '🎁 *Special Gift:*',
+        'We created a special discount just for you!',
+        '',
+        `Code: *${generatedCode}*`,
+        `Value: *${valueText} Off*`,
+        '',
+        'Valid for your next order (One-time use). Enjoy!',
+    ].join('\n');
 
     // 5. Send via WhatsApp
     const isSent = await sendWhatsAppMessage(order.customerPhoneNumber, message);
@@ -400,4 +418,58 @@ export async function sendOrderReward(input: {
     });
 
     return { code: generatedCode };
+}
+
+/**
+ * Send the customer a WhatsApp status update for their order: the current
+ * status plus the storefront tracking link. Unlike a reward, updates are
+ * repeatable — each rung of the journey is worth announcing — so nothing is
+ * stored beyond the audit log. Fails with 503 if the WhatsApp connection is
+ * down (nothing is recorded, so the admin can retry).
+ */
+export async function sendOrderUpdate(input: { orderId: string; adminId: string }) {
+    const { orderId, adminId } = input;
+
+    const order = await prisma.order.findUnique({
+        where: { id: orderId },
+        select: {
+            id: true,
+            orderNumber: true,
+            customerName: true,
+            customerPhoneNumber: true,
+            status: { select: { statusName: true } },
+        },
+    });
+
+    if (!order) {
+        throw new DomainError('Order not found.', 404);
+    }
+
+    const message = [
+        `Hi ${order.customerName}! 👋`,
+        '',
+        `Your order (#${order.orderNumber}) is now *${order.status.statusName}*.`,
+        '',
+        '📦 *Track your order any time:*',
+        trackOrderUrl(order.orderNumber),
+    ].join('\n');
+
+    const isSent = await sendWhatsAppMessage(order.customerPhoneNumber, message);
+
+    if (!isSent) {
+        throw new DomainError(
+            'Failed to send WhatsApp message. Please check the WhatsApp connection.',
+            503,
+        );
+    }
+
+    await logAdminAction({
+        adminId,
+        actionType: AdminActionType.ORDER_STATUS_UPDATE,
+        targetResource: 'Order',
+        targetId: orderId,
+        details: { statusName: order.status.statusName },
+    });
+
+    return { statusName: order.status.statusName };
 }

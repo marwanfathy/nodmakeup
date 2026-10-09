@@ -116,6 +116,34 @@ export const getAllOrderStatuses = asyncHandler(async (req: Request, res: Respon
 });
 
 /**
+ * @desc      Manually send a WhatsApp status update to the customer
+ * @route     POST /api/v1/orders/:orderId/send-update
+ * @access    Private (Admin)
+ */
+export const sendOrderUpdate = asyncHandler(async (req: Request, res: Response) => {
+    const orderId = req.params.orderId;
+    const adminId = req.admin?.admin_id;
+
+    if (!isValidOrderId(orderId)) {
+        res.status(400);
+        throw new Error('Invalid Order ID.');
+    }
+
+    if (!adminId) {
+        res.status(401);
+        throw new Error('Not authorized, admin context not found');
+    }
+
+    const data = await call(res, () => adminOrders.sendOrderUpdate({ orderId, adminId }));
+
+    res.status(200).json({
+        success: true,
+        message: 'Update sent successfully!',
+        data,
+    });
+});
+
+/**
  * @desc      Manually trigger sending a Reward WhatsApp to the customer
  * @route     POST /api/v1/orders/:orderId/send-reward
  * @access    Private (Admin)
