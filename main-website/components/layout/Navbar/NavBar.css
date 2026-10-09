@@ -202,7 +202,6 @@ letter-spacing: .5px;
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 1px solid #f0f0f0;
 }
 
 /* Confirmation that an item went in, without a popup.

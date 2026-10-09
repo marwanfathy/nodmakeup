@@ -133,20 +133,6 @@ const TrackOrderPage: React.FC = () => {
     <div className="track-page">
       <div className="track-page__inner">
         <header className="track-head">
-          <span className="track-head__icon" aria-hidden="true">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M3 7l9-4 9 4v10l-9 4-9-4z" />
-              <path d="M3 7l9 4 9-4" />
-              <path d="M12 11v10" />
-            </svg>
-          </span>
           <h1 className="track-head__title">{t('track.title')}</h1>
           <p className="track-head__subtitle">{t('track.subtitle')}</p>
         </header>
@@ -359,13 +345,6 @@ const TrackOrderPage: React.FC = () => {
                   </div>
                 </dl>
               </div>
-            </div>
-
-            <div className="track-result__footer">
-              <button type="button" className="track-result__reset" onClick={reset}>
-                {t('track.another')}
-              </button>
-              <p className="track-result__help">{t('track.help')}</p>
             </div>
           </section>
         )}

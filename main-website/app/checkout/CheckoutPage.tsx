@@ -557,7 +557,6 @@ export default function CheckoutPage() {
                 <div className="checkout-container" aria-busy="true" aria-live="polite">
                     <div className="checkout-form-column">
                         <header className="checkout-header">
-                            <div className="co-skeleton co-skeleton--logo" />
                             <div className="co-skeleton co-skeleton--bar" style={{ width: 180, height: 14 }} />
                         </header>
 
@@ -622,19 +621,7 @@ export default function CheckoutPage() {
         <div className="modern-checkout-page">
             <div className="checkout-container">
                 <div className="checkout-form-column">
-                    <header className="checkout-header">
-                        <Link href={localePath('/', locale)} className="checkout-logo-link" aria-label="NOD Makeup home">
-                            <Image
-                                src={mediaUrl('/uploads/images/l(dark).png')}
-                                alt="NOD Makeup"
-                                className="checkout-logo"
-                                width={1774}
-                                height={887}
-                                sizes="110px"
-                            />
-                        </Link>
-                        <p>{t('checkout.header')}</p>
-                    </header>
+
 
                     <form onSubmit={handleSubmit} noValidate>
                         {/* --- Everything the order cannot go without, first --- */}

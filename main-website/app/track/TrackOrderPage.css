@@ -1,9 +1,11 @@
 /* --- Track your order -------------------------------------------------------
    The public order lookup, dressed in the storefront's own language: white
-   surfaces on the warm grey page, hairline borders, the soft shadow ladder and
-   the brand blue used only as a tint. Every value is a token from
-   design-system/variables.css, so light and dark follow the OS with no second
-   rule. Logical inline properties keep the Arabic layout mirrored. Nothing here
+   surfaces on a white page, hairline borders and the soft shadow ladder. The
+   whole page is deliberately monochrome — ink, paper and greys only, with no
+   accent colour. Every value is a token from design-system/variables.css, and
+   the neutral colour tokens are pinned to their light values at .track-page
+   scope because the storefront ships no dark theme. Logical inline properties
+   keep the Arabic layout mirrored. Nothing here
    is allowed to force a sideways scroll: the page clips its own decoration and
    every flex/grid child can shrink (min-width: 0) and wrap.
 
@@ -65,27 +67,18 @@
 @keyframes track-pulse {
   0% {
     box-shadow:
-      inset 0 0 0 2px var(--color-brand-primary),
-      0 0 0 0 color-mix(in srgb, var(--color-brand-primary) 40%, transparent);
+      inset 0 0 0 2px var(--color-text-primary),
+      0 0 0 0 color-mix(in srgb, var(--color-text-primary) 40%, transparent);
   }
   70% {
     box-shadow:
-      inset 0 0 0 2px var(--color-brand-primary),
-      0 0 0 10px color-mix(in srgb, var(--color-brand-primary) 0%, transparent);
+      inset 0 0 0 2px var(--color-text-primary),
+      0 0 0 10px color-mix(in srgb, var(--color-text-primary) 0%, transparent);
   }
   100% {
     box-shadow:
-      inset 0 0 0 2px var(--color-brand-primary),
-      0 0 0 0 color-mix(in srgb, var(--color-brand-primary) 0%, transparent);
-  }
-}
-
-@keyframes track-float {
-  from {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  to {
-    transform: translate3d(24px, -18px, 0) scale(1.1);
+      inset 0 0 0 2px var(--color-text-primary),
+      0 0 0 0 color-mix(in srgb, var(--color-text-primary) 0%, transparent);
   }
 }
 
@@ -101,49 +94,27 @@
 /* --- Page ------------------------------------------------------------------ */
 
 .track-page {
+  /* Monochrome focus ring: a black halo instead of the brand-blue one. */
+  --track-focus-ring: 0 0 0 3px color-mix(in srgb, var(--color-text-primary) 18%, transparent);
+  /* Light-only. The storefront has no dark theme, but the shared tokens
+     re-declare themselves under prefers-color-scheme: dark; a device whose OS
+     asks for dark would otherwise flip this whole page black. Pinning the
+     light neutrals here keeps the background white and the ink black. */
+  --color-bg-primary: #FFFFFF;
+  --color-bg-secondary: #F5F5F7;
+  --color-bg-tertiary: #EBEBF0;
+  --color-bg-elevated: #FFFFFF;
+  --color-text-primary: #141414;
+  --color-text-secondary: #545454;
+  --color-text-tertiary: #6E6E73;
+  --color-border-light: #D1D1D6;
+  --color-border-medium: #6E6E73;
   position: relative;
   overflow: hidden;
   min-height: 80vh;
   padding: calc(var(--space-18) + var(--safe-top, 0px)) var(--space-5)
     calc(var(--space-20) + var(--safe-bottom, 0px));
-  background:
-    radial-gradient(
-      120% 70% at 50% -20%,
-      color-mix(in srgb, var(--color-brand-primary) 12%, transparent),
-      transparent 62%
-    ),
-    var(--color-bg-secondary);
-}
-
-/* Two soft glows drifting behind the content. They are the only decorative
-   colour on the page, kept low-opacity and heavily blurred so they read as
-   light rather than as shapes. `inset-inline-*` mirrors them for RTL. */
-.track-page::before,
-.track-page::after {
-  content: '';
-  position: absolute;
-  z-index: 0;
-  border-radius: var(--r-circle);
-  filter: blur(70px);
-  pointer-events: none;
-  animation: track-float 14s ease-in-out infinite alternate;
-}
-
-.track-page::before {
-  width: 320px;
-  height: 320px;
-  top: -80px;
-  inset-inline-start: -64px;
-  background: color-mix(in srgb, var(--color-brand-primary) 20%, transparent);
-}
-
-.track-page::after {
-  width: 260px;
-  height: 260px;
-  bottom: -64px;
-  inset-inline-end: -48px;
-  background: color-mix(in srgb, var(--color-brand-secondary) 14%, transparent);
-  animation-delay: -5s;
+  background: var(--color-bg-primary);
 }
 
 .track-page__inner {
@@ -163,24 +134,6 @@
   text-align: center;
   margin-bottom: var(--space-8);
   animation: track-fade-up var(--transition-spring) both;
-}
-
-.track-head__icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--space-12);
-  height: var(--space-12);
-  border-radius: var(--r-control);
-  background: color-mix(in srgb, var(--color-brand-primary) 12%, transparent);
-  color: var(--color-brand-primary);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-brand-primary) 18%, transparent);
-  animation: track-pop var(--transition-spring) 120ms both;
-}
-
-.track-head__icon svg {
-  width: var(--font-size-2xl);
-  height: var(--font-size-2xl);
 }
 
 .track-head__title {
@@ -281,19 +234,19 @@
 }
 
 .track-field__control:focus-within .track-field__icon {
-  color: var(--color-brand-primary);
+  color: var(--color-text-primary);
   transform: scale(1.08);
 }
 
 .track-field__input:focus-visible {
   outline: none;
-  border-color: var(--color-border-focus);
-  box-shadow: var(--shadow-focus);
+  border-color: var(--color-text-primary);
+  box-shadow: var(--track-focus-ring);
 }
 
 .track-field__input[aria-invalid='true'] {
-  border-color: var(--color-brand-error);
-  background: color-mix(in srgb, var(--color-brand-error) 4%, var(--color-bg-primary));
+  border-color: var(--color-text-primary);
+  background: color-mix(in srgb, var(--color-text-primary) 4%, var(--color-bg-primary));
 }
 
 .track-field__error {
@@ -301,8 +254,9 @@
   align-items: center;
   gap: var(--space-1);
   font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
   line-height: var(--line-height-normal);
-  color: var(--color-brand-error);
+  color: var(--color-text-primary);
   animation: track-fade-up var(--transition-normal) both;
 }
 
@@ -332,8 +286,7 @@
 }
 
 /* A light sweep that crosses the button on hover. The sheen is mixed from the
-   page background token, so it reads on the black button in light mode and on
-   the light button in dark mode without a second rule. */
+   page background token, so it reads as a white sweep across the black button. */
 .track-form__submit::after {
   content: '';
   position: absolute;
@@ -369,7 +322,7 @@
 
 .track-form__submit:focus-visible {
   outline: none;
-  box-shadow: var(--shadow-focus);
+  box-shadow: var(--track-focus-ring);
 }
 
 .track-form__arrow {
@@ -416,21 +369,21 @@
 }
 
 .track-feedback--notfound {
-  border-color: color-mix(in srgb, var(--color-brand-primary) 22%, transparent);
-  background: color-mix(in srgb, var(--color-brand-primary) 6%, var(--color-bg-elevated));
+  border-color: color-mix(in srgb, var(--color-text-primary) 20%, transparent);
+  background: color-mix(in srgb, var(--color-text-primary) 4%, var(--color-bg-elevated));
 }
 
 .track-feedback--notfound .track-feedback__icon {
-  color: var(--color-brand-primary);
+  color: var(--color-text-primary);
 }
 
 .track-feedback--error {
-  border-color: color-mix(in srgb, var(--color-brand-error) 24%, transparent);
-  background: color-mix(in srgb, var(--color-brand-error) 6%, var(--color-bg-elevated));
+  border-color: var(--color-text-primary);
+  background: color-mix(in srgb, var(--color-text-primary) 5%, var(--color-bg-elevated));
 }
 
 .track-feedback--error .track-feedback__icon {
-  color: var(--color-brand-error);
+  color: var(--color-text-primary);
 }
 
 /* --- Result ---------------------------------------------------------------- */
@@ -489,7 +442,7 @@
   flex-shrink: 0;
   padding: var(--space-2) var(--space-4);
   border-radius: var(--r-chip);
-  background: color-mix(in srgb, var(--color-brand-primary) 12%, transparent);
+  background: color-mix(in srgb, var(--color-text-primary) 8%, transparent);
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
@@ -500,23 +453,24 @@
   width: var(--space-2);
   height: var(--space-2);
   border-radius: var(--r-circle);
-  background: var(--color-brand-primary);
+  background: var(--color-text-primary);
 }
 
 .track-badge--success {
-  background: color-mix(in srgb, var(--color-brand-success) 16%, transparent);
+  background: var(--color-text-primary);
+  color: var(--color-bg-primary);
 }
 
 .track-badge--success .track-badge__dot {
-  background: var(--color-brand-success);
+  background: var(--color-bg-primary);
 }
 
 .track-badge--negative {
-  background: color-mix(in srgb, var(--color-brand-error) 14%, transparent);
+  background: color-mix(in srgb, var(--color-text-primary) 6%, transparent);
 }
 
 .track-badge--negative .track-badge__dot {
-  background: var(--color-brand-error);
+  background: var(--color-text-primary);
 }
 
 /* --- Fulfilment ladder ------------------------------------------------------
@@ -562,7 +516,7 @@
 
 .track-step--done:not(:first-child)::before,
 .track-step--current:not(:first-child)::before {
-  background: var(--color-brand-success);
+  background: var(--color-text-primary);
 }
 
 .track-step__dot {
@@ -581,13 +535,13 @@
 }
 
 .track-step--done .track-step__dot {
-  background: var(--color-brand-success);
-  box-shadow: inset 0 0 0 2px var(--color-brand-success);
+  background: var(--color-text-primary);
+  box-shadow: inset 0 0 0 2px var(--color-text-primary);
 }
 
 .track-step--current .track-step__dot {
   background: var(--color-bg-elevated);
-  box-shadow: inset 0 0 0 2px var(--color-brand-primary);
+  box-shadow: inset 0 0 0 2px var(--color-text-primary);
   animation:
     track-pop var(--transition-spring) both,
     track-pulse 2.6s ease-out infinite;
@@ -761,56 +715,6 @@
   color: var(--color-text-primary);
 }
 
-/* --- Result footer --------------------------------------------------------- */
-
-.track-result__footer {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  margin-top: var(--space-6);
-  padding-top: var(--space-5);
-  border-top: 1px solid color-mix(in srgb, var(--color-border-light) 55%, transparent);
-}
-
-.track-result__reset {
-  min-height: var(--control-height);
-  padding: 0 var(--space-5);
-  border: 1px solid color-mix(in srgb, var(--color-border-light) 70%, transparent);
-  border-radius: var(--r-control);
-  background: var(--color-bg-primary);
-  color: var(--color-text-primary);
-  font-family: inherit;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  transition:
-    border-color var(--transition-fast),
-    transform var(--transition-spring),
-    box-shadow var(--transition-spring);
-}
-
-.track-result__reset:hover {
-  border-color: var(--color-border-medium);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
-}
-
-.track-result__reset:active {
-  transform: translateY(0);
-}
-
-.track-result__reset:focus-visible {
-  outline: none;
-  box-shadow: var(--shadow-focus);
-}
-
-.track-result__help {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-}
-
 /* --- Skeleton --------------------------------------------------------------
    The result's own shape, so nothing moves when the order lands. The shimmer is
    local to this sheet: every stylesheet here is global, and a shared
@@ -903,7 +807,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .track-head,
-  .track-head__icon,
   .track-form,
   .track-result,
   .track-feedback,
@@ -912,9 +815,7 @@
   .track-badge,
   .track-step::before,
   .track-step__dot,
-  .track-step__label,
-  .track-page::before,
-  .track-page::after {
+  .track-step__label {
     animation: none;
   }
 
@@ -923,8 +824,7 @@
   }
 
   .track-item:hover,
-  .track-form__submit:hover:not(:disabled),
-  .track-result__reset:hover {
+  .track-form__submit:hover:not(:disabled) {
     transform: none;
   }
 }
