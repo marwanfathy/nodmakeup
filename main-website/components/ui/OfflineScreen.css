@@ -1,0 +1,107 @@
+/* --- Offline screen --------------------------------------------------------
+   The one state the app reaches without a network. OfflineWatcher renders it
+   as a full-screen overlay — which is what actually catches a dropped
+   connection, because the screen ships inside the already-loaded bundle
+   instead of being fetched — and /offline renders the same component in flow
+   for links, bookmarks and a future service-worker fallback. Only the
+   positioning differs; every measurement is a design token, so the two can
+   never drift apart. */
+
+.offline-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: var(--space-6);
+  padding-top: calc(var(--space-6) + var(--safe-top, 0px));
+  padding-bottom: calc(var(--space-6) + var(--safe-bottom, 0px));
+  background: var(--color-bg-primary);
+  text-align: center;
+}
+
+/* Above the nav (1000) and the cart sidebar (2000): an offline state is a
+   wall, not a layer. */
+.offline-screen--overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  overflow-y: auto; /* a short landscape screen can still reach the button */
+  overscroll-behavior: contain;
+}
+
+.offline-screen__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  max-width: 34ch;
+}
+
+.offline-screen__glyph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-16);
+  height: var(--space-16);
+  border-radius: var(--r-circle);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+}
+
+.offline-screen__glyph svg {
+  width: var(--space-8);
+  height: var(--space-8);
+}
+
+.offline-screen__title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-snug);
+  color: var(--color-text-primary);
+}
+
+.offline-screen__body {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-text-secondary);
+}
+
+.offline-screen__retry {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--control-height-xl);
+  padding: 0 var(--space-8);
+  border: 1px solid transparent;
+  border-radius: var(--r-control);
+  background: var(--color-text-primary);
+  color: var(--color-bg-primary);
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.offline-screen__retry:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.offline-screen__retry:disabled {
+  cursor: progress;
+  opacity: 0.6;
+}
+
+.offline-screen__retry:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+/* Reserved line: an attempt that fails adds its sentence without moving the
+   button the visitor is aiming at. */
+.offline-screen__status {
+  min-height: 1.2em;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-tertiary);
+}

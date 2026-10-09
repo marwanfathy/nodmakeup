@@ -323,6 +323,15 @@ const en: Dict = {
     'We use cookies to remember your cart items and analyze site traffic. You can choose to disable cookies through your browser settings.',
   'help.privacy.contact': 'Questions? Contact us at privacy@nod.com',
 
+  // --- offline ---
+  'offline.metaTitle': 'Offline | NOD',
+  'offline.title': 'You are offline',
+  'offline.body':
+    'This device lost its connection to the internet. Reconnect to Wi-Fi or mobile data, then try again.',
+  'offline.retry': 'Try again',
+  'offline.checking': 'Checking...',
+  'offline.stillOffline': 'Still offline. Check your connection and try again.',
+
   // --- titles ---
   'titles.home': 'Home',
   'titles.shop': 'Shop All Products',
@@ -638,6 +647,15 @@ const ar: Dict = {
   'help.privacy.s4.body':
     'نستخدم ملفات تعريف الارتباط لتذكُّر عناصر سلة التسوق الخاصة بك وتحليل حركة الموقع. يمكنك تعطيلها من إعدادات المتصفح.',
   'help.privacy.contact': 'لديك أسئلة؟ تواصل معنا على privacy@nod.com',
+
+  // --- offline ---
+  'offline.metaTitle': 'بلا اتصال | نود',
+  'offline.title': 'لا يوجد اتصال بالإنترنت',
+  'offline.body':
+    'انقطع اتصال جهازك بالإنترنت. أعد الاتصال بشبكة Wi-Fi أو بيانات الهاتف ثم حاول مرة أخرى.',
+  'offline.retry': 'إعادة المحاولة',
+  'offline.checking': 'جارٍ التحقق...',
+  'offline.stillOffline': 'لا يزال الاتصال منقطعاً. تحقق من الشبكة وحاول مرة أخرى.',
 
   // --- titles ---
   'titles.home': 'الرئيسية',

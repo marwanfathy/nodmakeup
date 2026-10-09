@@ -13,6 +13,7 @@ import '../lib/i18n/rtl.css';
 import { PageTracker } from '../components/tracking/PageTracker';
 import { BehaviorTracker } from '../components/tracking/BehaviorTracker';
 import TitleUpdater from '../components/tracking/TitleUpdater/TitleUpdater';
+import OfflineWatcher from '../components/ui/OfflineWatcher';
 import { LocaleProvider } from '../lib/i18n/client';
 import { defaultLocale, Locale } from '../lib/i18n/messages';
 
@@ -103,6 +104,7 @@ export default async function RootLayout({
             <TitleUpdater />
             <CartProvider>
               <Nav />
+              <OfflineWatcher />
               <main style={{ minHeight: '80vh' }}>{children}</main>
 
               <Footer /> {/* <--- Footer added here */}
