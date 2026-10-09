@@ -72,6 +72,9 @@ exports.API_V1 = {
         orders: {
             root: `${exports.API_PREFIX}/orders`,
             byId: (id) => `${exports.API_PREFIX}/orders/${id}`,
+            // Public lookup by order number. Kept a POST so the identifier stays out
+            // of access logs, proxy traces and browser history.
+            track: `${exports.API_PREFIX}/orders/track`,
             statuses: `${exports.API_PREFIX}/orders/statuses`,
             status: (orderId) => `${exports.API_PREFIX}/orders/${orderId}/status`,
             transactionStatus: (orderId) => `${exports.API_PREFIX}/orders/${orderId}/transaction-status`,

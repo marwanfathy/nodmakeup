@@ -27,6 +27,18 @@ export declare const createOrderSchema: z.ZodObject<{
     customerNotes?: string | undefined;
     checkoutKey?: string | undefined;
 }>;
+/**
+ * Public tracking lookup. The order number is stored upper-case (`RGE-…`) and
+ * is the only field. Kept in shared so the storefront form and the API handler
+ * refuse the same input for the same reason.
+ */
+export declare const trackOrderSchema: z.ZodObject<{
+    orderNumber: z.ZodEffects<z.ZodString, string, string>;
+}, "strip", z.ZodTypeAny, {
+    orderNumber: string;
+}, {
+    orderNumber: string;
+}>;
 export declare const addCartItemSchema: z.ZodObject<{
     variantId: z.ZodString;
     quantity: z.ZodNumber;

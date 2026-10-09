@@ -193,6 +193,31 @@ export interface OrderDetails {
     };
     items: OrderItemInfo[];
 }
+/**
+ * What a customer gets back from the public tracking lookup.
+ *
+ * Deliberately narrower than OrderDetails: the caller proved they know the
+ * order number *and* the phone stored on it, but not that they own the cart
+ * session, so nothing that identifies a person (name, phone, street address)
+ * is echoed back. Everything here is needed to recognise "yes, this is my
+ * order" and see where it is.
+ */
+export interface TrackingOrder {
+    orderNumber: string;
+    orderDate: string;
+    status: string;
+    shippingGovernorate: string;
+    payment: {
+        method: string;
+        status: string | null;
+    };
+    summary: {
+        totalPrice: number;
+        shippingCost: number;
+        totalDiscount: number;
+    };
+    items: OrderItemInfo[];
+}
 export type MediaType = 'IMAGE' | 'VIDEO';
 export interface StoryItem {
     id: string;

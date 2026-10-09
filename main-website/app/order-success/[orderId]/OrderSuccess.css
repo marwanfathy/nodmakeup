@@ -89,7 +89,31 @@
 
 /* --- Buttons --- */
 .success-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
     margin-bottom: var(--space-5);
+}
+
+/* Secondary action: an outline so the filled "continue shopping" stays the
+   one obvious next step, and the number it passes to /track is URL-safe. */
+.btn-track {
+    display: inline-block;
+    background-color: transparent;
+    color: #000;
+    border: 1px solid #000;
+    text-decoration: none;
+    padding: var(--space-4) var(--space-8);
+    border-radius: var(--r-control);
+    font-weight: 600;
+    transition: background 0.2s, color 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.btn-track:hover {
+    background-color: #000;
+    color: #fff;
 }
 
 .btn-continue, .btn-home {

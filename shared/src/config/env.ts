@@ -49,6 +49,13 @@ const ServerEnvSchema = z.object({
   rateLimitAuthMax: z.coerce.number().int().positive().default(10),
   rateLimitCheckoutMax: z.coerce.number().int().positive().default(60),
   rateLimitCatalogMax: z.coerce.number().int().positive().default(600),
+  /**
+   * Order-tracking lookups, per IP, per 15-minute window. Lower than the
+   * backstop because this route turns a bare order number into an order; the
+   * ceiling is high enough for a customer checking their order a few times, and
+   * low enough that it is not a convenient oracle to guess numbers with.
+   */
+  rateLimitTrackingMax: z.coerce.number().int().positive().default(60),
 });
 
 export type ServerEnv = z.infer<typeof ServerEnvSchema>;
@@ -70,6 +77,7 @@ const envKeys: Record<keyof Omit<ServerEnv, 'safeOrigins'>, string> = {
   rateLimitAuthMax: 'RATE_LIMIT_AUTH_MAX',
   rateLimitCheckoutMax: 'RATE_LIMIT_CHECKOUT_MAX',
   rateLimitCatalogMax: 'RATE_LIMIT_CATALOG_MAX',
+  rateLimitTrackingMax: 'RATE_LIMIT_TRACKING_MAX',
 };
 
 function pickEnv(): Record<string, unknown> {

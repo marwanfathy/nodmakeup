@@ -270,10 +270,32 @@ const catalogLimiter = rateLimit({
     message: { success: false, message: 'Too many requests. Please slow down.' },
 });
 
+/**
+ * Public order tracking — `POST /api/v1/orders/track`.
+ *
+ * A customer checks their order a handful of times, so the budget is generous
+ * for that. It is well below the backstop because the route turns a bare order
+ * number into an order, and a looser budget would make it a cheap way to try
+ * guesses against the order table. Keyed on normalized IP like checkout, for
+ * the same reason: a client-supplied header must not mint a new allowance.
+ */
+const trackingLimiter = rateLimit({
+    windowMs: RATE_WINDOW_MS,
+    max: env.rateLimitTrackingMax,
+    store: new RedisRateLimitStore({ prefix: 'rl:tracking:' }),
+    keyGenerator: ipKeyGenerator,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: { success: false, message: 'Too many tracking attempts. Please wait a moment.' },
+});
+
 app.use('/api/', apiLimiter);
 // Narrower rules shadow the backstop for the exact operations that warrant them.
 app.post('/api/v1/users/auth/login', authLimiter);
 app.post('/api/v1/orders', checkoutLimiter);
+// Tracking is a separate endpoint on the same resource, so it gets its own
+// budget. `app.post` matches the exact path, so this does not widen checkout.
+app.post('/api/v1/orders/track', trackingLimiter);
 app.use('/api/v1/catalog/', catalogLimiter);
 app.use('/api/v1/content/', catalogLimiter);
 

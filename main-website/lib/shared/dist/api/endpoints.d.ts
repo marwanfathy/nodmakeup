@@ -69,6 +69,7 @@ export declare const API_V1: {
         readonly orders: {
             readonly root: "/api/v1/orders";
             readonly byId: (id: string) => string;
+            readonly track: "/api/v1/orders/track";
             readonly statuses: "/api/v1/orders/statuses";
             readonly status: (orderId: string) => string;
             readonly transactionStatus: (orderId: string) => string;

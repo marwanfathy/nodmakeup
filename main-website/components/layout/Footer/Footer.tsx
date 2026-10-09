@@ -31,6 +31,7 @@ const Footer = () => {
                         <ul>
                             <li><Link href={localePath('/shipping', locale)}>{t('footer.shipping')}</Link></li>
                             <li><Link href={localePath('/returns', locale)}>{t('footer.returns')}</Link></li>
+                            <li><Link href={localePath('/track', locale)}>{t('footer.track')}</Link></li>
                         </ul>
                     </div>
 

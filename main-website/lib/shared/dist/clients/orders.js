@@ -38,6 +38,11 @@ const ordersApi = (baseURL, options = {}) => {
         client,
         createOrder: async (data) => (0, client_1.unwrap)(client.post(endpoints_1.API_V1.orders.orders.root, data)),
         getOrderDetails: async (orderId) => (0, client_1.unwrap)(client.get(endpoints_1.API_V1.orders.orders.byId(orderId))),
+        /**
+         * Public order lookup by order number. A POST so the identifier does not
+         * land in URL logs; the request is read-only and carries one field.
+         */
+        trackOrder: async (orderNumber) => (0, client_1.unwrap)(client.post(endpoints_1.API_V1.orders.orders.track, { orderNumber })),
         getShippingZones: async () => (0, client_1.unwrap)(client.get(endpoints_1.API_V1.orders.shippingZones.root)),
         validateCoupon: async (couponCode, customerPhone) => (0, client_1.unwrap)(client.post(endpoints_1.API_V1.orders.discounts.validate, { couponCode, customerPhone })),
     };

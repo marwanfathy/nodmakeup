@@ -7,6 +7,7 @@ import type {
   OrderCreationResponse,
   OrderDetails,
   ShippingZone,
+  TrackingOrder,
 } from '../api/types';
 import { isCouponRejectionReason } from '../api/types';
 import { apiErrorBody, createApiClient, type ApiClientOptionsPatch, unwrap } from './client';
@@ -57,6 +58,13 @@ export const ordersApi = (baseURL: string, options: ApiClientOptionsPatch = {}) 
 
     getOrderDetails: async (orderId: string): Promise<OrderDetails> =>
       unwrap(client.get(API_V1.orders.orders.byId(orderId))),
+
+    /**
+     * Public order lookup by order number. A POST so the identifier does not
+     * land in URL logs; the request is read-only and carries one field.
+     */
+    trackOrder: async (orderNumber: string): Promise<TrackingOrder> =>
+      unwrap(client.post(API_V1.orders.orders.track, { orderNumber })),
 
     getShippingZones: async (): Promise<ShippingZone[]> =>
       unwrap(client.get(API_V1.orders.shippingZones.root)),

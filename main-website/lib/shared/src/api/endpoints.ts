@@ -73,6 +73,9 @@ export const API_V1 = {
     orders: {
       root: `${API_PREFIX}/orders`,
       byId: (id: string) => `${API_PREFIX}/orders/${id}`,
+      // Public lookup by order number. Kept a POST so the identifier stays out
+      // of access logs, proxy traces and browser history.
+      track: `${API_PREFIX}/orders/track`,
       statuses: `${API_PREFIX}/orders/statuses`,
       status: (orderId: string) => `${API_PREFIX}/orders/${orderId}/status`,
       transactionStatus: (orderId: string) => `${API_PREFIX}/orders/${orderId}/transaction-status`,

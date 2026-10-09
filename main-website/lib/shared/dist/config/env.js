@@ -50,6 +50,13 @@ const ServerEnvSchema = zod_1.z.object({
     rateLimitAuthMax: zod_1.z.coerce.number().int().positive().default(10),
     rateLimitCheckoutMax: zod_1.z.coerce.number().int().positive().default(60),
     rateLimitCatalogMax: zod_1.z.coerce.number().int().positive().default(600),
+    /**
+     * Order-tracking lookups, per IP, per 15-minute window. Lower than the
+     * backstop because this route turns a bare order number into an order; the
+     * ceiling is high enough for a customer checking their order a few times, and
+     * low enough that it is not a convenient oracle to guess numbers with.
+     */
+    rateLimitTrackingMax: zod_1.z.coerce.number().int().positive().default(60),
 });
 const envKeys = {
     nodeEnv: 'NODE_ENV',
@@ -68,6 +75,7 @@ const envKeys = {
     rateLimitAuthMax: 'RATE_LIMIT_AUTH_MAX',
     rateLimitCheckoutMax: 'RATE_LIMIT_CHECKOUT_MAX',
     rateLimitCatalogMax: 'RATE_LIMIT_CATALOG_MAX',
+    rateLimitTrackingMax: 'RATE_LIMIT_TRACKING_MAX',
 };
 function pickEnv() {
     const out = {};

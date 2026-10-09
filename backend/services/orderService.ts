@@ -56,6 +56,25 @@ export interface PublicOrderDetails {
     }>;
 }
 
+/**
+ * The tracking projection. Same shape as `PublicOrderDetails` minus the
+ * customer-identifying fields, plus the governorate the parcel ships to.
+ * Returned for any caller that supplies a matching order number.
+ */
+export interface PublicTrackingOrder {
+    orderNumber: string;
+    orderDate: Date;
+    status: string;
+    shippingGovernorate: string;
+    payment: { method: string; status: TransactionStatus | null };
+    summary: {
+        totalPrice: Prisma.Decimal;
+        shippingCost: Prisma.Decimal;
+        totalDiscount: Prisma.Decimal;
+    };
+    items: PublicOrderDetails['items'];
+}
+
 /** Domain failure carrying the HTTP status the controller must respond with.
  *  Defaults to 500 because most uses really are server-side misconfiguration.
  *  Anything driven by customer input MUST pass an explicit 4xx: a 5xx here both
@@ -121,7 +140,7 @@ const buildOrderNumber = (orderId: string): string => {
 };
 
 const determineInitialStatus = (): { orderStatusName: string; transactionStatus: TransactionStatus } => ({
-    orderStatusName: 'Pending Payment',
+    orderStatusName: 'Processing',
     transactionStatus: TransactionStatus.Pending,
 });
 
@@ -520,6 +539,81 @@ export async function getPublicOrderDetails(
         orderNumber: order.orderNumber,
         orderDate: order.createdAt,
         status: order.status.statusName,
+        payment: {
+            method: 'Cash on Delivery',
+            status: order.transactions[0]?.status ?? null,
+        },
+        summary: {
+            totalPrice: order.totalPrice,
+            shippingCost: order.shippingCost,
+            totalDiscount: order.totalDiscount,
+        },
+        items: order.items.map((item) => ({
+            productName: item.product.name,
+            productNameAr: item.product.nameAr,
+            quantity: item.quantity,
+            price: item.priceAtPurchase,
+            color: item.variant.colorName,
+            size: item.variant.size,
+            imageUrl: item.variant.images[0]?.imageUrl ?? null,
+        })),
+    };
+}
+
+/**
+ * Public order lookup by order number.
+ *
+ * The order number is the only key. The projection carries no
+ * customer-identifying field (no name, phone or street address), so holding a
+ * number reveals the contents and delivery state of an order but nothing about
+ * the person behind it. A miss is reported as "not found", never "forbidden".
+ */
+export async function getOrderForTracking(
+    orderNumber: string,
+): Promise<PublicTrackingOrder | null> {
+    const order = await prisma.order.findUnique({
+        where: { orderNumber },
+        select: {
+            orderNumber: true,
+            shippingGovernorate: true,
+            totalPrice: true,
+            shippingCost: true,
+            totalDiscount: true,
+            createdAt: true,
+            status: { select: { statusName: true } },
+            transactions: {
+                take: 1,
+                orderBy: { transactionDate: 'desc' },
+                select: { status: true },
+            },
+            items: {
+                select: {
+                    quantity: true,
+                    priceAtPurchase: true,
+                    variant: {
+                        select: {
+                            colorName: true,
+                            size: true,
+                            images: {
+                                take: 1,
+                                orderBy: { displayOrder: 'asc' },
+                                select: { imageUrl: true },
+                            },
+                        },
+                    },
+                    product: { select: { name: true, nameAr: true } },
+                },
+            },
+        },
+    });
+
+    if (!order) return null;
+
+    return {
+        orderNumber: order.orderNumber,
+        orderDate: order.createdAt,
+        status: order.status.statusName,
+        shippingGovernorate: order.shippingGovernorate,
         payment: {
             method: 'Cash on Delivery',
             status: order.transactions[0]?.status ?? null,

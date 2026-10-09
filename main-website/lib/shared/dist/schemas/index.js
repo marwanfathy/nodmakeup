@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.upsertLandingLayoutSchema = exports.upsertLandingBannerSchema = exports.loginSchema = exports.validateCouponSchema = exports.updateCartItemSchema = exports.addCartItemSchema = exports.createOrderSchema = exports.checkoutKeySchema = exports.normalizedPhoneSchema = exports.phoneSchema = void 0;
+exports.upsertLandingLayoutSchema = exports.upsertLandingBannerSchema = exports.loginSchema = exports.validateCouponSchema = exports.updateCartItemSchema = exports.addCartItemSchema = exports.trackOrderSchema = exports.createOrderSchema = exports.checkoutKeySchema = exports.normalizedPhoneSchema = exports.phoneSchema = void 0;
 const zod_1 = require("zod");
 const phone_1 = require("../utils/phone");
 const sections_1 = require("../landing/sections");
@@ -31,6 +31,19 @@ exports.createOrderSchema = zod_1.z.object({
         .optional()
         .or(zod_1.z.literal('').transform(() => undefined)),
     checkoutKey: zod_1.z.string().uuid('checkoutKey must be a UUID.').optional(),
+});
+/**
+ * Public tracking lookup. The order number is stored upper-case (`RGE-…`) and
+ * is the only field. Kept in shared so the storefront form and the API handler
+ * refuse the same input for the same reason.
+ */
+exports.trackOrderSchema = zod_1.z.object({
+    orderNumber: zod_1.z
+        .string()
+        .trim()
+        .min(1, 'Order number is required.')
+        .max(50, 'Order number is too long.')
+        .transform((v) => v.toUpperCase()),
 });
 exports.addCartItemSchema = zod_1.z.object({
     variantId: zod_1.z.string().uuid('Invalid variant ID.'),

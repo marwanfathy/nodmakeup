@@ -1,4 +1,4 @@
-import type { AppliedDiscount, Cart, CouponRejectionReason, OrderCreationData, OrderCreationResponse, OrderDetails, ShippingZone } from '../api/types';
+import type { AppliedDiscount, Cart, CouponRejectionReason, OrderCreationData, OrderCreationResponse, OrderDetails, ShippingZone, TrackingOrder } from '../api/types';
 import { type ApiClientOptionsPatch } from './client';
 /**
  * Why a coupon was refused, read off the error `validateCoupon` rejected with.
@@ -23,6 +23,11 @@ export declare const ordersApi: (baseURL: string, options?: ApiClientOptionsPatc
     client: import("axios").AxiosInstance;
     createOrder: (data: OrderCreationData) => Promise<OrderCreationResponse>;
     getOrderDetails: (orderId: string) => Promise<OrderDetails>;
+    /**
+     * Public order lookup by order number. A POST so the identifier does not
+     * land in URL logs; the request is read-only and carries one field.
+     */
+    trackOrder: (orderNumber: string) => Promise<TrackingOrder>;
     getShippingZones: () => Promise<ShippingZone[]>;
     validateCoupon: (couponCode: string, customerPhone?: string) => Promise<AppliedDiscount>;
 };

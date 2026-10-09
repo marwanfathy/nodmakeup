@@ -82,3 +82,22 @@ export const getOrderDetails = asyncHandler(async (req: Request, res: Response) 
 
     res.status(200).json({ success: true, data });
 });
+
+/**
+ * @desc      Track an order by order number (no cart session needed)
+ * @route     POST /api/v1/orders/track
+ * @access    Public
+ */
+export const trackOrder = asyncHandler(async (req: Request, res: Response) => {
+    // Body was validated + normalized by trackOrderSchema in the route layer.
+    const { orderNumber } = req.body as { orderNumber: string };
+
+    const data = await orderService.getOrderForTracking(orderNumber);
+
+    if (!data) {
+        res.status(404);
+        throw new Error('Order not found');
+    }
+
+    res.status(200).json({ success: true, data });
+});

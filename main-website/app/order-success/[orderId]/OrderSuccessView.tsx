@@ -153,6 +153,12 @@ export default function OrderSuccessPage() {
                 </div>
 
                 <div className="success-actions">
+                    <Link
+                        href={`${localePath('/track', locale)}?orderNumber=${encodeURIComponent(displayId)}`}
+                        className="btn-track"
+                    >
+                        {t('footer.track')}
+                    </Link>
                     <Link href={localePath('/', locale)} className="btn-continue">
                         {t('order.continueShopping')}
                     </Link>

@@ -1,0 +1,930 @@
+/* --- Track your order -------------------------------------------------------
+   The public order lookup, dressed in the storefront's own language: white
+   surfaces on the warm grey page, hairline borders, the soft shadow ladder and
+   the brand blue used only as a tint. Every value is a token from
+   design-system/variables.css, so light and dark follow the OS with no second
+   rule. Logical inline properties keep the Arabic layout mirrored. Nothing here
+   is allowed to force a sideways scroll: the page clips its own decoration and
+   every flex/grid child can shrink (min-width: 0) and wrap.
+
+   Motion is deliberately gentle and all of it repeats the site's existing
+   vocabulary: a 400ms expo-out spring for entrances, a mild overshoot
+   (cubic-bezier(0.34, 1.56, 0.64, 1)) for things that "pop", and a slow shimmer
+   for skeletons. The staggered delays are driven by a `--i` custom property set
+   per element in the page, so a list animates in one soft wave rather than all
+   at once. Everything collapses under prefers-reduced-motion. */
+
+/* --- Motion primitives ----------------------------------------------------- */
+
+@keyframes track-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes track-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes track-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes track-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes track-pulse {
+  0% {
+    box-shadow:
+      inset 0 0 0 2px var(--color-brand-primary),
+      0 0 0 0 color-mix(in srgb, var(--color-brand-primary) 40%, transparent);
+  }
+  70% {
+    box-shadow:
+      inset 0 0 0 2px var(--color-brand-primary),
+      0 0 0 10px color-mix(in srgb, var(--color-brand-primary) 0%, transparent);
+  }
+  100% {
+    box-shadow:
+      inset 0 0 0 2px var(--color-brand-primary),
+      0 0 0 0 color-mix(in srgb, var(--color-brand-primary) 0%, transparent);
+  }
+}
+
+@keyframes track-float {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(24px, -18px, 0) scale(1.1);
+  }
+}
+
+@keyframes track-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* --- Page ------------------------------------------------------------------ */
+
+.track-page {
+  position: relative;
+  overflow: hidden;
+  min-height: 80vh;
+  padding: calc(var(--space-18) + var(--safe-top, 0px)) var(--space-5)
+    calc(var(--space-20) + var(--safe-bottom, 0px));
+  background:
+    radial-gradient(
+      120% 70% at 50% -20%,
+      color-mix(in srgb, var(--color-brand-primary) 12%, transparent),
+      transparent 62%
+    ),
+    var(--color-bg-secondary);
+}
+
+/* Two soft glows drifting behind the content. They are the only decorative
+   colour on the page, kept low-opacity and heavily blurred so they read as
+   light rather than as shapes. `inset-inline-*` mirrors them for RTL. */
+.track-page::before,
+.track-page::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  border-radius: var(--r-circle);
+  filter: blur(70px);
+  pointer-events: none;
+  animation: track-float 14s ease-in-out infinite alternate;
+}
+
+.track-page::before {
+  width: 320px;
+  height: 320px;
+  top: -80px;
+  inset-inline-start: -64px;
+  background: color-mix(in srgb, var(--color-brand-primary) 20%, transparent);
+}
+
+.track-page::after {
+  width: 260px;
+  height: 260px;
+  bottom: -64px;
+  inset-inline-end: -48px;
+  background: color-mix(in srgb, var(--color-brand-secondary) 14%, transparent);
+  animation-delay: -5s;
+}
+
+.track-page__inner {
+  position: relative;
+  z-index: 1;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+/* --- Heading --------------------------------------------------------------- */
+
+.track-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  text-align: center;
+  margin-bottom: var(--space-8);
+  animation: track-fade-up var(--transition-spring) both;
+}
+
+.track-head__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-12);
+  height: var(--space-12);
+  border-radius: var(--r-control);
+  background: color-mix(in srgb, var(--color-brand-primary) 12%, transparent);
+  color: var(--color-brand-primary);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-brand-primary) 18%, transparent);
+  animation: track-pop var(--transition-spring) 120ms both;
+}
+
+.track-head__icon svg {
+  width: var(--font-size-2xl);
+  height: var(--font-size-2xl);
+}
+
+.track-head__title {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+}
+
+.track-head__subtitle {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-text-secondary);
+  max-width: 44ch;
+}
+
+/* --- Search card ----------------------------------------------------------- */
+
+.track-form {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  background: color-mix(in srgb, var(--color-bg-elevated) 88%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-border-light) 55%, transparent);
+  /* Field 12px sits 20px in: 12 + 20 = 32, the --r-surface curve. */
+  border-radius: var(--r-surface);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: track-fade-up var(--transition-spring) 80ms both;
+}
+
+@media (min-width: 640px) {
+  .track-form {
+    grid-template-columns: 1fr auto;
+    align-items: end;
+  }
+}
+
+.track-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.track-field__label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.track-field__control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.track-field__icon {
+  position: absolute;
+  inset-inline-start: var(--space-4);
+  width: var(--font-size-lg);
+  height: var(--font-size-lg);
+  color: var(--color-text-tertiary);
+  pointer-events: none;
+  transition:
+    color var(--transition-normal),
+    transform var(--transition-spring);
+}
+
+.track-field__input {
+  width: 100%;
+  max-width: 100%;
+  min-height: var(--control-height-xl);
+  padding-block: 0;
+  padding-inline: calc(var(--space-4) + var(--font-size-lg) + var(--space-3)) var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--color-border-light) 70%, transparent);
+  border-radius: var(--r-field);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  letter-spacing: 0.02em;
+  transition:
+    border-color var(--transition-normal),
+    box-shadow var(--transition-normal),
+    background-color var(--transition-normal);
+}
+
+.track-field__input::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.track-field__control:focus-within .track-field__icon {
+  color: var(--color-brand-primary);
+  transform: scale(1.08);
+}
+
+.track-field__input:focus-visible {
+  outline: none;
+  border-color: var(--color-border-focus);
+  box-shadow: var(--shadow-focus);
+}
+
+.track-field__input[aria-invalid='true'] {
+  border-color: var(--color-brand-error);
+  background: color-mix(in srgb, var(--color-brand-error) 4%, var(--color-bg-primary));
+}
+
+.track-field__error {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  color: var(--color-brand-error);
+  animation: track-fade-up var(--transition-normal) both;
+}
+
+.track-form__submit {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--control-height-xl);
+  padding: 0 var(--space-8);
+  border: 1px solid transparent;
+  border-radius: var(--r-control);
+  background: var(--color-text-primary);
+  color: var(--color-bg-primary);
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    transform var(--transition-spring),
+    box-shadow var(--transition-spring),
+    opacity var(--transition-fast);
+}
+
+/* A light sweep that crosses the button on hover. The sheen is mixed from the
+   page background token, so it reads on the black button in light mode and on
+   the light button in dark mode without a second rule. */
+.track-form__submit::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 35%,
+    color-mix(in srgb, var(--color-bg-primary) 22%, transparent) 50%,
+    transparent 65%
+  );
+  transform: translateX(-130%);
+  transition: transform 650ms ease;
+  pointer-events: none;
+}
+
+.track-form__submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.track-form__submit:hover:not(:disabled)::after {
+  transform: translateX(130%);
+}
+
+.track-form__submit:active:not(:disabled) {
+  transform: translateY(0) scale(0.985);
+}
+
+.track-form__submit:disabled {
+  cursor: progress;
+  opacity: 0.6;
+}
+
+.track-form__submit:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+.track-form__arrow {
+  width: var(--font-size-lg);
+  height: var(--font-size-lg);
+  transition: transform var(--transition-spring);
+}
+
+.track-form__submit:hover:not(:disabled) .track-form__arrow {
+  transform: translateX(var(--space-1));
+}
+
+/* In RTL the arrow points the other way, and the hover nudge follows it. */
+[dir='rtl'] .track-form__arrow {
+  transform: scaleX(-1);
+}
+
+[dir='rtl'] .track-form__submit:hover:not(:disabled) .track-form__arrow {
+  transform: scaleX(-1) translateX(var(--space-1));
+}
+
+/* --- Inline feedback (no toast, no banner) --------------------------------- */
+
+.track-feedback {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid color-mix(in srgb, var(--color-border-light) 60%, transparent);
+  border-radius: var(--r-field);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+  animation: track-fade-up var(--transition-spring) both;
+}
+
+.track-feedback__icon {
+  flex: none;
+  width: var(--font-size-xl);
+  height: var(--font-size-xl);
+  margin-top: var(--space-half);
+}
+
+.track-feedback--notfound {
+  border-color: color-mix(in srgb, var(--color-brand-primary) 22%, transparent);
+  background: color-mix(in srgb, var(--color-brand-primary) 6%, var(--color-bg-elevated));
+}
+
+.track-feedback--notfound .track-feedback__icon {
+  color: var(--color-brand-primary);
+}
+
+.track-feedback--error {
+  border-color: color-mix(in srgb, var(--color-brand-error) 24%, transparent);
+  background: color-mix(in srgb, var(--color-brand-error) 6%, var(--color-bg-elevated));
+}
+
+.track-feedback--error .track-feedback__icon {
+  color: var(--color-brand-error);
+}
+
+/* --- Result ---------------------------------------------------------------- */
+
+.track-result {
+  margin-top: var(--space-6);
+  padding: var(--space-5);
+  background: color-mix(in srgb, var(--color-bg-elevated) 90%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-border-light) 55%, transparent);
+  border-radius: var(--r-surface);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: track-rise var(--transition-spring) both;
+}
+
+.track-result__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border-light) 55%, transparent);
+}
+
+.track-result__identity {
+  min-width: 0;
+}
+
+.track-result__eyebrow {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-tertiary);
+}
+
+.track-result__number {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.01em;
+  color: var(--color-text-primary);
+  overflow-wrap: anywhere;
+}
+
+.track-result__date {
+  margin-top: var(--space-1);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.track-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--r-chip);
+  background: color-mix(in srgb, var(--color-brand-primary) 12%, transparent);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  animation: track-pop var(--transition-spring) 140ms both;
+}
+
+.track-badge__dot {
+  width: var(--space-2);
+  height: var(--space-2);
+  border-radius: var(--r-circle);
+  background: var(--color-brand-primary);
+}
+
+.track-badge--success {
+  background: color-mix(in srgb, var(--color-brand-success) 16%, transparent);
+}
+
+.track-badge--success .track-badge__dot {
+  background: var(--color-brand-success);
+}
+
+.track-badge--negative {
+  background: color-mix(in srgb, var(--color-brand-error) 14%, transparent);
+}
+
+.track-badge--negative .track-badge__dot {
+  background: var(--color-brand-error);
+}
+
+/* --- Fulfilment ladder ------------------------------------------------------
+   A four-column timeline at every width. Each step after the first draws the
+   rail that links it to the previous dot: `inset-inline-end: 50%` anchors the
+   line at this dot's centre and `width: 100%` reaches the previous column's
+   centre, which is correct in both writing directions. The dot sits above the
+   rail; the rail grows in, then each dot pops and its label rises. */
+
+.track-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
+  margin: var(--space-6) 0;
+  padding: 0;
+  list-style: none;
+}
+
+.track-step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  text-align: center;
+}
+
+.track-step:not(:first-child)::before {
+  content: '';
+  position: absolute;
+  top: calc(var(--space-4) / 2 - 1px);
+  inset-inline-end: 50%;
+  width: 100%;
+  height: 2px;
+  z-index: 0;
+  border-radius: var(--r-track);
+  background: var(--color-border-light);
+  transform-origin: center;
+  animation: track-draw var(--transition-slow) both;
+  animation-delay: calc(var(--i, 0) * 80ms + 60ms);
+}
+
+.track-step--done:not(:first-child)::before,
+.track-step--current:not(:first-child)::before {
+  background: var(--color-brand-success);
+}
+
+.track-step__dot {
+  position: relative;
+  z-index: 1;
+  width: var(--space-4);
+  height: var(--space-4);
+  border-radius: var(--r-circle);
+  background: var(--color-bg-elevated);
+  box-shadow: inset 0 0 0 2px var(--color-border-light);
+  animation: track-pop var(--transition-spring) both;
+  animation-delay: calc(var(--i, 0) * 80ms + 100ms);
+  transition:
+    background var(--transition-normal),
+    box-shadow var(--transition-normal);
+}
+
+.track-step--done .track-step__dot {
+  background: var(--color-brand-success);
+  box-shadow: inset 0 0 0 2px var(--color-brand-success);
+}
+
+.track-step--current .track-step__dot {
+  background: var(--color-bg-elevated);
+  box-shadow: inset 0 0 0 2px var(--color-brand-primary);
+  animation:
+    track-pop var(--transition-spring) both,
+    track-pulse 2.6s ease-out infinite;
+  animation-delay: calc(var(--i, 0) * 80ms + 100ms), calc(var(--i, 0) * 80ms + 600ms);
+}
+
+.track-step__label {
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-tertiary);
+  overflow-wrap: anywhere;
+  animation: track-fade-up var(--transition-spring) both;
+  animation-delay: calc(var(--i, 0) * 80ms + 150ms);
+}
+
+.track-step--done .track-step__label,
+.track-step--current .track-step__label {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* --- Panels ---------------------------------------------------------------- */
+
+.track-result__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  margin-top: var(--space-5);
+}
+
+@media (min-width: 768px) {
+  .track-result__grid {
+    grid-template-columns: 3fr 2fr;
+  }
+}
+
+.track-panel {
+  min-width: 0;
+  animation: track-fade-up var(--transition-spring) both;
+  animation-delay: calc(var(--i, 0) * 80ms + 120ms);
+}
+
+.track-panel__title {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-tertiary);
+  margin-bottom: var(--space-3);
+}
+
+.track-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.track-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-3);
+  background: color-mix(in srgb, var(--color-bg-secondary) 70%, transparent);
+  border-radius: var(--r-field);
+  animation: track-fade-up var(--transition-spring) both;
+  animation-delay: calc(var(--i, 0) * 70ms + 180ms);
+  transition:
+    transform var(--transition-spring),
+    background-color var(--transition-normal);
+}
+
+.track-item:hover {
+  transform: translateY(-1px);
+  background: var(--color-bg-secondary);
+}
+
+.track-item__image {
+  flex-shrink: 0;
+  width: var(--space-14);
+  height: var(--space-14);
+  border-radius: var(--r-inset-thumb);
+  object-fit: cover;
+  background: var(--color-bg-tertiary);
+  box-shadow: var(--shadow-sm);
+}
+
+.track-item__image--empty {
+  display: block;
+}
+
+.track-item__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.track-item__name {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  overflow-wrap: anywhere;
+}
+
+.track-item__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  margin-top: var(--space-1);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.track-item__price {
+  flex-shrink: 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+}
+
+/* --- Totals + meta --------------------------------------------------------- */
+
+.track-summary,
+.track-meta {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.track-meta {
+  margin-top: var(--space-5);
+  padding-top: var(--space-5);
+  border-top: 1px solid color-mix(in srgb, var(--color-border-light) 55%, transparent);
+}
+
+.track-summary__row,
+.track-meta__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.track-summary__row dt,
+.track-meta__row dt {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.track-summary__row dd,
+.track-meta__row dd {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  text-align: end;
+  overflow-wrap: anywhere;
+}
+
+.track-summary__row--total {
+  margin-top: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: 1px solid color-mix(in srgb, var(--color-border-light) 55%, transparent);
+}
+
+.track-summary__row--total dt,
+.track-summary__row--total dd {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+/* --- Result footer --------------------------------------------------------- */
+
+.track-result__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid color-mix(in srgb, var(--color-border-light) 55%, transparent);
+}
+
+.track-result__reset {
+  min-height: var(--control-height);
+  padding: 0 var(--space-5);
+  border: 1px solid color-mix(in srgb, var(--color-border-light) 70%, transparent);
+  border-radius: var(--r-control);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition:
+    border-color var(--transition-fast),
+    transform var(--transition-spring),
+    box-shadow var(--transition-spring);
+}
+
+.track-result__reset:hover {
+  border-color: var(--color-border-medium);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.track-result__reset:active {
+  transform: translateY(0);
+}
+
+.track-result__reset:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+.track-result__help {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+/* --- Skeleton --------------------------------------------------------------
+   The result's own shape, so nothing moves when the order lands. The shimmer is
+   local to this sheet: every stylesheet here is global, and a shared
+   @keyframes name would collide with the shop's own. */
+
+.track-skeleton {
+  margin-top: var(--space-6);
+  padding: var(--space-5);
+  background: color-mix(in srgb, var(--color-bg-elevated) 90%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-border-light) 55%, transparent);
+  border-radius: var(--r-surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.track-skeleton__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border-light) 55%, transparent);
+}
+
+.track-skeleton__line,
+.track-skeleton__pill,
+.track-skeleton__block {
+  display: block;
+  background: color-mix(in srgb, var(--color-bg-tertiary) 70%, transparent);
+  background-image: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-bg-tertiary) 55%, transparent) 25%,
+    var(--color-bg-tertiary) 50%,
+    color-mix(in srgb, var(--color-bg-tertiary) 55%, transparent) 75%
+  );
+  background-size: 200% 100%;
+  animation: track-shimmer 1.6s infinite linear;
+  border-radius: var(--r-sm);
+}
+
+.track-skeleton__line {
+  height: var(--space-5);
+}
+
+.track-skeleton__line--short {
+  width: 40%;
+}
+
+.track-skeleton__pill {
+  width: 96px;
+  height: var(--space-8);
+  border-radius: var(--r-chip);
+}
+
+.track-skeleton__steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
+  margin: var(--space-6) 0;
+}
+
+.track-skeleton__body {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+}
+
+@media (min-width: 768px) {
+  .track-skeleton__body {
+    grid-template-columns: 3fr 2fr;
+  }
+}
+
+.track-skeleton__block {
+  height: var(--space-24);
+  border-radius: var(--r-field);
+}
+
+/* --- Small screens --------------------------------------------------------- */
+
+@media (max-width: 480px) {
+  .track-head__title {
+    font-size: var(--font-size-3xl);
+  }
+}
+
+/* --- Reduced motion --------------------------------------------------------
+   The global reduce rule already shortens every animation, but the entrance
+   animations use `both` fill, so pin them to their finished state explicitly
+   and stop the ambience outright. */
+
+@media (prefers-reduced-motion: reduce) {
+  .track-head,
+  .track-head__icon,
+  .track-form,
+  .track-result,
+  .track-feedback,
+  .track-panel,
+  .track-item,
+  .track-badge,
+  .track-step::before,
+  .track-step__dot,
+  .track-step__label,
+  .track-page::before,
+  .track-page::after {
+    animation: none;
+  }
+
+  .track-form__submit::after {
+    display: none;
+  }
+
+  .track-item:hover,
+  .track-form__submit:hover:not(:disabled),
+  .track-result__reset:hover {
+    transform: none;
+  }
+}

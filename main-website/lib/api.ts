@@ -30,6 +30,10 @@ const orders = ordersApi(API_URL, { headerProvider: sessionHeaders });
 const analytics = analyticsApi(API_URL);
 export const media = mediaApi(MEDIA_URL);
 
+// Axios-error discriminator, re-exported so callers can tell a 404 ("no such
+// order") apart from a failed request without importing axios themselves.
+export { isNotFound } from './shared/dist/clients/client.js';
+
 // ===============================================
 //           TYPES (re-exported from shared)
 // ===============================================
@@ -55,6 +59,7 @@ export type {
   OrderCreationResponse,
   OrderItemInfo,
   OrderDetails,
+  TrackingOrder,
   MediaType,
   StoryItem,
   StoryBundle,
@@ -130,6 +135,10 @@ export const createOrder = (data: import('./shared/dist/api/types.js').OrderCrea
 
 export const getPublicOrderDetails = (orderId: string) =>
   orders.getOrderDetails(orderId);
+
+/** Public order lookup by order number (no cart session needed). */
+export const trackOrder = (orderNumber: string) =>
+  orders.trackOrder(orderNumber);
 
 export const getShippingZones = () => orders.getShippingZones();
 

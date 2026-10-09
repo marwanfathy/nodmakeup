@@ -35,6 +35,20 @@ export const createOrderSchema = z.object({
     checkoutKey: z.string().uuid('checkoutKey must be a UUID.').optional(),
 });
 
+/**
+ * Public tracking lookup. The order number is stored upper-case (`RGE-…`) and
+ * is the only field. Kept in shared so the storefront form and the API handler
+ * refuse the same input for the same reason.
+ */
+export const trackOrderSchema = z.object({
+    orderNumber: z
+        .string()
+        .trim()
+        .min(1, 'Order number is required.')
+        .max(50, 'Order number is too long.')
+        .transform((v) => v.toUpperCase()),
+});
+
 export const addCartItemSchema = z.object({
     variantId: z.string().uuid('Invalid variant ID.'),
     quantity: z.coerce.number().int({ message: 'Quantity must be a number.' }).int().min(1, 'Quantity must be at least 1.').max(99, 'Maximum 99 units per line.'),
