@@ -1,830 +1,595 @@
-/* --- Track your order -------------------------------------------------------
-   The public order lookup, dressed in the storefront's own language: white
-   surfaces on a white page, hairline borders and the soft shadow ladder. The
-   whole page is deliberately monochrome — ink, paper and greys only, with no
-   accent colour. Every value is a token from design-system/variables.css, and
-   the neutral colour tokens are pinned to their light values at .track-page
-   scope because the storefront ships no dark theme. Logical inline properties
-   keep the Arabic layout mirrored. Nothing here
-   is allowed to force a sideways scroll: the page clips its own decoration and
-   every flex/grid child can shrink (min-width: 0) and wrap.
+/*
+ * The public order lookup — ported straight from the page mockup: a warm
+ * paper-white palette, rose highlights, a four-dotted progress rail that
+ * turns into a vertical timeline on small screens, and status colours that
+ * tell the state at a glance (amber = being prepared, blue = with the
+ * courier, green = delivered, rose = closed).
+ *
+ * The palette is scoped to this page on purpose. The storefront has no dark
+ * theme, and the shared tokens re-declare themselves under
+ * prefers-color-scheme: dark — pinning the design's own values here keeps the
+ * page ink-on-paper no matter what the OS asks for.
+ *
+ * Logical properties (inset-inline-start, margin-inline-start, …) keep the
+ * Arabic layout mirrored; the only physical values are the symmetrical ones
+ * (border-radius, border widths) or paint-only ones (shadows).
+ */
 
-   Motion is deliberately gentle and all of it repeats the site's existing
-   vocabulary: a 400ms expo-out spring for entrances, a mild overshoot
-   (cubic-bezier(0.34, 1.56, 0.64, 1)) for things that "pop", and a slow shimmer
-   for skeletons. The staggered delays are driven by a `--i` custom property set
-   per element in the page, so a list animates in one soft wave rather than all
-   at once. Everything collapses under prefers-reduced-motion. */
+.track-page {
+  --ink: #1c1917;
+  --muted: #6b6560;
+  --line: #e7e2dc;
+  --paper: #fff;
+  --wash: #f8f5f1;
+  --rose: #d4607a;
+  --rose-soft: #fbe9ed;
+  --amber: #8a5a00;
+  --amber-bg: #fdf1d6;
+  --blue: #1d4f91;
+  --blue-bg: #e2edfb;
+  --green: #1b6b3a;
+  --green-bg: #dff3e6;
 
-/* --- Motion primitives ----------------------------------------------------- */
-
-@keyframes track-fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  color: var(--ink);
+  background: var(--paper);
 }
 
-@keyframes track-rise {
-  from {
-    opacity: 0;
-    transform: translateY(18px) scale(0.985);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+.track-page__inner {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 48px 20px 64px;
 }
 
-@keyframes track-pop {
-  0% {
-    opacity: 0;
-    transform: scale(0.5);
-  }
-  60% {
-    opacity: 1;
-    transform: scale(1.08);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
+/* --- heading ------------------------------------------------------------ */
+
+.track-head {
+  margin-bottom: 28px;
 }
 
-@keyframes track-draw {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
+.track-head__title {
+  margin: 0 0 6px;
+  font-size: 32px;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+
+.track-head__subtitle {
+  margin: 0;
+  text-align: center;
+  color: var(--muted);
+}
+
+/* --- lookup form -------------------------------------------------------- */
+
+.lookup {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.field {
+  flex: 1;
+  position: relative;
+}
+
+.field__icon {
+  position: absolute;
+  inset-inline-start: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.field__input {
+  width: 100%;
+  height: 52px;
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  padding-inline: 14px 42px;
+  font: inherit;
+  font-weight: 500;
+  color: var(--ink);
+  background: var(--paper);
+}
+
+.field__input::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+
+.field__input:focus {
+  outline: none;
+  border-color: var(--ink);
+}
+
+.field__error {
+  margin: -8px 0 20px;
+  font-size: 14px;
+  color: var(--rose);
+}
+
+.btn {
+  height: 52px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--ink);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn:hover:not(:disabled) {
+  background: #2a2523;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.btn:focus-visible,
+.field__input:focus-visible {
+  outline: 3px solid var(--rose);
+  outline-offset: 2px;
+}
+
+/* --- inline feedback (notfound / error) --------------------------------- */
+/* No toasts, no popups: the state lives in the page, right under the form. */
+
+.msg {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 20px;
+  padding: 14px 16px;
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  background: var(--wash);
+  font-size: 15px;
+}
+
+.msg svg {
+  flex: none;
+  color: var(--rose);
+}
+
+/* --- order card --------------------------------------------------------- */
+
+.card {
+  border: 1.5px solid var(--line);
+  border-radius: 22px;
+  overflow: hidden;
+  background: var(--paper);
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 24px 26px 22px;
+}
+
+.head__label {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.head__num {
+  margin: 2px 0 0;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.badge__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+
+.badge--processing {
+  background: var(--amber-bg);
+  color: var(--amber);
+}
+
+.badge--shipped {
+  background: var(--blue-bg);
+  color: var(--blue);
+}
+
+.badge--delivered {
+  background: var(--green-bg);
+  color: var(--green);
+}
+
+.badge--negative {
+  background: var(--rose-soft);
+  color: var(--rose);
+}
+
+/* --- four-dot progress rail -------------------------------------------- */
+
+.tracker {
+  list-style: none;
+  margin: 30px 26px 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.step {
+  position: relative;
+  text-align: center;
+  padding: 0 6px;
+}
+
+.step::after {
+  content: '';
+  position: absolute;
+  top: 13px;
+  inset-inline-start: 50%;
+  width: 100%;
+  height: 2px;
+  background: var(--line);
+}
+
+.step:last-child::after {
+  display: none;
+}
+
+.step--done::after {
+  background: var(--ink);
+}
+
+.node {
+  position: relative;
+  z-index: 1;
+  width: 28px;
+  height: 28px;
+  margin: 0 auto 10px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  background: var(--paper);
+  display: grid;
+  place-items: center;
+  color: #fff;
+}
+
+.step--done .node {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.step--current .node {
+  border-color: var(--ink);
+  animation: track-pulse 2s ease-out infinite;
+}
+
+.step--current .node::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+.step b {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.step small {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.step--todo b {
+  color: var(--muted);
+  font-weight: 500;
 }
 
 @keyframes track-pulse {
   0% {
-    box-shadow:
-      inset 0 0 0 2px var(--color-text-primary),
-      0 0 0 0 color-mix(in srgb, var(--color-text-primary) 40%, transparent);
-  }
-  70% {
-    box-shadow:
-      inset 0 0 0 2px var(--color-text-primary),
-      0 0 0 10px color-mix(in srgb, var(--color-text-primary) 0%, transparent);
+    box-shadow: 0 0 0 0 rgba(28, 25, 23, 0.28);
   }
   100% {
-    box-shadow:
-      inset 0 0 0 2px var(--color-text-primary),
-      0 0 0 0 color-mix(in srgb, var(--color-text-primary) 0%, transparent);
+    box-shadow: 0 0 0 12px rgba(28, 25, 23, 0);
   }
 }
 
-@keyframes track-shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
+/* --- what happens next -------------------------------------------------- */
+
+.next {
+  margin: 26px 26px 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  font-size: 15px;
+  color: var(--ink);
 }
 
-/* --- Page ------------------------------------------------------------------ */
+/* --- card body: item + summary ----------------------------------------- */
 
-.track-page {
-  /* Monochrome focus ring: a black halo instead of the brand-blue one. */
-  --track-focus-ring: 0 0 0 3px color-mix(in srgb, var(--color-text-primary) 18%, transparent);
-  /* Light-only. The storefront has no dark theme, but the shared tokens
-     re-declare themselves under prefers-color-scheme: dark; a device whose OS
-     asks for dark would otherwise flip this whole page black. Pinning the
-     light neutrals here keeps the background white and the ink black. */
-  --color-bg-primary: #FFFFFF;
-  --color-bg-secondary: #F5F5F7;
-  --color-bg-tertiary: #EBEBF0;
-  --color-bg-elevated: #FFFFFF;
-  --color-text-primary: #141414;
-  --color-text-secondary: #545454;
-  --color-text-tertiary: #6E6E73;
-  --color-border-light: #D1D1D6;
-  --color-border-medium: #6E6E73;
-  position: relative;
-  overflow: hidden;
-  min-height: 80vh;
-  padding: calc(var(--space-18) + var(--safe-top, 0px)) var(--space-5)
-    calc(var(--space-20) + var(--safe-bottom, 0px));
-  background: var(--color-bg-primary);
-}
-
-.track-page__inner {
-  position: relative;
-  z-index: 1;
-  max-width: 960px;
-  margin: 0 auto;
-}
-
-/* --- Heading --------------------------------------------------------------- */
-
-.track-head {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-3);
-  text-align: center;
-  margin-bottom: var(--space-8);
-  animation: track-fade-up var(--transition-spring) both;
-}
-
-.track-head__title {
-  font-size: var(--font-size-4xl);
-  font-weight: var(--font-weight-semibold);
-  line-height: var(--line-height-tight);
-  letter-spacing: -0.02em;
-  color: var(--color-text-primary);
-}
-
-.track-head__subtitle {
-  font-size: var(--font-size-base);
-  line-height: var(--line-height-relaxed);
-  color: var(--color-text-secondary);
-  max-width: 44ch;
-}
-
-/* --- Search card ----------------------------------------------------------- */
-
-.track-form {
-  position: relative;
+.body {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-4);
-  padding: var(--space-5);
-  background: color-mix(in srgb, var(--color-bg-elevated) 88%, transparent);
-  border: 1px solid color-mix(in srgb, var(--color-border-light) 55%, transparent);
-  /* Field 12px sits 20px in: 12 + 20 = 32, the --r-surface curve. */
-  border-radius: var(--r-surface);
-  box-shadow: var(--shadow-lg);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  animation: track-fade-up var(--transition-spring) 80ms both;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 28px;
+  padding: 26px;
 }
 
-@media (min-width: 640px) {
-  .track-form {
-    grid-template-columns: 1fr auto;
-    align-items: end;
-  }
+.body h2 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--muted);
 }
 
-.track-field {
+.items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.item {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  min-width: 0;
-}
-
-.track-field__label {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-text-secondary);
-}
-
-.track-field__control {
-  position: relative;
-  display: flex;
+  gap: 14px;
   align-items: center;
-  min-width: 0;
+  background: var(--wash);
+  border-radius: 16px;
+  padding: 12px;
 }
 
-.track-field__icon {
-  position: absolute;
-  inset-inline-start: var(--space-4);
-  width: var(--font-size-lg);
-  height: var(--font-size-lg);
-  color: var(--color-text-tertiary);
-  pointer-events: none;
-  transition:
-    color var(--transition-normal),
-    transform var(--transition-spring);
-}
-
-.track-field__input {
-  width: 100%;
-  max-width: 100%;
-  min-height: var(--control-height-xl);
-  padding-block: 0;
-  padding-inline: calc(var(--space-4) + var(--font-size-lg) + var(--space-3)) var(--space-4);
-  border: 1px solid color-mix(in srgb, var(--color-border-light) 70%, transparent);
-  border-radius: var(--r-field);
-  background: var(--color-bg-primary);
-  color: var(--color-text-primary);
-  font-family: inherit;
-  font-size: var(--font-size-base);
-  letter-spacing: 0.02em;
-  transition:
-    border-color var(--transition-normal),
-    box-shadow var(--transition-normal),
-    background-color var(--transition-normal);
-}
-
-.track-field__input::placeholder {
-  color: var(--color-text-tertiary);
-}
-
-.track-field__control:focus-within .track-field__icon {
-  color: var(--color-text-primary);
-  transform: scale(1.08);
-}
-
-.track-field__input:focus-visible {
-  outline: none;
-  border-color: var(--color-text-primary);
-  box-shadow: var(--track-focus-ring);
-}
-
-.track-field__input[aria-invalid='true'] {
-  border-color: var(--color-text-primary);
-  background: color-mix(in srgb, var(--color-text-primary) 4%, var(--color-bg-primary));
-}
-
-.track-field__error {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  line-height: var(--line-height-normal);
-  color: var(--color-text-primary);
-  animation: track-fade-up var(--transition-normal) both;
-}
-
-.track-form__submit {
-  position: relative;
-  overflow: hidden;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  min-height: var(--control-height-xl);
-  padding: 0 var(--space-8);
-  border: 1px solid transparent;
-  border-radius: var(--r-control);
-  background: var(--color-text-primary);
-  color: var(--color-bg-primary);
-  font-family: inherit;
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: 0.01em;
-  white-space: nowrap;
-  cursor: pointer;
-  transition:
-    transform var(--transition-spring),
-    box-shadow var(--transition-spring),
-    opacity var(--transition-fast);
-}
-
-/* A light sweep that crosses the button on hover. The sheen is mixed from the
-   page background token, so it reads as a white sweep across the black button. */
-.track-form__submit::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    115deg,
-    transparent 35%,
-    color-mix(in srgb, var(--color-bg-primary) 22%, transparent) 50%,
-    transparent 65%
-  );
-  transform: translateX(-130%);
-  transition: transform 650ms ease;
-  pointer-events: none;
-}
-
-.track-form__submit:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-}
-
-.track-form__submit:hover:not(:disabled)::after {
-  transform: translateX(130%);
-}
-
-.track-form__submit:active:not(:disabled) {
-  transform: translateY(0) scale(0.985);
-}
-
-.track-form__submit:disabled {
-  cursor: progress;
-  opacity: 0.6;
-}
-
-.track-form__submit:focus-visible {
-  outline: none;
-  box-shadow: var(--track-focus-ring);
-}
-
-.track-form__arrow {
-  width: var(--font-size-lg);
-  height: var(--font-size-lg);
-  transition: transform var(--transition-spring);
-}
-
-.track-form__submit:hover:not(:disabled) .track-form__arrow {
-  transform: translateX(var(--space-1));
-}
-
-/* In RTL the arrow points the other way, and the hover nudge follows it. */
-[dir='rtl'] .track-form__arrow {
-  transform: scaleX(-1);
-}
-
-[dir='rtl'] .track-form__submit:hover:not(:disabled) .track-form__arrow {
-  transform: scaleX(-1) translateX(var(--space-1));
-}
-
-/* --- Inline feedback (no toast, no banner) --------------------------------- */
-
-.track-feedback {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-3);
-  margin-top: var(--space-5);
-  padding: var(--space-4) var(--space-5);
-  border: 1px solid color-mix(in srgb, var(--color-border-light) 60%, transparent);
-  border-radius: var(--r-field);
-  background: var(--color-bg-elevated);
-  color: var(--color-text-primary);
-  font-size: var(--font-size-base);
-  line-height: var(--line-height-relaxed);
-  animation: track-fade-up var(--transition-spring) both;
-}
-
-.track-feedback__icon {
+.thumb {
+  width: 64px;
+  height: 76px;
+  border-radius: 12px;
+  background: var(--paper);
+  display: grid;
+  place-items: center;
   flex: none;
-  width: var(--font-size-xl);
-  height: var(--font-size-xl);
-  margin-top: var(--space-half);
 }
 
-.track-feedback--notfound {
-  border-color: color-mix(in srgb, var(--color-text-primary) 20%, transparent);
-  background: color-mix(in srgb, var(--color-text-primary) 4%, var(--color-bg-elevated));
-}
-
-.track-feedback--notfound .track-feedback__icon {
-  color: var(--color-text-primary);
-}
-
-.track-feedback--error {
-  border-color: var(--color-text-primary);
-  background: color-mix(in srgb, var(--color-text-primary) 5%, var(--color-bg-elevated));
-}
-
-.track-feedback--error .track-feedback__icon {
-  color: var(--color-text-primary);
-}
-
-/* --- Result ---------------------------------------------------------------- */
-
-.track-result {
-  margin-top: var(--space-6);
-  padding: var(--space-5);
-  background: color-mix(in srgb, var(--color-bg-elevated) 90%, transparent);
-  border: 1px solid color-mix(in srgb, var(--color-border-light) 55%, transparent);
-  border-radius: var(--r-surface);
-  box-shadow: var(--shadow-lg);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  animation: track-rise var(--transition-spring) both;
-}
-
-.track-result__head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-4);
-  padding-bottom: var(--space-4);
-  border-bottom: 1px solid color-mix(in srgb, var(--color-border-light) 55%, transparent);
-}
-
-.track-result__identity {
-  min-width: 0;
-}
-
-.track-result__eyebrow {
-  font-size: var(--font-size-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-text-tertiary);
-}
-
-.track-result__number {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: 0.01em;
-  color: var(--color-text-primary);
-  overflow-wrap: anywhere;
-}
-
-.track-result__date {
-  margin-top: var(--space-1);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-}
-
-.track-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  flex-shrink: 0;
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--r-chip);
-  background: color-mix(in srgb, var(--color-text-primary) 8%, transparent);
-  color: var(--color-text-primary);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  animation: track-pop var(--transition-spring) 140ms both;
-}
-
-.track-badge__dot {
-  width: var(--space-2);
-  height: var(--space-2);
-  border-radius: var(--r-circle);
-  background: var(--color-text-primary);
-}
-
-.track-badge--success {
-  background: var(--color-text-primary);
-  color: var(--color-bg-primary);
-}
-
-.track-badge--success .track-badge__dot {
-  background: var(--color-bg-primary);
-}
-
-.track-badge--negative {
-  background: color-mix(in srgb, var(--color-text-primary) 6%, transparent);
-}
-
-.track-badge--negative .track-badge__dot {
-  background: var(--color-text-primary);
-}
-
-/* --- Fulfilment ladder ------------------------------------------------------
-   A four-column timeline at every width. Each step after the first draws the
-   rail that links it to the previous dot: `inset-inline-end: 50%` anchors the
-   line at this dot's centre and `width: 100%` reaches the previous column's
-   centre, which is correct in both writing directions. The dot sits above the
-   rail; the rail grows in, then each dot pops and its label rises. */
-
-.track-steps {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-2);
-  margin: var(--space-6) 0;
-  padding: 0;
-  list-style: none;
-}
-
-.track-step {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-2);
-  min-width: 0;
-  text-align: center;
-}
-
-.track-step:not(:first-child)::before {
-  content: '';
-  position: absolute;
-  top: calc(var(--space-4) / 2 - 1px);
-  inset-inline-end: 50%;
+.thumb img {
   width: 100%;
-  height: 2px;
-  z-index: 0;
-  border-radius: var(--r-track);
-  background: var(--color-border-light);
-  transform-origin: center;
-  animation: track-draw var(--transition-slow) both;
-  animation-delay: calc(var(--i, 0) * 80ms + 60ms);
-}
-
-.track-step--done:not(:first-child)::before,
-.track-step--current:not(:first-child)::before {
-  background: var(--color-text-primary);
-}
-
-.track-step__dot {
-  position: relative;
-  z-index: 1;
-  width: var(--space-4);
-  height: var(--space-4);
-  border-radius: var(--r-circle);
-  background: var(--color-bg-elevated);
-  box-shadow: inset 0 0 0 2px var(--color-border-light);
-  animation: track-pop var(--transition-spring) both;
-  animation-delay: calc(var(--i, 0) * 80ms + 100ms);
-  transition:
-    background var(--transition-normal),
-    box-shadow var(--transition-normal);
-}
-
-.track-step--done .track-step__dot {
-  background: var(--color-text-primary);
-  box-shadow: inset 0 0 0 2px var(--color-text-primary);
-}
-
-.track-step--current .track-step__dot {
-  background: var(--color-bg-elevated);
-  box-shadow: inset 0 0 0 2px var(--color-text-primary);
-  animation:
-    track-pop var(--transition-spring) both,
-    track-pulse 2.6s ease-out infinite;
-  animation-delay: calc(var(--i, 0) * 80ms + 100ms), calc(var(--i, 0) * 80ms + 600ms);
-}
-
-.track-step__label {
-  font-size: var(--font-size-xs);
-  line-height: var(--line-height-normal);
-  color: var(--color-text-tertiary);
-  overflow-wrap: anywhere;
-  animation: track-fade-up var(--transition-spring) both;
-  animation-delay: calc(var(--i, 0) * 80ms + 150ms);
-}
-
-.track-step--done .track-step__label,
-.track-step--current .track-step__label {
-  color: var(--color-text-primary);
-  font-weight: var(--font-weight-medium);
-}
-
-/* --- Panels ---------------------------------------------------------------- */
-
-.track-result__grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-6);
-  margin-top: var(--space-5);
-}
-
-@media (min-width: 768px) {
-  .track-result__grid {
-    grid-template-columns: 3fr 2fr;
-  }
-}
-
-.track-panel {
-  min-width: 0;
-  animation: track-fade-up var(--transition-spring) both;
-  animation-delay: calc(var(--i, 0) * 80ms + 120ms);
-}
-
-.track-panel__title {
-  font-size: var(--font-size-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-text-tertiary);
-  margin-bottom: var(--space-3);
-}
-
-.track-items {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.track-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  min-width: 0;
-  padding: var(--space-3);
-  background: color-mix(in srgb, var(--color-bg-secondary) 70%, transparent);
-  border-radius: var(--r-field);
-  animation: track-fade-up var(--transition-spring) both;
-  animation-delay: calc(var(--i, 0) * 70ms + 180ms);
-  transition:
-    transform var(--transition-spring),
-    background-color var(--transition-normal);
-}
-
-.track-item:hover {
-  transform: translateY(-1px);
-  background: var(--color-bg-secondary);
-}
-
-.track-item__image {
-  flex-shrink: 0;
-  width: var(--space-14);
-  height: var(--space-14);
-  border-radius: var(--r-inset-thumb);
+  height: 100%;
   object-fit: cover;
-  background: var(--color-bg-tertiary);
-  box-shadow: var(--shadow-sm);
+  border-radius: 12px;
 }
 
-.track-item__image--empty {
-  display: block;
-}
-
-.track-item__body {
-  flex: 1;
+.item__body {
   min-width: 0;
 }
 
-.track-item__name {
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
-  overflow-wrap: anywhere;
+.item__name {
+  font-weight: 600;
 }
 
-.track-item__meta {
+.item__meta {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2) var(--space-3);
-  margin-top: var(--space-1);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  gap: 4px;
+  font-size: 14px;
+  color: var(--muted);
 }
 
-.track-item__price {
-  flex-shrink: 0;
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
+.item__price {
+  margin-inline-start: auto;
+  font-weight: 700;
   white-space: nowrap;
 }
 
-/* --- Totals + meta --------------------------------------------------------- */
-
-.track-summary,
-.track-meta {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+.rows {
+  display: grid;
+  gap: 8px;
+  font-size: 15px;
 }
 
-.track-meta {
-  margin-top: var(--space-5);
-  padding-top: var(--space-5);
-  border-top: 1px solid color-mix(in srgb, var(--color-border-light) 55%, transparent);
-}
-
-.track-summary__row,
-.track-meta__row {
+.rows > div {
   display: flex;
-  align-items: baseline;
   justify-content: space-between;
-  gap: var(--space-4);
+  gap: 12px;
 }
 
-.track-summary__row dt,
-.track-meta__row dt {
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
+.rows__k {
+  color: var(--muted);
 }
 
-.track-summary__row dd,
-.track-meta__row dd {
-  color: var(--color-text-primary);
-  font-size: var(--font-size-sm);
-  text-align: end;
-  overflow-wrap: anywhere;
+.total {
+  border-top: 1px solid var(--line);
+  margin-top: 6px;
+  padding-top: 12px;
+  font-size: 18px;
+  font-weight: 700;
 }
 
-.track-summary__row--total {
-  margin-top: var(--space-2);
-  padding-top: var(--space-3);
-  border-top: 1px solid color-mix(in srgb, var(--color-border-light) 55%, transparent);
+.total .rows__k {
+  color: var(--ink);
+  font-weight: 700;
 }
 
-.track-summary__row--total dt,
-.track-summary__row--total dd {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
+.cod {
+  margin-top: 14px;
+  border: 1.5px dashed var(--ink);
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 15px;
 }
 
-/* --- Skeleton --------------------------------------------------------------
-   The result's own shape, so nothing moves when the order lands. The shimmer is
-   local to this sheet: every stylesheet here is global, and a shared
-   @keyframes name would collide with the shop's own. */
-
-.track-skeleton {
-  margin-top: var(--space-6);
-  padding: var(--space-5);
-  background: color-mix(in srgb, var(--color-bg-elevated) 90%, transparent);
-  border: 1px solid color-mix(in srgb, var(--color-border-light) 55%, transparent);
-  border-radius: var(--r-surface);
-  box-shadow: var(--shadow-lg);
+.cod strong {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 16px;
 }
 
-.track-skeleton__head {
+.ship {
+  margin-top: 18px;
+}
+
+/* --- card footer -------------------------------------------------------- */
+
+.foot {
   display: flex;
   align-items: center;
+  padding: 18px 26px;
+  background: var(--wash);
+  font-size: 15px;
+}
+
+/* --- result-shaped skeleton --------------------------------------------- */
+/* Reserves the card's height so the page does not jump while searching. */
+
+.skel {
+  border: 1.5px solid var(--line);
+  border-radius: 22px;
+  background: var(--paper);
+  padding: 26px;
+  display: grid;
+  gap: 22px;
+}
+
+.skel__head {
+  display: flex;
   justify-content: space-between;
-  gap: var(--space-4);
-  padding-bottom: var(--space-4);
-  border-bottom: 1px solid color-mix(in srgb, var(--color-border-light) 55%, transparent);
+  align-items: center;
+  gap: 16px;
 }
 
-.track-skeleton__line,
-.track-skeleton__pill,
-.track-skeleton__block {
+.skel__line {
   display: block;
-  background: color-mix(in srgb, var(--color-bg-tertiary) 70%, transparent);
-  background-image: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--color-bg-tertiary) 55%, transparent) 25%,
-    var(--color-bg-tertiary) 50%,
-    color-mix(in srgb, var(--color-bg-tertiary) 55%, transparent) 75%
-  );
-  background-size: 200% 100%;
-  animation: track-shimmer 1.6s infinite linear;
-  border-radius: var(--r-sm);
+  height: 10px;
+  border-radius: 6px;
+  background: var(--line);
 }
 
-.track-skeleton__line {
-  height: var(--space-5);
+.skel__line--short {
+  width: 170px;
 }
 
-.track-skeleton__line--short {
-  width: 40%;
+.skel__pill {
+  display: block;
+  width: 110px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--line);
 }
 
-.track-skeleton__pill {
-  width: 96px;
-  height: var(--space-8);
-  border-radius: var(--r-chip);
-}
-
-.track-skeleton__steps {
+.skel__steps {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-2);
-  margin: var(--space-6) 0;
+  gap: 24px;
 }
 
-.track-skeleton__body {
+.skel__dot {
+  display: block;
+  width: 28px;
+  height: 28px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: var(--line);
+}
+
+.skel__body {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-6);
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
 }
 
-@media (min-width: 768px) {
-  .track-skeleton__body {
-    grid-template-columns: 3fr 2fr;
+.skel__block {
+  display: block;
+  height: 120px;
+  border-radius: 16px;
+  background: var(--wash);
+}
+
+/* --- small screens: vertical timeline ----------------------------------- */
+
+@media (max-width: 640px) {
+  .track-page__inner {
+    padding-top: 32px;
   }
-}
 
-.track-skeleton__block {
-  height: var(--space-24);
-  border-radius: var(--r-field);
-}
-
-/* --- Small screens --------------------------------------------------------- */
-
-@media (max-width: 480px) {
   .track-head__title {
-    font-size: var(--font-size-3xl);
+    font-size: 26px;
+  }
+
+  .lookup {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+  }
+
+  .head,
+  .body,
+  .foot {
+    padding-inline: 18px;
+  }
+
+  .body {
+    grid-template-columns: 1fr;
+  }
+
+  .skel__body {
+    grid-template-columns: 1fr;
+  }
+
+  .tracker {
+    grid-template-columns: 1fr;
+    padding: 0 18px;
+    margin-top: 24px;
+  }
+
+  .step {
+    display: flex;
+    gap: 14px;
+    text-align: start;
+    padding: 0 0 22px;
+  }
+
+  .step:last-child {
+    padding-bottom: 0;
+  }
+
+  .node {
+    margin: 0;
+    flex: none;
+  }
+
+  .step::after {
+    top: 28px;
+    inset-inline-start: 13px;
+    width: 2px;
+    height: calc(100% - 28px);
   }
 }
-
-/* --- Reduced motion --------------------------------------------------------
-   The global reduce rule already shortens every animation, but the entrance
-   animations use `both` fill, so pin them to their finished state explicitly
-   and stop the ambience outright. */
 
 @media (prefers-reduced-motion: reduce) {
-  .track-head,
-  .track-form,
-  .track-result,
-  .track-feedback,
-  .track-panel,
-  .track-item,
-  .track-badge,
-  .track-step::before,
-  .track-step__dot,
-  .track-step__label {
+  .step--current .node {
     animation: none;
-  }
-
-  .track-form__submit::after {
-    display: none;
-  }
-
-  .track-item:hover,
-  .track-form__submit:hover:not(:disabled) {
-    transform: none;
   }
 }

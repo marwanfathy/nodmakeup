@@ -197,16 +197,25 @@ export interface OrderDetails {
  * What a customer gets back from the public tracking lookup.
  *
  * Deliberately narrower than OrderDetails: the caller proved they know the
- * order number *and* the phone stored on it, but not that they own the cart
- * session, so nothing that identifies a person (name, phone, street address)
- * is echoed back. Everything here is needed to recognise "yes, this is my
- * order" and see where it is.
+ * order number — but not that they own the cart session. The only traces of
+ * the person that survive are the name they typed at checkout (it identifies
+ * the order to the one who placed it) and a phone with its middle digits
+ * already masked by the API, so the response can confirm "yes, this is my
+ * order" and see where it is without ever carrying a dialable number or a
+ * street address.
  */
 export interface TrackingOrder {
     orderNumber: string;
     orderDate: string;
     status: string;
     shippingGovernorate: string;
+    /** Customer name, echoed so the shopper recognises their own order. */
+    customerName: string;
+    /**
+     * Customer phone, masked by the API before it leaves ("01•• ••• ••42"):
+     * prefix + last two digits only. Never a dialable number.
+     */
+    customerPhone: string;
     payment: {
         method: string;
         status: string | null;

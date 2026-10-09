@@ -57,15 +57,20 @@ export interface PublicOrderDetails {
 }
 
 /**
- * The tracking projection. Same shape as `PublicOrderDetails` minus the
- * customer-identifying fields, plus the governorate the parcel ships to.
- * Returned for any caller that supplies a matching order number.
+ * The tracking projection. Same shape as `PublicOrderDetails`, but the only
+ * customer-identifying fields allowed through are the name (so the shopper
+ * recognises their own order) and the phone with its middle digits masked —
+ * enough to confirm "this is mine", never a dialable number. The street
+ * address stays behind, and the mask is applied right here, at the API edge,
+ * so the full number never appears in any response.
  */
 export interface PublicTrackingOrder {
     orderNumber: string;
     orderDate: Date;
     status: string;
     shippingGovernorate: string;
+    customerName: string;
+    customerPhone: string;
     payment: { method: string; status: TransactionStatus | null };
     summary: {
         totalPrice: Prisma.Decimal;
@@ -561,12 +566,38 @@ export async function getPublicOrderDetails(
 }
 
 /**
+ * Mask an Egyptian mobile so a tracking response never carries enough of it to
+ * dial: only the two-digit prefix and the last two digits stay visible
+ * ("01•• ••• ••42"). That is precisely enough for the order's owner to
+ * recognise their own phone without exposing a stranger-dialable number.
+ *
+ * Numbers are stored with the +20 country code; the mask normalises to the
+ * 11-digit local form first so the result reads like the customer's own
+ * number, whatever spelling was saved at checkout.
+ */
+const maskTrackingPhone = (phone: string): string => {
+    const digits = phone.replace(/\D/g, '');
+    if (digits.length < 6) return phone;
+    // Stored either as "+20 10…" (12+ digits) or "+20 010…" (13); strip the
+    // country code, and restore the trunk zero the second form omits, so the
+    // mask always shows the customer's own 11-digit local number.
+    let local = digits.length >= 12 && digits.startsWith('20') ? digits.slice(2) : digits;
+    if (local.length === 10 && !local.startsWith('0')) local = `0${local}`;
+    const head = local.slice(0, 2);
+    const tail = local.slice(-2);
+    if (local.length === 11) return `${head}•• ••• ••${tail}`;
+    return `${head}${'•'.repeat(local.length - 4)}${tail}`;
+};
+
+/**
  * Public order lookup by order number.
  *
- * The order number is the only key. The projection carries no
- * customer-identifying field (no name, phone or street address), so holding a
- * number reveals the contents and delivery state of an order but nothing about
- * the person behind it. A miss is reported as "not found", never "forbidden".
+ * The order number is the only key. The projection deliberately keeps the
+ * parcel's story (contents, totals, delivery state) and barely any of the
+ * person: the name — which only meaningfully identifies the order to the one
+ * who typed it — and a phone with its middle digits masked out. The street
+ * address is never echoed, and a miss is reported as "not found", never
+ * "forbidden".
  */
 export async function getOrderForTracking(
     orderNumber: string,
@@ -576,6 +607,8 @@ export async function getOrderForTracking(
         select: {
             orderNumber: true,
             shippingGovernorate: true,
+            customerName: true,
+            customerPhoneNumber: true,
             totalPrice: true,
             shippingCost: true,
             totalDiscount: true,
@@ -614,6 +647,8 @@ export async function getOrderForTracking(
         orderDate: order.createdAt,
         status: order.status.statusName,
         shippingGovernorate: order.shippingGovernorate,
+        customerName: order.customerName,
+        customerPhone: maskTrackingPhone(order.customerPhoneNumber),
         payment: {
             method: 'Cash on Delivery',
             status: order.transactions[0]?.status ?? null,
